@@ -1,0 +1,46 @@
+﻿@page "/formulaire"
+@inject NavigationManager Navigation
+@using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
+
+<div class="container-fluid  formulaire-container">
+	<NavbarFormulaire OnPageSelected="HandlePageSelected" CurrentPage="selectedPageIndex" />
+
+	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
+		<CompFormulaireIdentification OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
+	</div>
+	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
+		<CompFormulaireAdresse OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	</div>
+	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
+		<CompFormulaireContact OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	</div>
+	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
+		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	</div>
+	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
+		<CompFormulaireRBQ Checkpoint="SetFormCheckpoint" />
+	</div>
+</div>
+
+
+@code {
+	private int selectedPageIndex = 0;
+
+	public int _checkpoint = 0;
+
+	private void SetFormCheckpoint(int pageIndex)
+	{
+		if(pageIndex > _checkpoint)
+		{
+			_checkpoint = pageIndex;
+		}
+	}
+
+	private void HandlePageSelected(int pageIndex)
+	{
+		if (pageIndex <= _checkpoint)
+		{
+			selectedPageIndex = pageIndex;
+		}			
+	}
+}

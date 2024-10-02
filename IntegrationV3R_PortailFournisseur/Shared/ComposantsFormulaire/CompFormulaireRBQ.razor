@@ -1,0 +1,187 @@
+﻿<div class="container-fluid mt-4">   
+
+    <form class="form" @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <label for="rbqNumberInput" class="form-label">Numéro RBQ</label>
+            <input type="text" class="form-control" id="rbqNumberInput" @bind="rbqNumberInput" maxlength="12" placeholder="Format: ####-####-##" @oninput="FormatRbqNumber">
+            @if (!string.IsNullOrEmpty(rbqNumberError))
+            {
+                <div class="text-danger">@rbqNumberError</div>
+            }
+        </div>
+
+
+        <div class="mb-3">
+            <label for="statusSelect" class="form-label">Statut</label>
+            <select class="form-select" id="statusSelect" @bind="selectedStatus">
+                <option value="">Choisissez un statut</option>
+                <option value="Valide">Valide</option>
+                <option value="Invalide">Invalide</option>
+            </select>
+            @if (!string.IsNullOrEmpty(statusError))
+            {
+                <div class="text-danger">@statusError</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label for="licenseTypeSelect" class="form-label">Type de licence</label>
+            <select class="form-select" id="licenseTypeSelect" @bind="SelectedLicenseType">
+                <option value="">Choisissez un type de licence</option>
+                @foreach (var type in licenseTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+            @if (!string.IsNullOrEmpty(licenseTypeError))
+            {
+                <div class="text-danger">@licenseTypeError</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <h5>Catégories sélectionnées</h5>
+            <ul>
+                @if (selectedCategories != null && selectedCategories.Any())
+                {
+                    foreach (var category in selectedCategories)
+                    {
+                        <li>@category.Code: @category.Description</li>
+                    }
+                }
+                else
+                {
+                    <li>Aucune catégorie sélectionnée.</li>
+                }
+            </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Suivant</button>
+    </form>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+
+    private string rbqNumberInput = string.Empty;
+    private string selectedStatus = string.Empty;
+    private string selectedLicenseType = string.Empty;
+
+    private string rbqNumberError = string.Empty;
+    private string statusError = string.Empty;
+    private string licenseTypeError = string.Empty;
+
+    private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" }; // Example types
+    private List<Category> selectedCategories = new List<Category>();
+
+    // Property to handle changes in the selectedLicenseType
+    private string SelectedLicenseType
+    {
+        get => selectedLicenseType;
+        set
+        {
+            selectedLicenseType = value;
+            UpdateCategories();
+        }
+    }
+
+    private void UpdateCategories()
+    {
+        // Clear previous selections
+        selectedCategories.Clear();
+
+        // Populate selected categories based on the selected license type
+        if (selectedLicenseType == "Entrepreneur")
+        {
+            selectedCategories.Add(new Category { Code = "G", Description = "Général" });
+            selectedCategories.Add(new Category { Code = "S", Description = "Spécialisé" });
+        }
+        else if (selectedLicenseType == "Constructeur-Propriétaire")
+        {
+            selectedCategories.Add(new Category { Code = "CR", Description = "Construction résidentielle" });
+        }
+        // Add more conditions as needed for other license types
+    }
+
+    private void HandleSubmit()
+    {
+        // Reset errors
+        rbqNumberError = string.Empty;
+        statusError = string.Empty;
+        licenseTypeError = string.Empty;
+
+        // Basic validation checks
+        var isValid = true;
+
+        // Validate RBQ number
+        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !System.Text.RegularExpressions.Regex.IsMatch(rbqNumberInput, @"^\d{4}-\d{4}-\d{2}$"))
+        {
+            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
+            isValid = false;
+        }
+
+        // Validate status
+        if (string.IsNullOrWhiteSpace(selectedStatus))
+        {
+            statusError = "Le statut est requis.";
+            isValid = false;
+        }
+
+        // Validate license type
+        if (string.IsNullOrWhiteSpace(selectedLicenseType))
+        {
+            licenseTypeError = "Le type de licence est requis.";
+            isValid = false;
+        }
+
+        if (isValid)
+        {
+            // If the form is valid, navigate to the next page
+            //Navigation.NavigateTo("/nextPage"); // Update to your next page route
+            Checkpoint.InvokeAsync(6);
+            OnPageSelected.InvokeAsync(6);
+        }
+    }
+
+    private void FormatRbqNumber(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+
+        // Remove any non-digit characters except dashes
+        input = new string(input.Where(c => char.IsDigit(c) || c == '-').ToArray());
+
+        // Ensure that the format is maintained
+        if (input.Length > 12)
+        {
+            input = input.Substring(0, 12); // Limit to max length
+        }
+
+        // Remove existing dashes to reinsert them correctly
+        input = input.Replace("-", string.Empty);
+
+        // Insert dashes at the correct positions
+        if (input.Length > 4)
+        {
+            input = input.Insert(4, "-");
+        }
+        if (input.Length > 9)
+        {
+            input = input.Insert(9, "-");
+        }
+
+        // Set the formatted value back
+        rbqNumberInput = input;
+    }
+
+
+
+    private class Category
+    {
+        public string Code { get; set; }
+        public string Description { get; set; }
+    }
+}

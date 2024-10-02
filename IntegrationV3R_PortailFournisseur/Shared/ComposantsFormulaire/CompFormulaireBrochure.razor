@@ -1,0 +1,133 @@
+﻿<div class="container-fluid mt-4">
+    <div class="nav nav-tabs" role="tablist">
+        <div class="nav-item"><span class="nav-link">Identification</span></div>
+        <div class="nav-item"><span class="nav-link">Adresse</span></div>
+        <div class="nav-item"><span class="nav-link">Contacts</span></div>
+        <div class="nav-item"><span class="nav-link">Produits/Services</span></div>
+        <div class="nav-item"><span class="nav-link">Finances</span></div>
+        <div class="nav-item"><span class="nav-link">Licence RBQ</span></div>
+        <div class="nav-item"><span class="nav-link active">Brochures</span></div>
+    </div>
+
+    <form class="form" @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <label for="fileInput" class="form-label">Sélectionnez des fichiers (doc, docx, pdf, jpg, jpeg, png, max 75 MB)</label>
+            <input type="file" class="form-control" id="fileInput" multiple @onchange="HandleFileSelected" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png" />
+            @if (!string.IsNullOrEmpty(fileError))
+            {
+                <div class="text-danger">@fileError</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <h5>Fichiers sélectionnés</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nom du fichier</th>
+                        <th>Taille (Mo)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (uploadedFiles.Any())
+                    {
+                        foreach (var file in uploadedFiles)
+                        {
+                            <tr>
+                                <td>@file.Name</td>
+                                <td>@(file.Size / (1024 * 1024.0)):F2</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2">Aucun fichier sélectionné.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Soumettre</button>
+    </form>
+</div>
+
+@code {
+    private List<UploadedFile> uploadedFiles = new List<UploadedFile>();
+    private string fileError = string.Empty;
+
+    private async Task HandleFileSelected(ChangeEventArgs e)
+    {
+        fileError = string.Empty;
+
+        // Get the files from the input
+        var inputFile = e.Value as InputFileChangeEventArgs;
+
+        if (inputFile?.FileCount > 0)
+        {
+            uploadedFiles.Clear(); // Clear previously selected files
+            long totalSize = 0; // Track total size of uploaded files
+
+            foreach (var file in inputFile.GetMultipleFiles())
+            {
+                // Validate file type
+                if (!IsValidFileType(file.ContentType))
+                {
+                    fileError = "Type de fichier non valide. Veuillez sélectionner des fichiers doc, docx, pdf, jpg, jpeg, ou png.";
+                    return;
+                }
+
+                // Validate file size
+                if (file.Size > 75 * 1024 * 1024)
+                {
+                    fileError = "Chaque fichier doit être inférieur à 75 Mo.";
+                    return;
+                }
+
+                // Accumulate the total size of uploaded files
+                totalSize += file.Size;
+
+                // Add to the uploaded files list
+                uploadedFiles.Add(new UploadedFile { Name = file.Name, Size = file.Size });
+            }
+
+            // Validate total size limit
+            if (totalSize > 75 * 1024 * 1024)
+            {
+                fileError = "La somme des tailles de l'ensemble des fichiers joints ne doit pas dépasser 75 Mo.";
+                uploadedFiles.Clear(); // Clear the list if the total size is exceeded
+                return;
+            }
+        }
+    }
+
+    private bool IsValidFileType(string contentType)
+    {
+        return contentType switch
+        {
+            "application/pdf" => true,
+            "application/msword" => true,
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => true,
+            "image/jpeg" => true,
+            "image/png" => true,
+            _ => false,
+        };
+    }
+
+    private void HandleSubmit()
+    {
+        if (!uploadedFiles.Any())
+        {
+            fileError = "Veuillez sélectionner au moins un fichier.";
+            return;
+        }
+
+    }
+
+    private class UploadedFile
+    {
+        public string Name { get; set; }
+        public long Size { get; set; }
+    }
+}

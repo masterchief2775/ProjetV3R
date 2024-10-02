@@ -1,0 +1,83 @@
+﻿@inject NavigationManager Navigation
+
+<div class="nav nav-tabs" role="tablist">
+        <div class="nav-item " @onclick="() => ChangePage(0)">
+            <span class="nav-link @_onglets[0]">Identification</span>
+        </div>
+
+        <div class="nav-item " @onclick="() => ChangePage(1)">
+            <span class="nav-link @_onglets[1]">Adresse</span>
+        </div>
+
+        <div class="nav-item" @onclick="() => ChangePage(2)">
+            <span class="nav-link @_onglets[2]" >Contacts</span>
+        </div>
+
+        <div class="nav-item" @onclick="() => ChangePage(3)">
+            <span class="nav-link @_onglets[3]" >Produits/Services</span>
+        </div>
+        <!--
+        <div class="nav-item">
+            <span class="nav-link @_onglets[4]" @onclick="() => ChangePage(4)">Finances</span>
+        </div>
+        -->
+        <div class="nav-item" @onclick="() => ChangePage(5)">
+            <span class="nav-link @_onglets[5]" >Lisence RBQ</span>
+        </div>
+        <div class="nav-item" @onclick="() => ChangePage(6)">
+            <span class="nav-link @_onglets[6]">Brochure</span>
+        </div>
+    </div>
+
+    @code 
+{
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+
+    //private int _pointer;
+
+    private string[] _onglets = new string[7];
+    private int _currentPage;
+
+    [Parameter]
+    public int CurrentPage
+    {
+        get => _currentPage;
+        set
+        {
+            if (_currentPage != value)
+            {
+                ChangePage(value);
+            }
+        }
+    }
+
+
+    protected override void OnInitialized()
+    {
+        ChangePage(0);
+    }
+
+
+    private void ChangePage(int id)
+    {
+        _currentPage = id;
+        SetInactive();
+        SetActive();
+        OnPageSelected.InvokeAsync(_currentPage);
+    }
+
+    private void SetInactive()
+    {
+        for (int i =0; i<_onglets.Length; i++)
+        {
+            _onglets[i] = "";
+        }
+    }
+
+    private void SetActive()
+    {
+        _onglets[_currentPage] = " active";            
+    }
+}

@@ -1,0 +1,43 @@
+﻿.nav-tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0; /* Remove space between tabs and form */
+    background-color: #a6a6a6; /* Match form background */
+    border-radius: 15px; /* Round corners for the tab container */
+}
+
+.nav-item {
+    flex: 1;
+    margin: 0.4em;
+}
+
+.nav-link {
+    background-color: #a6a6a6; /* Match form background */
+    color: white; /* Text color */
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 15px; /* Round corners for tabs */
+    pointer-events: none; /* Disable pointer events */
+}
+
+    .nav-link.active {
+        background-color: #0076d5; /* Active tab color */
+        color: white; /* White text when selected */
+        border-radius: 15px; /* Round corners for active tab */
+    }
+
+.form {
+    background-color: #a6a6a6;
+    padding: 20px;
+    border-radius: 15px;
+    border: groove #737373 2px;
+}
+
+input {
+    border-radius: 20px;
+}
+
+label {
+    font-weight: bolder;
+}

@@ -1,0 +1,194 @@
+﻿@using System.Text.RegularExpressions
+
+<div class="container-fluid mt-4">    
+
+    <form class="form" @onsubmit="HandleSubmit">
+        <h5>Informations de l'entreprise</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="nomEntrepriseInput" class="form-label">Nom de l'entreprise</label>
+                <input type="text" class="form-control" id="nomEntrepriseInput" @bind="nomEntrepriseInput" required>
+                @if (!string.IsNullOrEmpty(nomEntrepriseError))
+                {
+                    <div class="text-danger">@nomEntrepriseError</div>
+                }
+            </div>
+            <div class="col-md-6">
+                <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
+                <input type="text" class="form-control" id="neqInput" @bind="neqInput" required>
+                @if (!string.IsNullOrEmpty(neqError))
+                {
+                    <div class="text-danger">@neqError</div>
+                }
+                <div id="neqHelp" class="form-text">
+                    <a href="https://www.quebec.ca/entreprises-et-travailleurs-autonomes/demarrer-entreprise/immatriculer-constituer-entreprise/immatriculation-entreprise/numero-entreprise-quebec" target="_blank">En savoir plus sur le NEQ</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="emailInput" class="form-label">Adresse courriel</label>
+                <input type="email" class="form-control" id="emailInput" @bind="emailInput" required>
+                @if (!string.IsNullOrEmpty(emailError))
+                {
+                    <div class="text-danger">@emailError</div>
+                }
+            </div>
+        </div>
+
+        <h5>Informations de connexion</h5>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="passwordInput" class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" id="passwordInput" @bind="passwordInput" required>
+                @if (!string.IsNullOrEmpty(passwordError))
+                {
+                    <div class="text-danger">@passwordError</div>
+                }
+            </div>
+            <div class="col-md-6">
+                <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe</label>
+                <input type="password" class="form-control" id="repeatPasswordInput" @bind="repeatPasswordInput" required>
+                @if (!string.IsNullOrEmpty(repeatPasswordError))
+                {
+                    <div class="text-danger">@repeatPasswordError</div>
+                }
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Suivant</button>
+    </form>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+
+    private string neqInput = string.Empty;
+    private string nomEntrepriseInput = string.Empty;
+    private string emailInput = string.Empty;
+    private string passwordInput = string.Empty;
+    private string repeatPasswordInput = string.Empty;
+
+    private string neqError = string.Empty;
+    private string nomEntrepriseError = string.Empty;
+    private string emailError = string.Empty;
+    private string passwordError = string.Empty;
+    private string repeatPasswordError = string.Empty;    
+
+    private void HandleSubmit()
+    {
+
+
+        // Reset errors
+        neqError = string.Empty;
+        nomEntrepriseError = string.Empty;
+        emailError = string.Empty;
+        passwordError = string.Empty;
+        repeatPasswordError = string.Empty;
+
+        // Basic validation checks
+        var isValid = true;
+
+        // Validation for NEQ
+        if (string.IsNullOrWhiteSpace(neqInput))
+        {
+            neqError = "Le NEQ est requis.";
+            isValid = false;
+        }
+        else if (!IsNumeric(neqInput) || neqInput.Length != 10 || !IsValidNEQFormat(neqInput))
+        {
+            neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88 et ayant le troisième caractère entre 4 et 9.";
+            isValid = false;
+        }
+
+        // Validation for Nom de l'entreprise
+        if (string.IsNullOrWhiteSpace(nomEntrepriseInput) || nomEntrepriseInput.Length > 64)
+        {
+            nomEntrepriseError = "Le nom de l'entreprise est requis et doit faire moins de 64 caractères.";
+            isValid = false;
+        }
+
+        // Validation for Email
+        if (string.IsNullOrWhiteSpace(emailInput) || emailInput.Length > 64 || !IsValidEmail(emailInput))
+        {
+            emailError = "Une adresse courriel valide de l'entreprise est requise et doit faire moins de 64 caractères.";
+            isValid = false;
+        }
+
+        // Validation for Password
+        if (string.IsNullOrWhiteSpace(passwordInput) || passwordInput.Length < 7 || passwordInput.Length > 12 ||
+            !HasUpperCase(passwordInput) || !HasLowerCase(passwordInput) || !HasDigit(passwordInput) || !HasSpecialChar(passwordInput))
+        {
+            passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+            isValid = false;
+        }
+
+        // Check if passwords match
+        if (passwordInput != repeatPasswordInput)
+        {
+            repeatPasswordError = "Les mots de passe ne correspondent pas.";
+            isValid = false;
+        }
+
+        // If valid, navigate to the address form
+        if (isValid)
+        {
+            Checkpoint.InvokeAsync(1);
+            OnPageSelected.InvokeAsync(1);            
+            //Navigation.NavigateTo("/formulaireDemandeAdresse");
+        }
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        return email.Contains("@") && email.Contains("."); // Simple check, can be improved
+    }
+
+    private bool IsNumeric(string input)
+    {
+        return input.All(char.IsDigit);
+    }
+
+    private bool IsValidNEQFormat(string neq)
+    {
+        return (neq.StartsWith("11") || neq.StartsWith("22") || neq.StartsWith("33") || neq.StartsWith("88")) &&
+               (char.IsDigit(neq[2]) && "456789".Contains(neq[2]));
+    }
+
+    private bool HasUpperCase(string password)
+    {
+        return password.Any(char.IsUpper);
+    }
+
+    private bool HasLowerCase(string password)
+    {
+        return password.Any(char.IsLower);
+    }
+
+    private bool HasDigit(string password)
+    {
+        return password.Any(char.IsDigit);
+    }
+
+    private bool HasSpecialChar(string password)
+    {
+        var specialChars = "!@#$%^&*()_+-=[]{}|;':\",.<>?/`~";
+        return password.Any(c => specialChars.Contains(c));
+    }
+
+    // Postal code validation
+    private bool IsValidPostalCode(string postalCode)
+    {
+        var regex = new Regex(@"^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$");
+        return regex.IsMatch(postalCode);
+    }
+
+    
+}

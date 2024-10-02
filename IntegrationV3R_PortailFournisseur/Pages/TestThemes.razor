@@ -1,0 +1,42 @@
+@*@page "/theme"
+@inject ThemeSettings ThemeSettings
+
+<h3>Thème sélectionné</h3>
+
+<div style="background-color:@backgroundColor; color:@textColor; padding: 20px;">
+    <h1>Bienvenue dans le mode @themeMode</h1>
+    <p>Ceci est un exemple de texte dans le thème sélectionné.</p>
+</div>
+
+<button @onclick="ToggleTheme">Changer de thème</button>
+
+@code {
+    private string themeMode = "clair";
+    private string? backgroundColor;
+    private string? textColor;
+
+    protected override void OnInitialized()
+    {
+        ApplyTheme();
+    }
+
+    private void ToggleTheme()
+    {
+        themeMode = themeMode == "clair" ? "sombre" : "clair";
+        ApplyTheme();
+    }
+
+    private void ApplyTheme()
+    {
+        if (themeMode == "clair")
+        {
+            backgroundColor = ThemeSettings.Light.BackgroundColor;
+            textColor = ThemeSettings.Light.TextColor;
+        }
+        else
+        {
+            backgroundColor = ThemeSettings.Dark.BackgroundColor;
+            textColor = ThemeSettings.Dark.TextColor;
+        }
+    }
+}*@

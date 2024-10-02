@@ -1,0 +1,137 @@
+﻿<div class="container-fluid mt-4">    
+
+    <form class="form" @onsubmit="HandleSubmit">
+
+        <!-- Search bar for product lookup -->
+        <div class="mb-3">
+            <label for="productSearch" class="form-label">Rechercher un produit</label>
+            <input type="text" class="form-control" id="productSearch" @bind="searchTerm" @oninput="SearchProducts" placeholder="Tapez au moins 3 caractères...">
+            @if (!string.IsNullOrEmpty(searchError))
+            {
+                <div class="text-danger">@searchError</div>
+            }
+
+            <!-- Display suggestions -->
+            @if (matchingProducts.Count > 0)
+            {
+                <div class="mt-2">
+                    <label>Sélectionner les produits correspondants :</label>
+                    <select multiple class="form-control" @onchange="SelectProduct">
+                        @foreach (var product in matchingProducts)
+                        {
+                            <option value="@product">@product</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+
+        <!-- Display selected products -->
+        @if (selectedProducts.Count > 0)
+        {
+            <div class="mt-3">
+                <h5>Produits sélectionnés :</h5>
+                <ul>
+                    @foreach (var selectedProduct in selectedProducts)
+                    {
+                        <li>@selectedProduct</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <!-- Large text area for details and specs -->
+        <div class="mb-3">
+            <label for="productDetails" class="form-label">Détails et spécifications du produit</label>
+            <textarea class="form-control" id="productDetails" rows="5" @bind="productDetails"></textarea>
+            @if (!string.IsNullOrEmpty(productDetailsError))
+            {
+                <div class="text-danger">@productDetailsError</div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Confirmer</button>
+    </form>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+
+    private string productDetails = string.Empty;
+    private string productDetailsError = string.Empty;
+
+    private string searchTerm = string.Empty;
+    private string searchError = string.Empty;
+
+    // Simulate database search results
+    private List<string> allProducts = new List<string> { "Produit A", "Produit B", "Produit C", "Produit D", "Produit E" };
+    private List<string> matchingProducts = new List<string>();
+    private List<string> selectedProducts = new List<string>();
+
+    private void SearchProducts(ChangeEventArgs e)
+    {
+        searchError = string.Empty;
+        matchingProducts.Clear();
+
+        // Perform search after 3 characters are typed
+        if (searchTerm.Length >= 3)
+        {
+            matchingProducts = allProducts
+                .Where(p => p.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (matchingProducts.Count == 0)
+            {
+                searchError = "Aucun produit ne correspond à la recherche.";
+            }
+        }
+        else
+        {
+            searchError = "Veuillez entrer au moins 3 caractères pour effectuer une recherche.";
+        }
+    }
+
+    private void SelectProduct(ChangeEventArgs e)
+    {
+        var selectedProduct = e.Value.ToString();
+        if (!selectedProducts.Contains(selectedProduct))
+        {
+            selectedProducts.Add(selectedProduct);
+        }
+    }
+
+    private void HandleSubmit()
+    {
+        // Reset error messages
+        productDetailsError = string.Empty;
+        searchError = string.Empty;
+
+        // Validate the details and specs field
+        if (string.IsNullOrWhiteSpace(productDetails))
+        {
+            productDetailsError = "Les détails et spécifications du produit sont requis.";
+            return;
+        }
+        else if (productDetails.Length > 500)
+        {
+            productDetailsError = "Les détails et spécifications doivent faire moins de 500 caractères.";
+            return;
+        }
+
+        // Check if at least one product has been selected
+        if (selectedProducts.Count == 0)
+        {
+            searchError = "Veuillez sélectionner au moins un produit.";
+            return;
+        }
+
+        Checkpoint.InvokeAsync(5);
+        OnPageSelected.InvokeAsync(5);
+        // If form is valid, navigate to the next page or process data
+        //Navigation.NavigateTo("/formulaireDemandeFinance"); // Adjust to your next page
+    }
+}

@@ -1,0 +1,274 @@
+﻿<div class="container-fluid mt-4">    
+
+    <form class="form" @onsubmit="HandleSubmit">
+        <h5>Adresse de l'entreprise</h5>
+        <div class="row mb-3">
+            <div class="mb-3 col-6">
+                <label for="numCiviqueInput" class="form-label">Numéro Civique</label>
+                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput">
+                @if (!string.IsNullOrEmpty(numCiviqueError))
+                {
+                    <div class="text-danger">@numCiviqueError</div>
+                }
+            </div>
+
+            <div class="mb-3 col-6">
+                <label for="bureauInput" class="form-label">Numéro de Bureau (optionnel)</label>
+                <input type="text" class="form-control" id="bureauInput" @bind="bureauInput" maxlength="8">
+                @if (!string.IsNullOrEmpty(bureauError))
+                {
+                    <div class="text-danger">@bureauError</div>
+                }
+            </div>
+
+            <div class="mb-3 col-6">
+                <label for="rueInput" class="form-label">Nom de rue</label>
+                <input type="text" class="form-control" id="rueInput" @bind="rueInput">
+                @if (!string.IsNullOrEmpty(rueError))
+                {
+                    <div class="text-danger">@rueError</div>
+                }
+            </div>
+
+            <div class="mb-3 col-6">
+                <label for="villeInput" class="form-label">Nom Ville</label>
+                <input type="text" class="form-control" id="villeInput" @bind="villeInput">
+                @if (!string.IsNullOrEmpty(villeError))
+                {
+                    <div class="text-danger">@villeError</div>
+                }
+            </div>
+
+            <div class="mb-3 col-6">
+                <label for="provinceInput" class="form-label">Province</label>
+                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput">
+                @if (!string.IsNullOrEmpty(provinceError))
+                {
+                    <div class="text-danger">@provinceError</div>
+                }
+            </div>
+
+            <div class="mb-3 col-6">
+                <label for="codePostalInput" class="form-label">Code postal</label>
+                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7">
+                @if (!string.IsNullOrEmpty(codePostalError))
+                {
+                    <div class="text-danger">@codePostalError</div>
+                }
+            </div>
+        </div>
+        
+
+        <br />
+        <h5>Informations supplémentaires</h5>
+        <div class="mb-3">
+            <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
+            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12">
+            @if (!string.IsNullOrEmpty(numeroTelephoneError))
+            {
+                <div class="text-danger">@numeroTelephoneError</div>
+            }
+        </div>
+       
+        <div class="mb-3">
+            <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
+            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput">
+            @if (!string.IsNullOrEmpty(siteWebError))
+            {
+                <div class="text-danger">@siteWebError</div>
+            }
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Suivant</button>
+    </form>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+
+
+
+    private string numCiviqueInput = string.Empty;
+    private string rueInput = string.Empty;
+    private string bureauInput = string.Empty;
+    private string provinceInput = string.Empty;
+    private string villeInput = string.Empty;
+    private string codePostalInput = string.Empty;
+
+    private string numeroTelephoneInput = string.Empty;    
+    private string siteWebInput = string.Empty;
+
+
+
+
+    private string numCiviqueError = string.Empty;
+    private string rueError = string.Empty;
+    private string bureauError = string.Empty;
+    private string provinceError = string.Empty;
+    private string villeError = string.Empty;
+    private string codePostalError = string.Empty;
+
+    private string numeroTelephoneError = string.Empty;
+    private string siteWebError = string.Empty;
+
+
+    private void HandleSubmit()
+    {
+        // Reset errors        
+        numCiviqueError = string.Empty;
+        rueError = string.Empty;
+        bureauError = string.Empty;
+        villeError = string.Empty;
+        provinceError = string.Empty;
+        codePostalError = string.Empty;
+
+        numeroTelephoneError = string.Empty;        
+        siteWebError = string.Empty;
+
+
+        // Basic validation checks
+        var isValid = true;
+
+        if (string.IsNullOrWhiteSpace(numCiviqueInput))
+        {
+            numCiviqueError = "Le numéro civique est requis";
+            isValid = false;
+        }
+        else
+        {
+            for (int i = 0; i<numCiviqueInput.Length; i ++)
+            {
+                if (!Char.IsDigit(numCiviqueInput[i]))
+                {
+                    numCiviqueError = "Le numéro civique doit être numérique (Si le numéro contient un suffixe, veuillez rentré le suffixe dans la section Bureau)";
+                    isValid = false;
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(rueInput))
+        {
+            rueError = "Le nom de rue est requis";
+            isValid = false;
+        }
+
+        //MaxLength numBureau = 8 car le plus long par exemple (1/2 1224) suffixe + bureau dans les 1000
+
+        if (string.IsNullOrWhiteSpace(villeInput))
+        {
+            villeError = "Le nom de la ville est requis";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(provinceInput))
+        {
+            provinceError = "Le nom de la province est requis";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(codePostalInput))
+        {
+            codePostalError = "Le code postal est requis et doit être au format valide.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(numeroTelephoneInput))
+        {
+            numeroTelephoneError = "Le numéro de téléphone est requis et doit être au format valide.";
+            isValid = false;
+        }
+       
+
+        if (string.IsNullOrWhiteSpace(siteWebInput) || !Uri.IsWellFormedUriString(siteWebInput, UriKind.Absolute))
+        {
+            siteWebError = "Le site web est requis et doit être une URL valide.";
+            isValid = false;
+        }                
+
+        if (isValid)
+        {
+            // If the form is valid, navigate to the next page
+            //Navigation.NavigateTo("/formulaireDemandeContact");
+            Checkpoint.InvokeAsync(2);
+            OnPageSelected.InvokeAsync(2);
+        }
+    }
+
+    //Vérifié dans trigger insertion dans bd
+    private bool IsPhoneNumberValid(string phoneNumber)
+    {
+        // Example format: 123-456-7890
+        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\d{3}-\d{3}-\d{4}$");
+    }
+
+    //Vérifié dans trigger insertion dans bd
+    private bool IsPostalCodeValid(string postalCode)
+    {
+        // Example format: A1B 2C3
+        return System.Text.RegularExpressions.Regex.IsMatch(postalCode, @"^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$");
+    }
+
+    private bool IsAddressValid(string address, string city)
+    {
+        // Placeholder for real address verification logic
+        // This could be an API call to a geolocation service or database lookup
+        // For demonstration purposes, let's just check for non-empty values
+        return !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(city);
+    }
+
+    private void FormatTelephoneNumber(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+
+        // Remove any non-digit characters except dashes
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        // Limit to a maximum of 10 digits (excluding dashes)
+        if (input.Length > 10)
+        {
+            input = input.Substring(0, 10); 
+        }       
+        
+
+        // Insert dashes at the correct positions
+        if (input.Length > 3)
+        {
+            input = input.Insert(3, "-");
+        }
+        if (input.Length > 7)
+        {
+            input = input.Insert(7, "-");
+        }       
+
+        // Set the formatted value back
+        numeroTelephoneInput = input;
+    }
+
+    private void FormatCodePostal(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+
+        // Remove any non-digit characters except dashes
+        input = new string(input.Where(char.IsLetterOrDigit).ToArray());
+
+        // Limit to a maximum of 6 digits (excluding blank spaces)
+        if (input.Length > 6)
+        {
+            input = input.Substring(0, 6);
+        }
+
+
+        // Insert dashes at the correct positions
+        if (input.Length > 3)
+        {
+            input = input.Insert(3, " ");
+        }
+      
+        // Set the formatted value back
+        codePostalInput = input;
+    }
+}

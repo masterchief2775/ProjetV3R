@@ -1,0 +1,162 @@
+﻿@page "/formulaireDemandeAdresse"
+@inject NavigationManager Navigation
+
+<PageTitle>Formulaire de demande - Adresse</PageTitle>
+
+<div class="container-fluid mt-4">
+    <div class="nav nav-tabs" role="tablist">
+        <div class="nav-item">
+            <span class="nav-link">Identification</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link active">Adresse</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link">Contacts</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link">Produits/Services</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link">Finances</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link">Licences RBQ</span>
+        </div>
+        <div class="nav-item">
+            <span class="nav-link">Brochures</span>
+        </div>
+    </div>
+
+    <form class="form" @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <label for="adresseCompleteInput" class="form-label">Adresse complète</label>
+            <input type="text" class="form-control" id="adresseCompleteInput" @bind="adresseCompleteInput">
+            @if (!string.IsNullOrEmpty(adresseCompleteError))
+            {
+                <div class="text-danger">@adresseCompleteError</div>
+            }
+        </div>
+        <div class="mb-3">
+            <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone</label>
+            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890">
+            @if (!string.IsNullOrEmpty(numeroTelephoneError))
+            {
+                <div class="text-danger">@numeroTelephoneError</div>
+            }
+        </div>
+        <div class="mb-3">
+            <label for="villeInput" class="form-label">Ville</label>
+            <input type="text" class="form-control" id="villeInput" @bind="villeInput">
+            @if (!string.IsNullOrEmpty(villeError))
+            {
+                <div class="text-danger">@villeError</div>
+            }
+        </div>
+        <div class="mb-3">
+            <label for="siteWebInput" class="form-label">Site web</label>
+            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput">
+            @if (!string.IsNullOrEmpty(siteWebError))
+            {
+                <div class="text-danger">@siteWebError</div>
+            }
+        </div>
+        <div class="mb-3">
+            <label for="codePostalInput" class="form-label">Code postal</label>
+            <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3">
+            @if (!string.IsNullOrEmpty(codePostalError))
+            {
+                <div class="text-danger">@codePostalError</div>
+            }
+        </div>
+        <button type="submit" class="btn btn-primary">Suivant</button>
+    </form>
+</div>
+
+@code {
+    private string adresseCompleteInput = string.Empty;
+    private string numeroTelephoneInput = string.Empty;
+    private string villeInput = string.Empty;
+    private string siteWebInput = string.Empty;
+    private string codePostalInput = string.Empty;
+
+    private string adresseCompleteError = string.Empty;
+    private string numeroTelephoneError = string.Empty;
+    private string villeError = string.Empty;
+    private string siteWebError = string.Empty;
+    private string codePostalError = string.Empty;
+
+    private void HandleSubmit()
+    {
+        // Reset errors
+        adresseCompleteError = string.Empty;
+        numeroTelephoneError = string.Empty;
+        villeError = string.Empty;
+        siteWebError = string.Empty;
+        codePostalError = string.Empty;
+
+        // Basic validation checks
+        var isValid = true;
+
+        if (string.IsNullOrWhiteSpace(adresseCompleteInput))
+        {
+            adresseCompleteError = "L'adresse complète est requise.";
+            isValid = false;
+        }
+        else if (!IsAddressValid(adresseCompleteInput, villeInput))
+        {
+            adresseCompleteError = "L'adresse ou la ville n'existe pas.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(numeroTelephoneInput) || !IsPhoneNumberValid(numeroTelephoneInput))
+        {
+            numeroTelephoneError = "Le numéro de téléphone est requis et doit être au format valide.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(villeInput))
+        {
+            villeError = "La ville est requise.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(siteWebInput) || !Uri.IsWellFormedUriString(siteWebInput, UriKind.Absolute))
+        {
+            siteWebError = "Le site web est requis et doit être une URL valide.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(codePostalInput) || !IsPostalCodeValid(codePostalInput))
+        {
+            codePostalError = "Le code postal est requis et doit être au format valide.";
+            isValid = false;
+        }
+
+        if (isValid)
+        {
+            // If the form is valid, navigate to the next page
+            Navigation.NavigateTo("/formulaireDemandeContact");
+        }
+    }
+
+    private bool IsPhoneNumberValid(string phoneNumber)
+    {
+        // Example format: 123-456-7890
+        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\d{3}-\d{3}-\d{4}$");
+    }
+
+    private bool IsPostalCodeValid(string postalCode)
+    {
+        // Example format: A1B 2C3
+        return System.Text.RegularExpressions.Regex.IsMatch(postalCode, @"^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$");
+    }
+
+    private bool IsAddressValid(string address, string city)
+    {
+        // Placeholder for real address verification logic
+        // This could be an API call to a geolocation service or database lookup
+        // For demonstration purposes, let's just check for non-empty values
+        return !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(city);
+    }
+}
