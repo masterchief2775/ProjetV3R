@@ -5,7 +5,7 @@
         <div class="row mb-3">
             <div class="mb-3 col-6">
                 <label for="numCiviqueInput" class="form-label">Numéro Civique</label>
-                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput">
+                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput" required>
                 @if (!string.IsNullOrEmpty(numCiviqueError))
                 {
                     <div class="text-danger">@numCiviqueError</div>
@@ -23,7 +23,7 @@
 
             <div class="mb-3 col-6">
                 <label for="rueInput" class="form-label">Nom de rue</label>
-                <input type="text" class="form-control" id="rueInput" @bind="rueInput">
+                <input type="text" class="form-control" id="rueInput" @bind="rueInput" required>
                 @if (!string.IsNullOrEmpty(rueError))
                 {
                     <div class="text-danger">@rueError</div>
@@ -32,7 +32,7 @@
 
             <div class="mb-3 col-6">
                 <label for="villeInput" class="form-label">Nom Ville</label>
-                <input type="text" class="form-control" id="villeInput" @bind="villeInput">
+                <input type="text" class="form-control" id="villeInput" @bind="villeInput" required>
                 @if (!string.IsNullOrEmpty(villeError))
                 {
                     <div class="text-danger">@villeError</div>
@@ -41,7 +41,7 @@
 
             <div class="mb-3 col-6">
                 <label for="provinceInput" class="form-label">Province</label>
-                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput">
+                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput" required>
                 @if (!string.IsNullOrEmpty(provinceError))
                 {
                     <div class="text-danger">@provinceError</div>
@@ -50,7 +50,7 @@
 
             <div class="mb-3 col-6">
                 <label for="codePostalInput" class="form-label">Code postal</label>
-                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7">
+                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7" required>
                 @if (!string.IsNullOrEmpty(codePostalError))
                 {
                     <div class="text-danger">@codePostalError</div>
@@ -63,7 +63,7 @@
         <h5>Informations supplémentaires</h5>
         <div class="mb-3">
             <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
-            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12">
+            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
             @if (!string.IsNullOrEmpty(numeroTelephoneError))
             {
                 <div class="text-danger">@numeroTelephoneError</div>
@@ -72,7 +72,7 @@
        
         <div class="mb-3">
             <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
-            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput">
+            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput" required>
             @if (!string.IsNullOrEmpty(siteWebError))
             {
                 <div class="text-danger">@siteWebError</div>
