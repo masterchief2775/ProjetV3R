@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
-public partial class A2024420517riGr2Eq11888838LouisFernandHenriFolcherContext : DbContext
+public partial class ApplicationDbContext : DbContext
 {
-    public A2024420517riGr2Eq11888838LouisFernandHenriFolcherContext()
+    public ApplicationDbContext()
     {
     }
 
-    public A2024420517riGr2Eq11888838LouisFernandHenriFolcherContext(DbContextOptions<A2024420517riGr2Eq11888838LouisFernandHenriFolcherContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
