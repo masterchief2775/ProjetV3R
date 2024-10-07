@@ -1,14 +1,4 @@
 ﻿<div class="container-fluid mt-4">
-    <div class="nav nav-tabs" role="tablist">
-        <div class="nav-item"><span class="nav-link">Identification</span></div>
-        <div class="nav-item"><span class="nav-link">Adresse</span></div>
-        <div class="nav-item"><span class="nav-link">Contacts</span></div>
-        <div class="nav-item"><span class="nav-link">Produits/Services</span></div>
-        <div class="nav-item"><span class="nav-link">Finances</span></div>
-        <div class="nav-item"><span class="nav-link">Licence RBQ</span></div>
-        <div class="nav-item"><span class="nav-link active">Brochures</span></div>
-    </div>
-
     <form class="form" @onsubmit="HandleSubmit">
         <div class="mb-3">
             <label for="fileInput" class="form-label">Sélectionnez des fichiers (doc, docx, pdf, jpg, jpeg, png, max 75 MB)</label>
@@ -54,6 +44,13 @@
 </div>
 
 @code {
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+
+
     private List<UploadedFile> uploadedFiles = new List<UploadedFile>();
     private string fileError = string.Empty;
 
