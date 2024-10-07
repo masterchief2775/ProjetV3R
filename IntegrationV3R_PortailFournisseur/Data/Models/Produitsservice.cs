@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntegrationV3R_PortailFournisseur.Data;
+namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class Produitsservice
 {
@@ -9,9 +9,13 @@ public partial class Produitsservice
 
     public int FournisseurId { get; set; }
 
-    public string Unspsc { get; set; } = null!;
+    public int ComoditeId { get; set; }
+
+    public string Details { get; set; } = null!;
 
     public DateTime Timestamps { get; set; }
+
+    public virtual UnspscComodite Comodite { get; set; } = null!;
 
     public virtual Fournisseur Fournisseur { get; set; } = null!;
 }

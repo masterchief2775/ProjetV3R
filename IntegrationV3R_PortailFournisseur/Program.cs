@@ -22,6 +22,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    new MySqlServerVersion(new Version(8, 0, 25)))); // Remplace par la version de ton serveur MySQL
+
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
