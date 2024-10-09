@@ -42,13 +42,11 @@
 		}
 	}
 
-	private async void HandlePageSelected(int pageIndex)
+	private void HandlePageSelected(int pageIndex)
 	{
 		if (pageIndex <= _checkpoint)
 		{
 			selectedPageIndex = pageIndex;
-			Console.WriteLine($"Navigating to page: {selectedPageIndex}"); // Log the current page index
-			await JSRuntime.InvokeVoidAsync("console.log", $"Navigated to page: {selectedPageIndex}"); // Log in browser console
 		}
 	}
 

@@ -1,52 +1,114 @@
-﻿<div class="container-fluid mt-4">   
-
+﻿<div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
-        <div class="mb-3">
-            <label for="rbqNumberInput" class="form-label">Numéro RBQ</label>
-            <input type="text" class="form-control" id="rbqNumberInput" @bind="rbqNumberInput" maxlength="12" placeholder="Format: ####-####-##" @oninput="FormatRbqNumber">
-            @if (!string.IsNullOrEmpty(rbqNumberError))
-            {
-                <div class="text-danger">@rbqNumberError</div>
-            }
-        </div>
-
-
-        <div class="mb-3">
-            <label for="statusSelect" class="form-label">Statut</label>
-            <select class="form-select" id="statusSelect" @bind="selectedStatus">
-                <option value="">Choisissez un statut</option>
-                <option value="Valide">Valide</option>
-                <option value="Invalide">Invalide</option>
-            </select>
-            @if (!string.IsNullOrEmpty(statusError))
-            {
-                <div class="text-danger">@statusError</div>
-            }
-        </div>
-
-        <div class="mb-3">
-            <label for="licenseTypeSelect" class="form-label">Type de licence</label>
-            <select class="form-select" id="licenseTypeSelect" @bind="SelectedLicenseType">
-                <option value="">Choisissez un type de licence</option>
-                @foreach (var type in licenseTypes)
+        <div class="row mb-3">
+            <!-- Numéro RBQ -->
+            <div class="col-md-4">
+                <label for="rbqNumberInput" class="form-label">Numéro RBQ</label>
+                <input type="text" class="form-control" id="rbqNumberInput"
+                       @bind="rbqNumberInput" maxlength="12" placeholder="Format: ####-####-##"
+                       @oninput="FormatRbqNumber">
+                @if (!string.IsNullOrEmpty(rbqNumberError))
                 {
-                    <option value="@type">@type</option>
+                    <div class="text-danger">@rbqNumberError</div>
                 }
-            </select>
-            @if (!string.IsNullOrEmpty(licenseTypeError))
+            </div>
+
+            <!-- Date de début -->
+            <div class="col-md-4">
+                <label for="startDateInput" class="form-label">Date de début</label>
+                <input type="date" class="form-control" id="startDateInput"
+                       @bind="startDate">
+            </div>
+
+            <!-- Date de fin -->
+            <div class="col-md-4">
+                <label for="endDateInput" class="form-label">Date de fin</label>
+                <input type="date" class="form-control" id="endDateInput"
+                       @bind="endDate">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <!-- Statut -->
+            <div class="col-md-4">
+                <label for="statusSelect" class="form-label">Statut</label>
+                <select class="form-select" id="statusSelect" @bind="selectedStatus">
+                    <option value="">Choisissez un statut</option>
+                    <option value="Valide">Valide</option>
+                    <option value="Invalide">Invalide</option>
+                </select>
+                @if (!string.IsNullOrEmpty(statusError))
+                {
+                    <div class="text-danger">@statusError</div>
+                }
+            </div>
+
+            <!-- Type de licence -->
+            <div class="col-md-4">
+                <label for="licenseTypeSelect" class="form-label">Type de licence</label>
+                <select class="form-select" id="licenseTypeSelect" @bind="selectedLicenseType">
+                    <option value="">Choisissez un type de licence</option>
+                    @foreach (var type in licenseTypes)
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+                @if (!string.IsNullOrEmpty(licenseTypeError))
+                {
+                    <div class="text-danger">@licenseTypeError</div>
+                }
+            </div>
+
+            <!-- Catégorie -->
+            <div class="col-md-4">
+                <label for="categorySelect" class="form-label">Catégorie</label>
+                <select class="form-select" id="categorySelect" @bind="selectedCategory">
+                    <option value="">Choisissez une catégorie</option>
+                    <option value="Général">Général</option>
+                    <option value="Spécialisé">Spécialisé</option>
+                </select>
+                @if (!string.IsNullOrEmpty(categoryError))
+                {
+                    <div class="text-danger">@categoryError</div>
+                }
+            </div>
+        </div>
+
+        <!-- Sous-catégories Search -->
+        <div class="mb-3">
+            <label for="subCategorySearch" class="form-label">Sous-catégories</label>
+            <input type="text" class="form-control" id="subCategorySearch"
+                   @bind="subCategorySearch" @oninput="SearchSubCategories"
+                   placeholder="Recherchez des sous-catégories..." />
+            @if (!string.IsNullOrWhiteSpace(subCategorySearch))
             {
-                <div class="text-danger">@licenseTypeError</div>
+                <ul class="list-group" id="subCategoryResults">
+                    @if (filteredSubCategories != null && filteredSubCategories.Any())
+                    {
+                        @foreach (var subCategory in filteredSubCategories)
+                        {
+                            <li class="list-group-item" @onclick="() => SelectSubCategory(subCategory)">
+                                @subCategory
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item">Aucune sous-catégorie trouvée.</li>
+                    }
+                </ul>
             }
         </div>
 
+        <!-- Catégories sélectionnées -->
         <div class="mb-3">
-            <h5>Catégories sélectionnées</h5>
+            <h5>Catégories et Sous-catégories sélectionnées</h5>
             <ul>
-                @if (selectedCategories != null && selectedCategories.Any())
+                @if (selectedCategories.Any())
                 {
                     foreach (var category in selectedCategories)
                     {
-                        <li>@category.Code: @category.Description</li>
+                        <li><strong>@category</strong></li>
                     }
                 }
                 else
@@ -61,127 +123,127 @@
 </div>
 
 @code {
+    // Parameters and Variables
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
-
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
     private string rbqNumberInput = string.Empty;
     private string selectedStatus = string.Empty;
     private string selectedLicenseType = string.Empty;
+    private string selectedCategory = string.Empty;
+    private DateTime startDate = DateTime.Now;
+    private DateTime endDate = DateTime.Now;
+    private string subCategorySearch = string.Empty;
 
     private string rbqNumberError = string.Empty;
     private string statusError = string.Empty;
     private string licenseTypeError = string.Empty;
+    private string categoryError = string.Empty;
 
-    private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" }; // Example types
-    private List<Category> selectedCategories = new List<Category>();
+    // License types and categories
+    private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };
+    private List<string> selectedCategories = new List<string>();
+    private List<string> filteredSubCategories = new List<string>(); // To hold search results
 
-    // Property to handle changes in the selectedLicenseType
-    private string SelectedLicenseType
+    // Sample sub-categories for both "Général" and "Spécialisé"
+    private Dictionary<string, List<string>> allSubCategories = new Dictionary<string, List<string>>
     {
-        get => selectedLicenseType;
-        set
-        {
-            selectedLicenseType = value;
-            UpdateCategories();
-        }
-    }
+        { "Général", new List<string> { "1.2 - Petits bâtiments", "1.3 - Bâtiments de tout genre" }},
+        { "Spécialisé", new List<string> { "2.2 - Ouvrages de captage d'eau non forés", "2.4 - Systèmes d'assainissement autonome" }}
+    };
 
-    private void UpdateCategories()
+    // Handle submitting the form
+    private async Task HandleSubmit()
     {
-        // Clear previous selections
-        selectedCategories.Clear();
-
-        // Populate selected categories based on the selected license type
-        if (selectedLicenseType == "Entrepreneur")
-        {
-            selectedCategories.Add(new Category { Code = "G", Description = "Général" });
-            selectedCategories.Add(new Category { Code = "S", Description = "Spécialisé" });
-        }
-        else if (selectedLicenseType == "Constructeur-Propriétaire")
-        {
-            selectedCategories.Add(new Category { Code = "CR", Description = "Construction résidentielle" });
-        }
-        // Add more conditions as needed for other license types
-    }
-
-    private void HandleSubmit()
-    {
-        // Reset errors
+        // Reset error messages
         rbqNumberError = string.Empty;
         statusError = string.Empty;
         licenseTypeError = string.Empty;
+        categoryError = string.Empty;
 
-        // Basic validation checks
-        var isValid = true;
-
-        // Validate RBQ number
-        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !System.Text.RegularExpressions.Regex.IsMatch(rbqNumberInput, @"^\d{4}-\d{4}-\d{2}$"))
+        // Validation logic
+        if (string.IsNullOrWhiteSpace(rbqNumberInput))
         {
-            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
-            isValid = false;
+            rbqNumberError = "Le numéro RBQ est requis.";
         }
-
-        // Validate status
         if (string.IsNullOrWhiteSpace(selectedStatus))
         {
             statusError = "Le statut est requis.";
-            isValid = false;
         }
-
-        // Validate license type
         if (string.IsNullOrWhiteSpace(selectedLicenseType))
         {
             licenseTypeError = "Le type de licence est requis.";
-            isValid = false;
+        }
+        if (string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            categoryError = "La catégorie est requise.";
         }
 
-        if (isValid)
+        // If there are any errors, do not proceed
+        if (!string.IsNullOrEmpty(rbqNumberError) ||
+            !string.IsNullOrEmpty(statusError) ||
+            !string.IsNullOrEmpty(licenseTypeError) ||
+            !string.IsNullOrEmpty(categoryError))
         {
-            // If the form is valid, navigate to the next page
-            //Navigation.NavigateTo("/nextPage"); // Update to your next page route
-            Checkpoint.InvokeAsync(5);
-            OnPageSelected.InvokeAsync(5);
+            return;
         }
+
+        // Proceed with further logic, e.g., saving the data or navigating to another page
+        await OnPageSelected.InvokeAsync(1); // Adjust the argument as necessary
     }
 
+    // Format RBQ Number input dynamically
     private void FormatRbqNumber(ChangeEventArgs e)
     {
-        var input = e.Value.ToString();
-
-        // Remove any non-digit characters except dashes
-        input = new string(input.Where(c => char.IsDigit(c) || c == '-').ToArray());
-
-        // Ensure that the format is maintained
-        if (input.Length > 12)
+        var value = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(value))
         {
-            input = input.Substring(0, 12); // Limit to max length
-        }
+            // Clean the input by removing spaces and dashes
+            rbqNumberInput = value.Replace(" ", "").Replace("-", "").Trim();
 
-        // Remove existing dashes to reinsert them correctly
-        input = input.Replace("-", string.Empty);
-
-        // Insert dashes at the correct positions
-        if (input.Length > 4)
-        {
-            input = input.Insert(4, "-");
+            // Apply formatting only if the cleaned input has a valid length
+            if (rbqNumberInput.Length >= 2)
+            {
+                rbqNumberInput = rbqNumberInput.Insert(Math.Min(4, rbqNumberInput.Length), "-");
+            }
+            if (rbqNumberInput.Length >= 7)
+            {
+                rbqNumberInput = rbqNumberInput.Insert(Math.Min(9, rbqNumberInput.Length), "-");
+            }
         }
-        if (input.Length > 9)
-        {
-            input = input.Insert(9, "-");
-        }
-
-        // Set the formatted value back
-        rbqNumberInput = input;
     }
 
-
-
-    private class Category
+    // Update sub-category list based on the selected category
+    private void UpdateSubCategoryList()
     {
-        public string Code { get; set; }
-        public string Description { get; set; }
+        // Clear previous sub-category selection and reset search
+        filteredSubCategories.Clear();
+        subCategorySearch = string.Empty;
+    }
+
+    // Search the sub-categories based on user input
+    private void SearchSubCategories()
+    {
+        // Add your search logic here
+        if (string.IsNullOrWhiteSpace(subCategorySearch))
+        {
+            filteredSubCategories = new List<string>();
+        }
+        else if (allSubCategories.TryGetValue(selectedCategory, out var subCategories))
+        {
+            filteredSubCategories = subCategories
+                .Where(sc => sc.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    // Method to select a sub-category
+    private void SelectSubCategory(string subCategory)
+    {
+        selectedCategories.Add(subCategory);
+        filteredSubCategories.Clear();
+        subCategorySearch = string.Empty;
     }
 }
