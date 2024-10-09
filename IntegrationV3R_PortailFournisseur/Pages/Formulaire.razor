@@ -2,11 +2,13 @@
 @inject NavigationManager Navigation
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
+<CompPreremplissage OnDataFetched="HandleSharedData" />
+
 <div class="container-fluid  formulaire-container">
 	<NavbarFormulaire OnPageSelected="HandlePageSelected" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
-		<CompFormulaireIdentification OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
+		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
 		<CompFormulaireAdresse OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -24,9 +26,13 @@
 
 
 @code {
+	private CompFormulaireIdentification compIdentification;
+
 	private int selectedPageIndex = 0;
 
-	public int _checkpoint = 0;
+	public int _checkpoint = 8;
+
+	public bool _sharedData = false;
 
 	private void SetFormCheckpoint(int pageIndex)
 	{
@@ -42,5 +48,10 @@
 		{
 			selectedPageIndex = pageIndex;
 		}			
+	}
+
+	private void HandleSharedData(bool value)
+	{
+		compIdentification.LoadSharedData();
 	}
 }

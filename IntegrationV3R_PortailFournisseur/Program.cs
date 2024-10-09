@@ -12,6 +12,13 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
+builder.Services.AddSingleton<SharedDataService>();
+
+builder.Services.AddHttpClient<DonneesQuebecService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.donneesquebec.ca/");
+});
+
 
 var app = builder.Build();
 

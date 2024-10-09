@@ -1,4 +1,5 @@
 ﻿@using System.Text.RegularExpressions
+@using IntegrationV3R_PortailFournisseur.Data;
 
 <div class="container-fluid mt-4">    
 
@@ -64,11 +65,14 @@
 </div>
 
 @code {
+    [Inject] private SharedDataService SharedData { get; set; }
+
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
     [Parameter]
-    public EventCallback<int> Checkpoint { get; set; }
+    public EventCallback<int> Checkpoint { get; set; }   
+        
 
     private string neqInput = string.Empty;
     private string nomEntrepriseInput = string.Empty;
@@ -81,6 +85,13 @@
     private string emailError = string.Empty;
     private string passwordError = string.Empty;
     private string repeatPasswordError = string.Empty;    
+
+
+    public void LoadSharedData()
+    {
+        neqInput = SharedData.NEQ;
+        StateHasChanged();
+    }
 
     private void HandleSubmit()
     {

@@ -1,4 +1,5 @@
-﻿<div class="container-fluid mt-4">    
+﻿@using IntegrationV3R_PortailFournisseur.Data;
+<div class="container-fluid mt-4">    
 
     <form class="form" @onsubmit="HandleSubmit">
         <h5>Adresse de l'entreprise</h5>
@@ -84,6 +85,8 @@
 </div>
 
 @code {
+    [Inject] private SharedDataService SharedData { get; set; }
+
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
