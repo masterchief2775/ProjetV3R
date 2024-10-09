@@ -1,6 +1,9 @@
 ﻿@page "/formulaire"
 @inject NavigationManager Navigation
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
 
 <div class="container-fluid  formulaire-container">
 	<NavbarFormulaire OnPageSelected="HandlePageSelected" CurrentPage="selectedPageIndex" />
@@ -17,8 +20,11 @@
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
 		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
+	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
+		<CompFormulaireRBQ OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireRBQ Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireBrochure OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
 
@@ -26,7 +32,7 @@
 @code {
 	private int selectedPageIndex = 0;
 
-	public int _checkpoint = 0;
+	public int _checkpoint = 5; // Remettre à 0 pour le release, permet de ce deplacer entre pages pour tester
 
 	private void SetFormCheckpoint(int pageIndex)
 	{
@@ -41,6 +47,7 @@
 		if (pageIndex <= _checkpoint)
 		{
 			selectedPageIndex = pageIndex;
-		}			
+		}
 	}
+
 }
