@@ -41,6 +41,10 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<SeaoUnspscNature> SeaoUnspscNatures { get; set; }
 
+    public virtual DbSet<Souscategorieafter2008> Souscategorieafter2008s { get; set; }
+
+    public virtual DbSet<Souscategoriebefore2008> Souscategoriebefore2008s { get; set; }
+
     public virtual DbSet<UnspscClass> UnspscClasses { get; set; }
 
     public virtual DbSet<UnspscComodite> UnspscComodites { get; set; }
@@ -133,9 +137,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.BrochureId)
                 .HasColumnType("int(11)")
                 .HasColumnName("brochureId");
-            entity.Property(e => e.Contenu)
-                .HasMaxLength(128)
-                .HasColumnName("contenu");
             entity.Property(e => e.DateCreation)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
@@ -143,6 +144,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FournisseurId)
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurId");
+            entity.Property(e => e.LienDocument)
+                .HasMaxLength(128)
+                .HasColumnName("lienDocument");
+            entity.Property(e => e.NoFichier).HasMaxLength(32);
             entity.Property(e => e.Nom)
                 .HasMaxLength(32)
                 .HasColumnName("nom");
@@ -517,6 +522,42 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.NatureNom)
                 .HasMaxLength(30)
                 .HasColumnName("natureNom");
+        });
+
+        modelBuilder.Entity<Souscategorieafter2008>(entity =>
+        {
+            entity.HasKey(e => e.SousCategorieAfter2008Id).HasName("PRIMARY");
+
+            entity.ToTable("souscategorieafter2008");
+
+            entity.HasIndex(e => e.NomSousCategorieAfter2008, "nomSousCategorieAfter2008").IsUnique();
+
+            entity.HasIndex(e => e.NumeroSousCategorieAfter2008, "numeroSousCategorieAfter2008").IsUnique();
+
+            entity.Property(e => e.SousCategorieAfter2008Id).HasColumnType("int(11)");
+            entity.Property(e => e.NomSousCategorieAfter2008)
+                .HasMaxLength(128)
+                .HasColumnName("nomSousCategorieAfter2008");
+            entity.Property(e => e.NumeroSousCategorieAfter2008)
+                .HasMaxLength(8)
+                .HasColumnName("numeroSousCategorieAfter2008");
+        });
+
+        modelBuilder.Entity<Souscategoriebefore2008>(entity =>
+        {
+            entity.HasKey(e => e.SousCategorieBefore2008Id).HasName("PRIMARY");
+
+            entity.ToTable("souscategoriebefore2008");
+
+            entity.HasIndex(e => e.NomSousCategorieBefore2008, "nomSousCategorieBefore2008").IsUnique();
+
+            entity.Property(e => e.SousCategorieBefore2008Id).HasColumnType("int(11)");
+            entity.Property(e => e.NomSousCategorieBefore2008)
+                .HasMaxLength(128)
+                .HasColumnName("nomSousCategorieBefore2008");
+            entity.Property(e => e.NumeroSousCategorieBefore2008)
+                .HasMaxLength(8)
+                .HasColumnName("numeroSousCategorieBefore2008");
         });
 
         modelBuilder.Entity<UnspscClass>(entity =>

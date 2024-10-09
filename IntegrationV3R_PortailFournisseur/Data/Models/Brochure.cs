@@ -13,9 +13,11 @@ public partial class Brochure
 
     public string TypeFichier { get; set; } = null!;
 
+    public string NoFichier { get; set; } = null!;
+
     public string Taille { get; set; } = null!;
 
-    public string Contenu { get; set; } = null!;
+    public string LienDocument { get; set; } = null!;
 
     public DateTime DateCreation { get; set; }
 
