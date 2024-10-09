@@ -27,4 +27,11 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Documents\" />
+    <Folder Include="Data\Images\" />
+    <Folder Include="Data\Models\" />
+    <Folder Include="Data\NewFolder\" />
+  </ItemGroup>
+
 </Project>
