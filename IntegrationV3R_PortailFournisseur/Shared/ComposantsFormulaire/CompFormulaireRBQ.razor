@@ -1,4 +1,5 @@
-﻿<div class="container-fluid mt-4">   
+﻿@using IntegrationV3R_PortailFournisseur.Data
+<div class="container-fluid mt-4">   
 
     <form class="form" @onsubmit="HandleSubmit">
         <div class="mb-3">
@@ -15,8 +16,8 @@
             <label for="statusSelect" class="form-label">Statut</label>
             <select class="form-select" id="statusSelect" @bind="selectedStatus">
                 <option value="">Choisissez un statut</option>
-                <option value="Valide">Valide</option>
-                <option value="Invalide">Invalide</option>
+                <option value="Valide" selected="@(_selectionStatut[0] == true)">Valide</option>
+                <option value="Invalide" selected="@(_selectionStatut[1] == true)">Invalide</option>
             </select>
             @if (!string.IsNullOrEmpty(statusError))
             {
@@ -61,11 +62,17 @@
 </div>
 
 @code {
+    [Inject] private SharedDataService SharedData { get; set; }
+
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+
+    private bool[] _selectionStatut = new bool[2];
+    private bool[] _selectionType = new bool[2];
+
 
     private string rbqNumberInput = string.Empty;
     private string selectedStatus = string.Empty;
@@ -77,6 +84,34 @@
 
     private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" }; // Example types
     private List<Category> selectedCategories = new List<Category>();
+
+
+    protected override void OnInitialized()
+    {
+        _selectionStatut[0] = false;
+        _selectionStatut[1] = false;
+
+        _selectionType[0] = false;
+        _selectionType[1] = false;
+    }
+
+    public void LoadSharedData()
+    {
+        rbqNumberInput = SharedData.NumLicence;
+
+        if(SharedData.StatutLicence == "Active")
+        {
+            _selectionStatut[0] = true;
+        }
+        else
+        {
+            _selectionStatut[1] = true;
+        }
+
+
+
+        StateHasChanged();
+    }
 
     // Property to handle changes in the selectedLicenseType
     private string SelectedLicenseType
@@ -105,7 +140,7 @@
             selectedCategories.Add(new Category { Code = "CR", Description = "Construction résidentielle" });
         }
         // Add more conditions as needed for other license types
-    }
+    }    
 
     private void HandleSubmit()
     {

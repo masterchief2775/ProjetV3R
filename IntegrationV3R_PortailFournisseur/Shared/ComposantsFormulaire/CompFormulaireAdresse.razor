@@ -118,6 +118,17 @@
     private string numeroTelephoneError = string.Empty;
     private string siteWebError = string.Empty;
 
+    public void LoadSharedData()
+    {
+        numCiviqueInput = SharedData.NumCivique;
+        rueInput = SharedData.NomRue;
+        villeInput = SharedData.NomVille;
+        provinceInput = SharedData.Province;
+        codePostalInput = SharedData.CodePostal;
+        numeroTelephoneInput = SharedData.NumTelephone;
+        //regionAdministraviteInput = SharedData.RegionAdministrative
+        StateHasChanged();
+    }
 
     private void HandleSubmit()
     {

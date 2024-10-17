@@ -11,7 +11,7 @@
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
 		<CompFormulaireContact OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -20,13 +20,15 @@
 		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireRBQ Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireRBQ @ref="compRBQ" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
 
 
 @code {
 	private CompFormulaireIdentification compIdentification;
+	private CompFormulaireAdresse compAdresse;
+	private CompFormulaireRBQ compRBQ;
 
 	private int selectedPageIndex = 0;
 
@@ -53,5 +55,7 @@
 	private void HandleSharedData(bool value)
 	{
 		compIdentification.LoadSharedData();
+		compAdresse.LoadSharedData();
+		compRBQ.LoadSharedData();
 	}
 }

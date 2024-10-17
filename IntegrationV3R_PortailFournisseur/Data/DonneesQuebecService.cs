@@ -38,17 +38,41 @@ namespace IntegrationV3R_PortailFournisseur.Data
 
     public class Fiche
     {
+    //Identification
+		[JsonPropertyName("NEQ")]
+		public string NEQ { get; set; }
+
+		[JsonPropertyName("Nom de l'intervenant")]
+		public string NomEntreprise { get; set; }
+
+		[JsonPropertyName("Courriel")]
+		public string Courriel { get; set; }
+
+    //Adresse
+        [JsonPropertyName("Adresse")]
+        public string Adresse { get; set; }
+
+        [JsonPropertyName("Numero de telephone")]
+        public string NumTelephone { get; set; }
+
+        [JsonPropertyName("Region administrative")]
+        public string RegionAdministrative { get; set; }
+
+    //RBQ
         [JsonPropertyName("Numero de licence")]
         public string NumeroDeLicence { get; set; }
 
         [JsonPropertyName("Statut de la licence")]
-        public string StatutDeLaLicence { get; set; }
+        public string StatutLicence { get; set; }
 
-        [JsonPropertyName("Adresse")]
-        public string Adresse { get; set; }
+        [JsonPropertyName("Type de licence")]
+        public string TypeLicence { get; set; }
 
-        [JsonPropertyName("NEQ")]
-        public string NEQ { get; set;}
-        // Add other fields based on API response
+        [JsonPropertyName("Categorie")]
+        public string CategorieLicence { get; set; }
+
+
+
+
     }
 }
