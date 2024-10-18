@@ -1,6 +1,9 @@
 ﻿@page "/formulaire"
 @inject NavigationManager Navigation
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
+@using Microsoft.JSInterop
+
+@inject IJSRuntime JSRuntime
 
 <CompPreremplissage OnDataFetched="HandleSharedData" />
 
@@ -19,8 +22,11 @@
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
 		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
-	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireRBQ @ref="compRBQ" Checkpoint="SetFormCheckpoint" />
+	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
+		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	</div>
+	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">		
+		<CompFormulaireBrochure OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
 
@@ -49,7 +55,7 @@
 		if (pageIndex <= _checkpoint)
 		{
 			selectedPageIndex = pageIndex;
-		}			
+		}
 	}
 
 	private void HandleSharedData(bool value)

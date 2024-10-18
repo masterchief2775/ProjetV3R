@@ -1,12 +1,17 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data;
 <div class="container-fluid mt-4">    
+﻿@using System.Text.RegularExpressions
+@using Microsoft.JSInterop
 
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
         <h5>Adresse de l'entreprise</h5>
         <div class="row mb-3">
             <div class="mb-3 col-6">
                 <label for="numCiviqueInput" class="form-label">Numéro Civique</label>
-                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput">
+                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput" required>
                 @if (!string.IsNullOrEmpty(numCiviqueError))
                 {
                     <div class="text-danger">@numCiviqueError</div>
@@ -24,7 +29,7 @@
 
             <div class="mb-3 col-6">
                 <label for="rueInput" class="form-label">Nom de rue</label>
-                <input type="text" class="form-control" id="rueInput" @bind="rueInput">
+                <input type="text" class="form-control" id="rueInput" @bind="rueInput" required>
                 @if (!string.IsNullOrEmpty(rueError))
                 {
                     <div class="text-danger">@rueError</div>
@@ -33,7 +38,7 @@
 
             <div class="mb-3 col-6">
                 <label for="villeInput" class="form-label">Nom Ville</label>
-                <input type="text" class="form-control" id="villeInput" @bind="villeInput">
+                <input type="text" class="form-control" id="villeInput" @bind="villeInput" required>
                 @if (!string.IsNullOrEmpty(villeError))
                 {
                     <div class="text-danger">@villeError</div>
@@ -42,7 +47,7 @@
 
             <div class="mb-3 col-6">
                 <label for="provinceInput" class="form-label">Province</label>
-                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput">
+                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput" required>
                 @if (!string.IsNullOrEmpty(provinceError))
                 {
                     <div class="text-danger">@provinceError</div>
@@ -51,35 +56,62 @@
 
             <div class="mb-3 col-6">
                 <label for="codePostalInput" class="form-label">Code postal</label>
-                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7">
+                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7" required>
                 @if (!string.IsNullOrEmpty(codePostalError))
                 {
                     <div class="text-danger">@codePostalError</div>
                 }
             </div>
         </div>
-        
 
         <br />
         <h5>Informations supplémentaires</h5>
         <div class="mb-3">
+            <label for="regionInput" class="form-label">Région administrative</label>
+            <select class="form-select" id="regionInput" @bind="regionInput" required>
+                <option value="">Sélectionner une région</option>
+                <option value="Abitibi-Témiscamingue">Abitibi-Témiscamingue</option>
+                <option value="Bas-Saint-Laurent">Bas-Saint-Laurent</option>
+                <option value="Capitale-Nationale">Capitale-Nationale</option>
+                <option value="Centre-du-Québec">Centre-du-Québec</option>
+                <option value="Chaudière-Appalaches">Chaudière-Appalaches</option>
+                <option value="Côte-Nord">Côte-Nord</option>
+                <option value="Estrie">Estrie</option>
+                <option value="Gaspésie–Îles-de-la-Madeleine">Gaspésie–Îles-de-la-Madeleine</option>
+                <option value="Lanaudière">Lanaudière</option>
+                <option value="Laurentides">Laurentides</option>
+                <option value="Laval">Laval</option>
+                <option value="Mauricie">Mauricie</option>
+                <option value="Montérégie">Montérégie</option>
+                <option value="Montréal">Montréal</option>
+                <option value="Nord-du-Québec">Nord-du-Québec</option>
+                <option value="Outaouais">Outaouais</option>
+                <option value="Saguenay–Lac-Saint-Jean">Saguenay–Lac-Saint-Jean</option>
+            </select>
+            @if (!string.IsNullOrEmpty(regionError))
+            {
+                <div class="text-danger">@regionError</div>
+            }
+        </div>
+
+        <div class="mb-3">
             <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
-            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12">
+            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
             @if (!string.IsNullOrEmpty(numeroTelephoneError))
             {
                 <div class="text-danger">@numeroTelephoneError</div>
             }
         </div>
-       
+
         <div class="mb-3">
             <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
-            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput">
+            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput" required>
             @if (!string.IsNullOrEmpty(siteWebError))
             {
                 <div class="text-danger">@siteWebError</div>
             }
         </div>
-        
+
         <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
 </div>
@@ -93,20 +125,15 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
-
-
     private string numCiviqueInput = string.Empty;
     private string rueInput = string.Empty;
     private string bureauInput = string.Empty;
     private string provinceInput = string.Empty;
     private string villeInput = string.Empty;
     private string codePostalInput = string.Empty;
-
-    private string numeroTelephoneInput = string.Empty;    
+    private string numeroTelephoneInput = string.Empty;
     private string siteWebInput = string.Empty;
-
-
-
+    private string regionInput = string.Empty; // Added declaration for regionInput
 
     private string numCiviqueError = string.Empty;
     private string rueError = string.Empty;
@@ -114,10 +141,10 @@
     private string provinceError = string.Empty;
     private string villeError = string.Empty;
     private string codePostalError = string.Empty;
-
     private string numeroTelephoneError = string.Empty;
     private string siteWebError = string.Empty;
-
+    private string regionError = string.Empty; // Added declaration for regionError
+    
     public void LoadSharedData()
     {
         numCiviqueInput = SharedData.NumCivique;
@@ -129,20 +156,20 @@
         //regionAdministraviteInput = SharedData.RegionAdministrative
         StateHasChanged();
     }
+   
 
     private void HandleSubmit()
     {
-        // Reset errors        
+        // Reset errors
         numCiviqueError = string.Empty;
         rueError = string.Empty;
         bureauError = string.Empty;
         villeError = string.Empty;
         provinceError = string.Empty;
         codePostalError = string.Empty;
-
-        numeroTelephoneError = string.Empty;        
+        numeroTelephoneError = string.Empty;
         siteWebError = string.Empty;
-
+        regionError = string.Empty; // Reset region error
 
         // Basic validation checks
         var isValid = true;
@@ -154,11 +181,11 @@
         }
         else
         {
-            for (int i = 0; i<numCiviqueInput.Length; i ++)
+            for (int i = 0; i < numCiviqueInput.Length; i++)
             {
                 if (!Char.IsDigit(numCiviqueInput[i]))
                 {
-                    numCiviqueError = "Le numéro civique doit être numérique (Si le numéro contient un suffixe, veuillez rentré le suffixe dans la section Bureau)";
+                    numCiviqueError = "Le numéro civique doit être numérique (Si le numéro contient un suffixe, veuillez rentrer le suffixe dans la section Bureau)";
                     isValid = false;
                 }
             }
@@ -169,8 +196,6 @@
             rueError = "Le nom de rue est requis";
             isValid = false;
         }
-
-        //MaxLength numBureau = 8 car le plus long par exemple (1/2 1224) suffixe + bureau dans les 1000
 
         if (string.IsNullOrWhiteSpace(villeInput))
         {
@@ -195,60 +220,70 @@
             numeroTelephoneError = "Le numéro de téléphone est requis et doit être au format valide.";
             isValid = false;
         }
-       
 
         if (string.IsNullOrWhiteSpace(siteWebInput) || !Uri.IsWellFormedUriString(siteWebInput, UriKind.Absolute))
         {
             siteWebError = "Le site web est requis et doit être une URL valide.";
             isValid = false;
-        }                
+        }
+
+        if (string.IsNullOrWhiteSpace(regionInput))
+        {
+            regionError = "La région administrative est requise."; // Set error for region
+            isValid = false;
+        }
 
         if (isValid)
         {
-            // If the form is valid, navigate to the next page
-            //Navigation.NavigateTo("/formulaireDemandeContact");
+            // Export and log data
+            var formData = ExportFormData();
+            LogToInspector(formData);
+
+            // Navigate to the next page
             Checkpoint.InvokeAsync(2);
             OnPageSelected.InvokeAsync(2);
         }
     }
 
-    //Vérifié dans trigger insertion dans bd
-    private bool IsPhoneNumberValid(string phoneNumber)
+    private string[] ExportFormData()
     {
-        // Example format: 123-456-7890
-        return System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\d{3}-\d{3}-\d{4}$");
+        return new string[]
+        {
+            numCiviqueInput,
+            bureauInput,
+            rueInput,
+            villeInput,
+            provinceInput,
+            codePostalInput,
+            numeroTelephoneInput,
+            siteWebInput,
+            regionInput // Include region in the exported data
+        };
     }
 
-    //Vérifié dans trigger insertion dans bd
-    private bool IsPostalCodeValid(string postalCode)
+    private async void LogToInspector(string[] formData)
     {
-        // Example format: A1B 2C3
-        return System.Text.RegularExpressions.Regex.IsMatch(postalCode, @"^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$");
-    }
-
-    private bool IsAddressValid(string address, string city)
-    {
-        // Placeholder for real address verification logic
-        // This could be an API call to a geolocation service or database lookup
-        // For demonstration purposes, let's just check for non-empty values
-        return !string.IsNullOrWhiteSpace(address) && !string.IsNullOrWhiteSpace(city);
+        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro Civique: {formData[0]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Bureau: {formData[1]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Nom de Rue: {formData[2]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Ville: {formData[3]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Province: {formData[4]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Code Postal: {formData[5]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro de Téléphone: {formData[6]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Site Web: {formData[7]}");
+        await JSRuntime.InvokeVoidAsync("console.log", $"Région Administrative: {formData[8]}"); // Log region
     }
 
     private void FormatTelephoneNumber(ChangeEventArgs e)
     {
         var input = e.Value.ToString();
-
-        // Remove any non-digit characters except dashes
         input = new string(input.Where(char.IsDigit).ToArray());
 
-        // Limit to a maximum of 10 digits (excluding dashes)
         if (input.Length > 10)
         {
-            input = input.Substring(0, 10); 
-        }       
-        
+            input = input.Substring(0, 10);
+        }
 
-        // Insert dashes at the correct positions
         if (input.Length > 3)
         {
             input = input.Insert(3, "-");
@@ -256,33 +291,26 @@
         if (input.Length > 7)
         {
             input = input.Insert(7, "-");
-        }       
+        }
 
-        // Set the formatted value back
         numeroTelephoneInput = input;
     }
 
     private void FormatCodePostal(ChangeEventArgs e)
     {
         var input = e.Value.ToString();
-
-        // Remove any non-digit characters except dashes
         input = new string(input.Where(char.IsLetterOrDigit).ToArray());
 
-        // Limit to a maximum of 6 digits (excluding blank spaces)
         if (input.Length > 6)
         {
             input = input.Substring(0, 6);
         }
 
-
-        // Insert dashes at the correct positions
         if (input.Length > 3)
         {
             input = input.Insert(3, " ");
         }
-      
-        // Set the formatted value back
+
         codePostalInput = input;
     }
 }
