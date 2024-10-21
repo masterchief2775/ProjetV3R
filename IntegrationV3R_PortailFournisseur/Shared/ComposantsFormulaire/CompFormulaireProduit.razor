@@ -6,7 +6,7 @@
         <!-- Product Description -->
         <div class="mb-3">
             <label for="productDescriptionInput" class="form-label">Description du produit</label>
-            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3"></textarea>
+            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3" required></textarea>
             @if (!string.IsNullOrEmpty(productDescriptionError))
             {
                 <div class="text-danger">@productDescriptionError</div>
@@ -16,7 +16,7 @@
         <!-- Product Search -->
         <div class="mb-3">
             <label for="productSearchInput" class="form-label">Rechercher des produits</label>
-            <input type="text" class="form-control" id="productSearchInput" @bind="productSearch" @oninput="OnProductSearchInput" placeholder="Recherchez des produits..." />
+            <input type="text" class="form-control" id="productSearchInput" @bind="productSearch" @oninput="OnProductSearchInput" placeholder="Recherchez des produits..."/>
             @if (filteredProducts != null && filteredProducts.Any())
             {
                 <ul class="list-group" id="productResults">
@@ -82,38 +82,60 @@
     private List<string> selectedProducts = new List<string>();
 
     // Handle the form submission
-    private async Task HandleSubmit()
+    private void HandleSubmit()
     {
-        // Reset error messages and validation flag
+        // Reset errors
+        ResetErrors();
+
+        // Basic validation checks
+        var isValid = ValidateInputs();
+
+        // If valid, export and log data to console
+        if (isValid)
+        {
+            var formData = ExportFormData();
+            LogToConsole(formData);
+
+            Checkpoint.InvokeAsync(4);
+            OnPageSelected.InvokeAsync(4);
+        }
+    }
+
+    // Reset error messages
+    private void ResetErrors()
+    {
         productDescriptionError = string.Empty;
         productSearchError = string.Empty;
+    }
 
-        bool isValid = true; // Reset isValid to true
+    // Validate inputs
+    private bool ValidateInputs()
+    {
+        bool isValid = true;
 
-        // Validation logic
         if (string.IsNullOrWhiteSpace(productDescription))
         {
             productDescriptionError = "La description du produit est requise.";
-            isValid = false; // Set isValid to false if validation fails
+            isValid = false;
         }
+
         if (!selectedProducts.Any())
         {
             productSearchError = "Au moins un produit doit être sélectionné.";
-            isValid = false; // Set isValid to false if validation fails
+            isValid = false;
         }
 
-        // If there are any errors, do not proceed
-        if (!isValid)
+        return isValid;
+    }
+
+    // Export form data as an array of strings
+    private string[] ExportFormData()
+    {
+        return new string[]
         {
-            return;
-        }
-
-        // Log data to the console
-        await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
-
-        // Trigger checkpoint and page change
-        await Checkpoint.InvokeAsync(4);
-        await OnPageSelected.InvokeAsync(4);
+            productDescription,
+            string.Join(", ", selectedProducts)
+        };
     }
 
     // Handle search input dynamically for products
@@ -155,5 +177,12 @@
     private void RemoveProduct(string product)
     {
         selectedProducts.Remove(product);
+    }
+
+    // Log data to the console using Console.WriteLine
+    private void LogToConsole(string[] formData)
+    {
+        Console.WriteLine($"Description du produit: {formData[0]}");
+        Console.WriteLine($"Produits sélectionnés: {formData[1]}");
     }
 }

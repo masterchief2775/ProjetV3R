@@ -219,9 +219,15 @@
             isValid = false;
         }
 
+        // Validate phone number format
         if (string.IsNullOrWhiteSpace(numeroTelephoneInput))
         {
             numeroTelephoneError = "Le numéro de téléphone est requis.";
+            isValid = false;
+        }
+        else if (!Regex.IsMatch(numeroTelephoneInput, @"^\d{3}-\d{3}-\d{4}$"))
+        {
+            numeroTelephoneError = "Le numéro de téléphone doit être au format XXX-XXX-XXXX.";
             isValid = false;
         }
 
@@ -239,6 +245,7 @@
 
         return isValid;
     }
+
 
     private string ExportFormData()
     {
