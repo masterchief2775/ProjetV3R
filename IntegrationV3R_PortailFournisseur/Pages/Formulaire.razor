@@ -20,7 +20,7 @@
 		<CompFormulaireContact OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
-		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
 		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
@@ -34,6 +34,7 @@
 @code {
 	private CompFormulaireIdentification compIdentification;
 	private CompFormulaireAdresse compAdresse;
+	private CompFormulaireProduit compProduit;
 	private CompFormulaireRBQ compRBQ;
 
 
@@ -76,9 +77,11 @@
 		switch (_FetchedComp)
 		{
 			case 2 :
+				compProduit.FetchDataDB();
+				break;
+			case 3:
 				compRBQ.FetchDataDB();
 				break;
-
 		}
 
 		Console.WriteLine("In FORMULAIRE");

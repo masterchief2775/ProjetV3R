@@ -1,8 +1,8 @@
-﻿@using IntegrationV3R_PortailFournisseur.Data.Services;﻿
+﻿﻿@using IntegrationV3R_PortailFournisseur.Data.Services;﻿
 @using IntegrationV3R_PortailFournisseur.Data.Models;﻿
 @using Microsoft.EntityFrameworkCore;
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
-    
+
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
@@ -55,7 +55,7 @@
                 <select class="form-select" id="licenseTypeSelect" @bind="selectedLicenseType">
                     <option value="">Choisissez un type de licence</option>
                     <option value="Entrepreneur">Entrepreneur</option>
-                    <option value="Constructeur-Propriétaire">Constructeur-Propriétaire</option>                    
+                    <option value="Constructeur-Propriétaire">Constructeur-Propriétaire</option>
                 </select>
                 @if (!string.IsNullOrEmpty(licenseTypeError))
                 {
@@ -82,12 +82,12 @@
         <div class="mb-3">
             <label for="subCategorySearch" class="form-label">Sous-catégories</label>
             <input type="text" class="form-control" id="subCategorySearch"
-                   @bind="subCategorySearch" @oninput="SearchSubCategories"
+                   @bind="@subCategorySearch" @oninput="@OnSubCategoryInput"
                    placeholder="Recherchez des sous-catégories..." />
-            @if (!string.IsNullOrWhiteSpace(subCategorySearch))
+            @if (filteredSubCategories != null && filteredSubCategories.Any())
             {
                 <ul class="list-group" id="subCategoryResults">
-                    @if (filteredSubCategories != null && filteredSubCategories.Any())
+                    @foreach (var subCategory in filteredSubCategories)
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectSubCategory(subCategory)">
                             @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008
@@ -96,7 +96,12 @@
                     }
                 </ul>
             }
+            @if (!string.IsNullOrEmpty(subCategoryError))
+            {
+                <div class="text-danger">@subCategoryError</div> <!-- Display the error message here -->
+            }
         </div>
+
 
         <!-- Catégories sélectionnées -->
         <div class="mb-3">
@@ -109,8 +114,8 @@
                         <li>
                             <strong>@category</strong>
                             <button type="button" class="btn btn-link text-danger btn-sm"
-                                    @onclick="() => RemoveSubCategory(category)"
-                                    style="margin-left: 10px; padding: 0;">
+                            @onclick="() => RemoveSubCategory(category)"
+                            style="margin-left: 10px; padding: 0;">
                                 &times;
                             </button>
                         </li>
@@ -125,7 +130,7 @@
 
         <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
-    @foreach(var subCategory in fetchedSousCategories)
+    @foreach (var subCategory in fetchedSousCategories)
     {
         <p>@subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008</p>
     }
@@ -145,7 +150,7 @@
 
 
     private bool[] _selectionStatut = new bool[2];
-    private bool[] _selectionType = new bool[2];    
+    private bool[] _selectionType = new bool[2];
 
     private string rbqNumberInput = string.Empty;
     private string selectedStatus = string.Empty;
@@ -159,6 +164,7 @@
     private string statusError = string.Empty;
     private string licenseTypeError = string.Empty;
     private string categoryError = string.Empty;
+    private string subCategoryError = string.Empty; // New error message for sub-categories
 
     // License types and categories
     private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };
@@ -179,12 +185,12 @@
         {
             subCategoryError = "Erreur lors de la récupération des régions.";
             Console.WriteLine(ex.Message);
-        }        
+        }
         BDFetched.InvokeAsync();
     }
 
     protected override async Task OnInitializedAsync()
-    {       
+    {
         //Revérifier, peut être inutile
         _selectionStatut[0] = false;
         _selectionStatut[1] = false;
@@ -193,11 +199,30 @@
         _selectionType[1] = false;
     }
 
-    // Sample sub-categories for both "Général" and "Spécialisé"
-    private Dictionary<string, List<string>> allSubCategories = new Dictionary<string, List<string>>
+    // Updated sub-categories for testing
+    private List<string> allSubCategories = new List<string>
     {
-        { "Général", new List<string> { "1.2 - Petits bâtiments", "1.3 - Bâtiments de tout genre" }},
-        { "Spécialisé", new List<string> { "2.2 - Ouvrages de captage d'eau non forés", "2.4 - Systèmes d'assainissement autonome" }}
+        "4093.1 Sous-stations pour distribution d’électricité",
+        "4093.2 Lignes aériennes",
+        "4093.3 Lignes souterraines",
+        "4096 Canalisation",
+        "4200 Pieux de fondations spéciales",
+        "4201 Charpente et éléments architecturaux",
+        "4202 Produits réfractaires",
+        "4203 Maçonnerie",
+        "4204 Finition de béton",
+        "4205 Marbre, granito, céramique et terrazzo",
+        "4206 Enduits calcaires",
+        "4207 Systèmes intérieurs",
+        "4208 Piscines",
+        "4209 Ferraillage",
+        "4210.1 Charpenterie",
+        "4210.2 Menuiserie",
+        "4211.1 Coffrage",
+        "4211.2 Coffrage pour assises et murs de fondation",
+        "4212 Revêtements souples",
+        "4213 Parquetage",
+        "4220 Serrurerie de bâtiment"
     };
 
     public void LoadSharedData()
@@ -206,11 +231,11 @@
 
         if (SharedData.StatutLicence == "Active")
         {
-            _selectionStatut[0] = true;            
+            _selectionStatut[0] = true;
         }
         else
         {
-            _selectionStatut[1] = true;            
+            _selectionStatut[1] = true;
         }
         selectedStatus = SharedData.StatutLicence;
 
@@ -228,11 +253,12 @@
         statusError = string.Empty;
         licenseTypeError = string.Empty;
         categoryError = string.Empty;
+        subCategoryError = string.Empty; // Reset sub-category error
 
         // Validation logic
-        if (string.IsNullOrWhiteSpace(rbqNumberInput))
+        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !IsValidRbqNumber(rbqNumberInput))
         {
-            rbqNumberError = "Le numéro RBQ est requis.";
+            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
         }
         if (string.IsNullOrWhiteSpace(selectedStatus))
         {
@@ -246,12 +272,17 @@
         {
             categoryError = "La catégorie est requise.";
         }
+        if (!selectedCategories.Any()) // Check if at least one sub-category is selected
+        {
+            subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
+        }
 
         // If there are any errors, do not proceed
         if (!string.IsNullOrEmpty(rbqNumberError) ||
             !string.IsNullOrEmpty(statusError) ||
             !string.IsNullOrEmpty(licenseTypeError) ||
-            !string.IsNullOrEmpty(categoryError))
+            !string.IsNullOrEmpty(categoryError) ||
+            !string.IsNullOrEmpty(subCategoryError))
         {
             return;
         }
@@ -260,29 +291,42 @@
         await OnPageSelected.InvokeAsync(1); // Adjust the argument as necessary
     }
 
-    // Format RBQ Number input dynamically
-    private void FormatRbqNumber(ChangeEventArgs e)
-    {
-        var value = e.Value?.ToString();
-        if (!string.IsNullOrEmpty(value))
-        {
-            // Clean the input by removing spaces and dashes
-            rbqNumberInput = value.Replace(" ", "").Replace("-", "").Trim();
 
-            // Apply formatting only if the cleaned input has a valid length
-            if (rbqNumberInput.Length >= 2)
-            {
-                rbqNumberInput = rbqNumberInput.Insert(Math.Min(4, rbqNumberInput.Length), "-");
-            }
-            if (rbqNumberInput.Length >= 7)
-            {
-                rbqNumberInput = rbqNumberInput.Insert(Math.Min(9, rbqNumberInput.Length), "-");
-            }
-        }
+    // Check if the RBQ number is valid
+    private bool IsValidRbqNumber(string value)
+    {
+        // Check if the input matches the desired format ####-####-##
+        return System.Text.RegularExpressions.Regex.IsMatch(value, @"^\d{4}-\d{4}-\d{2}$");
     }
 
-    // Update sub-category list based on the selected category
-    private void UpdateSubCategoryList()
+    // Format RBQ number while typing
+    private void FormatRbqNumber(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        // Remove non-digit characters
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        // Format input to ####-####-##
+        if (input.Length > 0)
+        {
+            // Append hyphens as necessary
+            if (input.Length > 8)
+            {
+                input = input.Insert(8, "-");
+            }
+            if (input.Length > 4)
+            {
+                input = input.Insert(4, "-");
+            }
+            // Limit to 12 characters
+            input = input.Substring(0, Math.Min(input.Length, 12));
+        }
+
+        rbqNumberInput = input; // Update the input value
+    }
+
+    // Search sub-categories dynamically
+    private void OnSubCategoryInput(ChangeEventArgs e)
     {
         subCategorySearch = e.Value?.ToString() ?? string.Empty;
 
@@ -297,7 +341,7 @@
         }
     }
 
-    // Search the sub-categories based on user input
+    // Filter the sub-categories based on the search input
     private void SearchSubCategories()
     {
         // Filter the sub-categories based on the search input
@@ -308,7 +352,7 @@
             if (categorie.NomSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase) || categorie.NumeroSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
             {
                 filteredSubCategories.Add(categorie);
-            }            
+            }
         }
     }
 
@@ -317,21 +361,15 @@
     {
         if (!selectedCategories.Contains(subCategory))
         {
-            filteredSubCategories = new List<string>();
-        }
-        else if (allSubCategories.TryGetValue(selectedCategory, out var subCategories))
-        {
-            filteredSubCategories = subCategories
-                .Where(sc => sc.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            selectedCategories.Add(subCategory);
+            subCategorySearch = string.Empty; // Clear the search box after selection
+            filteredSubCategories.Clear(); // Clear the search results
         }
     }
 
     // Remove a sub-category from the selection
     private void RemoveSubCategory(Souscategorieafter2008 category)
     {
-        selectedCategories.Add(subCategory);
-        filteredSubCategories.Clear();
-        subCategorySearch = string.Empty;
+        selectedCategories.Remove(category);
     }
 }
