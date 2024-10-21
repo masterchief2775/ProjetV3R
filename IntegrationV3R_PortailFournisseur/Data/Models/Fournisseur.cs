@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntegrationV3R_PortailFournisseur.Data;
+namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class Fournisseur
 {
     public int FournisseurId { get; set; }
 
     public string NomEntreprise { get; set; } = null!;
-
-    public string Rbq { get; set; } = null!;
 
     public string Neq { get; set; } = null!;
 
@@ -32,6 +30,8 @@ public partial class Fournisseur
     public virtual ICollection<Finance> Finances { get; } = new List<Finance>();
 
     public virtual ICollection<Produitsservice> Produitsservices { get; } = new List<Produitsservice>();
+
+    public virtual ICollection<Rbq> Rbqs { get; } = new List<Rbq>();
 
     public virtual ICollection<User> Users { get; } = new List<User>();
 }

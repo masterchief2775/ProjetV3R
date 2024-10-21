@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntegrationV3R_PortailFournisseur.Data;
+namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class User
 {
@@ -9,7 +9,7 @@ public partial class User
 
     public int FournisseurId { get; set; }
 
-    public string Pseudo { get; set; } = null!;
+    public string Identifiant { get; set; } = null!;
 
     public DateTime DateCreation { get; set; }
 

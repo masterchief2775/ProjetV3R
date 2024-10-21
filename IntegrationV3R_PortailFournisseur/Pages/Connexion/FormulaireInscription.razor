@@ -1,0 +1,207 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+
+@page "/inscription"
+@using System.Security.Cryptography
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext _context
+@inject NavigationManager Navigation
+
+<h3>Inscription</h3>
+
+<div class="container-fluid mt-4">
+    <form class="form" @onsubmit="HandleSubmit">
+        <div class="mb-3">
+            <label for="identifiantInput" class="form-label">Identifiant</label>
+            <input type="text" class="form-control" id="identifiantInput" @bind="identifiantInput" required>
+            @if (!string.IsNullOrEmpty(identifiantError))
+            {
+                <div class="text-danger">@identifiantError</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label for="motDePasseInput" class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" id="motDePasseInput" @bind="motDePasseInput" required>
+            @if (!string.IsNullOrEmpty(motDePasseError))
+            {
+                <div class="text-danger">@motDePasseError</div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">S'inscrire</button>
+    </form>
+</div>
+
+@code {
+    private string identifiantInput = string.Empty;
+
+    private string motDePasseInput = string.Empty;
+
+    private string identifiantError = string.Empty;
+
+    private string motDePasseError = string.Empty;
+
+
+
+    private async Task HandleSubmit()
+
+    {
+
+        identifiantError = string.Empty;
+
+        motDePasseError = string.Empty;
+
+
+
+        // Validation basique
+
+        if (string.IsNullOrWhiteSpace(identifiantInput))
+
+        {
+
+            identifiantError = "L'identifiant est requis.";
+
+            return;
+
+        }
+
+
+
+        if (string.IsNullOrWhiteSpace(motDePasseInput))
+
+        {
+
+            motDePasseError = "Le mot de passe est requis.";
+
+            return;
+
+        }
+
+
+
+        // Création d'un nouvel utilisateur
+
+        var nouveauUser = new User
+
+            {
+
+                FournisseurId = 1, // Id de fournisseur fixe
+
+                Identifiant = identifiantInput,
+
+                DateCreation = DateTime.Now
+
+            };
+
+
+
+        // Ajout de l'utilisateur dans la bd
+
+        _context.Users.Add(nouveauUser);
+
+        await _context.SaveChangesAsync();
+
+
+
+        // Récupérer l'IP externe
+
+        var externalIp = await GetExternalIpAsync();
+
+
+
+        // Hachage du mot de passe
+
+        var hashedPassword = HashPassword(motDePasseInput);
+
+
+
+        // Ajout du mdp pour le user
+
+
+        var nouveauMdp = new Motsdepass
+
+            {
+
+                UserId = nouveauUser.UserId,
+
+                Mdp = hashedPassword,
+
+                IpChangementMdp = externalIp,
+
+                Timestamps = DateTime.Now
+
+            };
+
+        _context.Motsdepasses.Add(nouveauMdp);
+
+        await _context.SaveChangesAsync();
+
+
+
+
+
+
+
+
+
+        var nouvelleConnexion = new Connexion
+
+            {
+
+                UserId = nouveauUser.UserId,
+
+                IpConnexion = externalIp,
+
+                Timestamps = DateTime.Now
+
+            };
+
+        _context.Connexions.Add(nouvelleConnexion);
+
+        await _context.SaveChangesAsync();
+
+
+
+        // Redirection ou message de succès
+
+        Navigation.NavigateTo("/");
+
+    }
+
+
+
+    // Fonction pour hash le mdp avec sha256
+
+    private string HashPassword(string password)
+
+    {
+
+        using (var sha256 = SHA256.Create())
+
+        {
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+
+            var hash = sha256.ComputeHash(bytes);
+
+            return Convert.ToBase64String(hash);
+
+        }
+
+    }
+
+
+
+    // Fonction pour récupérer l'IP externe
+
+    private async Task<string> GetExternalIpAsync()
+
+    {
+
+        using var httpClient = new HttpClient();
+
+        return await httpClient.GetStringAsync("https://api64.ipify.org");
+
+    }
+}

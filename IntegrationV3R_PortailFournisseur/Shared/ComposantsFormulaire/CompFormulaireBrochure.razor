@@ -1,101 +1,71 @@
-﻿<div class="container-fluid mt-4">
-    <form class="form" @onsubmit="HandleSubmit">
-        <div class="mb-3">
-            <label for="fileInput" class="form-label">Sélectionnez des fichiers (doc, docx, pdf, jpg, jpeg, png, max 75 MB)</label>
-            <input type="file" class="form-control" id="fileInput" multiple @onchange="HandleFileSelected" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png" />
-            @if (!string.IsNullOrEmpty(fileError))
-            {
-                <div class="text-danger">@fileError</div>
-            }
-        </div>
+﻿@page "/upload"
+@using System.Text.RegularExpressions
+@using Microsoft.JSInterop
 
-        <div class="mb-3">
-            <h5>Fichiers sélectionnés</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Nom du fichier</th>
-                        <th>Taille (Mo)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (uploadedFiles.Any())
-                    {
-                        foreach (var file in uploadedFiles)
-                        {
-                            <tr>
-                                <td>@file.Name</td>
-                                <td>@(file.Size / (1024 * 1024.0)):F2</td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2">Aucun fichier sélectionné.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+@inject IJSRuntime JSRuntime
 
-        <button type="submit" class="btn btn-primary">Soumettre</button>
-    </form>
+<h3>Insérez vos fichiers</h3>
+
+@if (!string.IsNullOrEmpty(fileError))
+{
+    <p class="text-danger">@fileError</p>
+}
+
+<div>
+    <h4>Brochure</h4>
+    <InputFile OnChange="@(async e => await HandleBrochureUpload(e))" />
+</div>
+<div>
+    <h4>Carte de visite</h4>
+    <InputFile OnChange="@(async e => await HandleCarteVisiteUpload(e))" />
 </div>
 
+@if (uploadedFiles.Any())
+{
+    <h4>Fichiers téléchargés:</h4>
+    <ul>
+        @foreach (var file in uploadedFiles)
+        {
+            <li>@file.Name (@file.Size / 1024 / 1024) MB</li>
+        }
+    </ul>
+}
+
 @code {
-    [Parameter]
-    public EventCallback<int> OnPageSelected { get; set; }
-
-    [Parameter]
-    public EventCallback<int> Checkpoint { get; set; }
-
-
-    private List<UploadedFile> uploadedFiles = new List<UploadedFile>();
+    private List<UploadedFile> uploadedFiles = new();
     private string fileError = string.Empty;
 
-    private async Task HandleFileSelected(ChangeEventArgs e)
+    private async Task HandleBrochureUpload(InputFileChangeEventArgs e)
     {
-        fileError = string.Empty;
+        await HandleFileUpload(e, "Brochure");
+    }
 
-        // Get the files from the input
-        var inputFile = e.Value as InputFileChangeEventArgs;
+    private async Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
+    {
+        await HandleFileUpload(e, "Carte de visite");
+    }
 
-        if (inputFile?.FileCount > 0)
+    private async Task HandleFileUpload(InputFileChangeEventArgs e, string fileType)
+    {
+        long totalSize = 0;
+        foreach (var file in e.GetMultipleFiles())
         {
-            uploadedFiles.Clear(); // Clear previously selected files
-            long totalSize = 0; // Track total size of uploaded files
-
-            foreach (var file in inputFile.GetMultipleFiles())
+            // Valider le type de fichier
+            if (!IsValidFileType(file.ContentType))
             {
-                // Validate file type
-                if (!IsValidFileType(file.ContentType))
-                {
-                    fileError = "Type de fichier non valide. Veuillez sélectionner des fichiers doc, docx, pdf, jpg, jpeg, ou png.";
-                    return;
-                }
-
-                // Validate file size
-                if (file.Size > 75 * 1024 * 1024)
-                {
-                    fileError = "Chaque fichier doit être inférieur à 75 Mo.";
-                    return;
-                }
-
-                // Accumulate the total size of uploaded files
-                totalSize += file.Size;
-
-                // Add to the uploaded files list
-                uploadedFiles.Add(new UploadedFile { Name = file.Name, Size = file.Size });
-            }
-
-            // Validate total size limit
-            if (totalSize > 75 * 1024 * 1024)
-            {
-                fileError = "La somme des tailles de l'ensemble des fichiers joints ne doit pas dépasser 75 Mo.";
-                uploadedFiles.Clear(); // Clear the list if the total size is exceeded
+                fileError = $"Type de fichier non valide pour {fileType}. Veuillez sélectionner des fichiers doc, docx, pdf, jpg, jpeg, ou png.";
                 return;
             }
+
+            // Valider la taille du fichier
+            if (file.Size > 75 * 1024 * 1024)
+            {
+                fileError = $"{fileType} doit être inférieur à 75 Mo.";
+                return;
+            }
+
+            // Ajouter le fichier à la liste des fichiers uploadés
+            uploadedFiles.Add(new UploadedFile { Name = file.Name, Size = file.Size });
         }
     }
 
@@ -112,19 +82,15 @@
         };
     }
 
-    private void HandleSubmit()
-    {
-        if (!uploadedFiles.Any())
-        {
-            fileError = "Veuillez sélectionner au moins un fichier.";
-            return;
-        }
-
-    }
-
     private class UploadedFile
     {
         public string Name { get; set; }
         public long Size { get; set; }
     }
+
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
 }
