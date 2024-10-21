@@ -1,7 +1,10 @@
 ﻿@page "/upload"
-@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.RegularExpressions
+@using Microsoft.JSInterop
 
-<h3>Uploader vos fichiers</h3>
+@inject IJSRuntime JSRuntime
+
+<h3>Insérez vos fichiers</h3>
 
 @if (!string.IsNullOrEmpty(fileError))
 {
