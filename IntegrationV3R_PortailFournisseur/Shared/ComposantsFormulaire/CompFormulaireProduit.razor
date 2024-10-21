@@ -1,137 +1,159 @@
-﻿<div class="container-fluid mt-4">    
+﻿@inject IJSRuntime JSRuntime
 
+<div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
 
-        <!-- Search bar for product lookup -->
+        <!-- Product Description -->
         <div class="mb-3">
-            <label for="productSearch" class="form-label">Rechercher un produit</label>
-            <input type="text" class="form-control" id="productSearch" @bind="searchTerm" @oninput="SearchProducts" placeholder="Tapez au moins 3 caractères...">
-            @if (!string.IsNullOrEmpty(searchError))
+            <label for="productDescriptionInput" class="form-label">Description du produit</label>
+            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3"></textarea>
+            @if (!string.IsNullOrEmpty(productDescriptionError))
             {
-                <div class="text-danger">@searchError</div>
-            }
-
-            <!-- Display suggestions -->
-            @if (matchingProducts.Count > 0)
-            {
-                <div class="mt-2">
-                    <label>Sélectionner les produits correspondants :</label>
-                    <select multiple class="form-control" @onchange="SelectProduct">
-                        @foreach (var product in matchingProducts)
-                        {
-                            <option value="@product">@product</option>
-                        }
-                    </select>
-                </div>
+                <div class="text-danger">@productDescriptionError</div>
             }
         </div>
 
-        <!-- Display selected products -->
-        @if (selectedProducts.Count > 0)
-        {
-            <div class="mt-3">
-                <h5>Produits sélectionnés :</h5>
-                <ul>
-                    @foreach (var selectedProduct in selectedProducts)
+        <!-- Product Search -->
+        <div class="mb-3">
+            <label for="productSearchInput" class="form-label">Rechercher des produits</label>
+            <input type="text" class="form-control" id="productSearchInput" @bind="productSearch" @oninput="OnProductSearchInput" placeholder="Recherchez des produits..." />
+            @if (filteredProducts != null && filteredProducts.Any())
+            {
+                <ul class="list-group" id="productResults">
+                    @foreach (var product in filteredProducts)
                     {
-                        <li>@selectedProduct</li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectProduct(product)">
+                            @product
+                            <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveProduct(product)"></button>
+                        </li>
                     }
                 </ul>
-            </div>
-        }
-
-        <!-- Large text area for details and specs -->
-        <div class="mb-3">
-            <label for="productDetails" class="form-label">Détails et spécifications du produit</label>
-            <textarea class="form-control" id="productDetails" rows="5" @bind="productDetails"></textarea>
-            @if (!string.IsNullOrEmpty(productDetailsError))
+            }
+            @if (!string.IsNullOrEmpty(productSearchError))
             {
-                <div class="text-danger">@productDetailsError</div>
+                <div class="text-danger">@productSearchError</div>
             }
         </div>
 
-        <button type="submit" class="btn btn-primary">Confirmer</button>
+        <!-- Selected Products -->
+        <div class="mb-3">
+            <h5>Produits sélectionnés</h5>
+            <ul>
+                @if (selectedProducts.Any())
+                {
+                    foreach (var product in selectedProducts)
+                    {
+                        <li>
+                            <strong>@product</strong>
+                            <button type="button" class="btn btn-link text-danger btn-sm" @onclick="() => RemoveProduct(product)" style="margin-left: 10px; padding: 0;">&times;</button>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>Aucun produit sélectionné.</li>
+                }
+            </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
 </div>
 
 @code {
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
-
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
-    private string productDetails = string.Empty;
-    private string productDetailsError = string.Empty;
+    private string productDescription = string.Empty;
+    private string productSearch = string.Empty;
 
-    private string searchTerm = string.Empty;
-    private string searchError = string.Empty;
+    private string productDescriptionError = string.Empty;
+    private string productSearchError = string.Empty;
 
-    // Simulate database search results
-    private List<string> allProducts = new List<string> { "Produit A", "Produit B", "Produit C", "Produit D", "Produit E" };
-    private List<string> matchingProducts = new List<string>();
+    // Simulated products for testing purposes
+    private List<string> allProducts = new List<string>
+    {
+        "Produit A", "Produit B", "Produit C", "Produit D", "Produit E", "Produit F", "Produit G"
+    };
+
+    private List<string> filteredProducts = new List<string>();
     private List<string> selectedProducts = new List<string>();
 
-    private void SearchProducts(ChangeEventArgs e)
+    // Handle the form submission
+    private async Task HandleSubmit()
     {
-        searchError = string.Empty;
-        matchingProducts.Clear();
+        // Reset error messages and validation flag
+        productDescriptionError = string.Empty;
+        productSearchError = string.Empty;
 
-        // Perform search after 3 characters are typed
-        if (searchTerm.Length >= 3)
+        bool isValid = true; // Reset isValid to true
+
+        // Validation logic
+        if (string.IsNullOrWhiteSpace(productDescription))
         {
-            matchingProducts = allProducts
-                .Where(p => p.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            productDescriptionError = "La description du produit est requise.";
+            isValid = false; // Set isValid to false if validation fails
+        }
+        if (!selectedProducts.Any())
+        {
+            productSearchError = "Au moins un produit doit être sélectionné.";
+            isValid = false; // Set isValid to false if validation fails
+        }
 
-            if (matchingProducts.Count == 0)
-            {
-                searchError = "Aucun produit ne correspond à la recherche.";
-            }
+        // If there are any errors, do not proceed
+        if (!isValid)
+        {
+            return;
+        }
+
+        // Log data to the console
+        await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
+
+        // Trigger checkpoint and page change
+        await Checkpoint.InvokeAsync(4);
+        await OnPageSelected.InvokeAsync(4);
+    }
+
+    // Handle search input dynamically for products
+    private void OnProductSearchInput(ChangeEventArgs e)
+    {
+        productSearch = e.Value?.ToString() ?? string.Empty;
+
+        // Only perform search if there are at least 3 characters
+        if (productSearch.Length >= 3)
+        {
+            SearchProducts();
         }
         else
         {
-            searchError = "Veuillez entrer au moins 3 caractères pour effectuer une recherche.";
+            filteredProducts.Clear();
         }
     }
 
-    private void SelectProduct(ChangeEventArgs e)
+    // Search and filter products
+    private void SearchProducts()
     {
-        var selectedProduct = e.Value.ToString();
-        if (!selectedProducts.Contains(selectedProduct))
+        filteredProducts = allProducts
+            .Where(product => product.Contains(productSearch, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    // Select a product from the search results
+    private void SelectProduct(string product)
+    {
+        if (!selectedProducts.Contains(product))
         {
-            selectedProducts.Add(selectedProduct);
+            selectedProducts.Add(product);
+            productSearch = string.Empty; // Clear the search input after selection
+            filteredProducts.Clear(); // Clear search results after selection
         }
     }
 
-    private void HandleSubmit()
+    // Remove a product from the selected list
+    private void RemoveProduct(string product)
     {
-        // Reset error messages
-        productDetailsError = string.Empty;
-        searchError = string.Empty;
-
-        // Validate the details and specs field
-        if (string.IsNullOrWhiteSpace(productDetails))
-        {
-            productDetailsError = "Les détails et spécifications du produit sont requis.";
-            return;
-        }
-        else if (productDetails.Length > 500)
-        {
-            productDetailsError = "Les détails et spécifications doivent faire moins de 500 caractères.";
-            return;
-        }
-
-        // Check if at least one product has been selected
-        if (selectedProducts.Count == 0)
-        {
-            searchError = "Veuillez sélectionner au moins un produit.";
-            return;
-        }
-
-        Checkpoint.InvokeAsync(4);
-        OnPageSelected.InvokeAsync(4);
-        // If form is valid, navigate to the next page or process data
-        //Navigation.NavigateTo("/formulaireDemandeFinance"); // Adjust to your next page
+        selectedProducts.Remove(product);
     }
 }
