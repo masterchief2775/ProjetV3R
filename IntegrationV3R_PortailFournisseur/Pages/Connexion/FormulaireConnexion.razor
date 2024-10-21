@@ -1,6 +1,10 @@
 ﻿@page "/Connexion"
 @page "/"
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 @inject NavigationManager Navigation
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+@using System.Text
 
 <PageTitle>Connexion</PageTitle>
 
@@ -19,7 +23,7 @@
             <input type="password" class="form-control" id="mdpInput" @bind="mdpInput">
             @if (!string.IsNullOrEmpty(mdpError))
             {
-                    <div class="text-danger">@mdpError</div>
+                <div class="text-danger">@mdpError</div>
             }
         </div>
         <button type="submit" class="btn btn-primary">Connexion</button>
@@ -33,13 +37,11 @@
     private string identifiantError = string.Empty;
     private string mdpError = string.Empty;
 
-    private void HandleSubmit()
+    private async Task HandleSubmit()
     {
-        // Remise a 0 des champs
         identifiantError = string.Empty;
         mdpError = string.Empty;
 
-        // Validations
         var isValid = true;
 
         if (string.IsNullOrWhiteSpace(identifiantInput))
@@ -51,6 +53,52 @@
         {
             mdpError = "Un mot de passe est requis.";
             isValid = false;
+        }
+
+        if (isValid)
+        {
+            // Recherche dans la base de données pour trouver l'utilisateur avec cet identifiant
+            var user = await dbContext.Users
+                .Include(u => u.Motsdepasses)
+                .FirstOrDefaultAsync(u => u.Identifiant == identifiantInput);
+
+            if (user != null)
+            {
+                var encryptedPassword = ComputeMd5Hash(mdpInput);
+
+                var mdpCorrespondant = user.Motsdepasses.FirstOrDefault(m => m.Mdp == encryptedPassword);
+
+                if (mdpCorrespondant != null)
+                {
+                    // Connexion réussie
+                    Navigation.NavigateTo("/formulaire");
+                }
+                else
+                {
+                    mdpError = "Mot de passe incorrect.";
+                }
+            }
+            else
+            {
+                identifiantError = "Identifiant incorrect.";
+            }
+        }
+    }
+
+    private string ComputeMd5Hash(string input)
+    {
+        using (MD5 md5 = MD5.Create())
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convertir le tableau de bytes en une chaîne hexadécimale
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
         }
     }
 }

@@ -4,7 +4,6 @@
 
 @inject IJSRuntime JSRuntime
 
-
 <div class="container-fluid mt-4">
 
     <form class="form" @onsubmit="HandleSubmit">
@@ -12,7 +11,6 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <!-- Full width for company name -->
                 <label for="nomEntrepriseInput" class="form-label">Nom de l'entreprise</label>
                 <input type="text" class="form-control" id="nomEntrepriseInput" @bind="nomEntrepriseInput" required>
                 @if (!string.IsNullOrEmpty(nomEntrepriseError))
@@ -22,7 +20,6 @@
             </div>
 
             <div class="col-md-3">
-                <!-- Half width for NEQ -->
                 <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
                 <input type="text" class="form-control" id="neqInput" @bind="neqInput" required>
                 @if (!string.IsNullOrEmpty(neqError))
@@ -37,7 +34,6 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <!-- Half width for email -->
                 <label for="emailInput" class="form-label">Adresse courriel</label>
                 <input type="email" class="form-control" id="emailInput" @bind="emailInput" required>
                 @if (!string.IsNullOrEmpty(emailError))
@@ -51,7 +47,6 @@
 
         <div class="row mb-3">
             <div class="col-md-3">
-                <!-- Half width for password -->
                 <label for="passwordInput" class="form-label">Mot de passe</label>
                 <input type="password" class="form-control" id="passwordInput" @bind="passwordInput" required>
                 @if (!string.IsNullOrEmpty(passwordError))
@@ -60,7 +55,6 @@
                 }
             </div>
             <div class="col-md-3">
-                <!-- Half width for repeat password -->
                 <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe</label>
                 <input type="password" class="form-control" id="repeatPasswordInput" @bind="repeatPasswordInput" required>
                 @if (!string.IsNullOrEmpty(repeatPasswordError))
@@ -73,7 +67,6 @@
         <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
 </div>
-
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
@@ -110,13 +103,33 @@
     private void HandleSubmit()
     {
         // Reset errors
+        ResetErrors();
+
+        // Validate inputs
+        var isValid = ValidateInputs();
+
+        // If valid, log the data and navigate
+        if (isValid)
+        {
+            var formData = ExportFormData();
+            LogToConsole(formData);
+            Checkpoint.InvokeAsync(1);
+            OnPageSelected.InvokeAsync(1);
+            //Navigation.NavigateTo("/formulaireDemandeAdresse");
+        }
+    }
+
+    private void ResetErrors()
+    {
         neqError = string.Empty;
         nomEntrepriseError = string.Empty;
         emailError = string.Empty;
         passwordError = string.Empty;
         repeatPasswordError = string.Empty;
+    }
 
-        // Basic validation checks
+    private bool ValidateInputs()
+    {
         var isValid = true;
 
         // Validation for NEQ
@@ -160,20 +173,9 @@
             isValid = false;
         }
 
-        // If valid, log the data and navigate
-        if (isValid)
-        {
-            // Export data
-            var formData = ExportFormData();
-
-            // Log data to the browser's inspector
-            LogToInspector(formData);
-
-            Checkpoint.InvokeAsync(1);
-            OnPageSelected.InvokeAsync(1);
-            //Navigation.NavigateTo("/formulaireDemandeAdresse");
-        }
+        return isValid;
     }
+
     private string[] ExportFormData()
     {
         return new string[]
@@ -186,15 +188,14 @@
         };
     }
 
-    private async void LogToInspector(string[] formData)
+    private void LogToConsole(string[] formData)
     {
-        await JSRuntime.InvokeVoidAsync("console.log", $"Nom de l'entreprise: {formData[0]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"NEQ: {formData[1]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Email: {formData[2]}");
+        Console.WriteLine($"Nom de l'entreprise: {formData[0]}");
+        Console.WriteLine($"NEQ: {formData[1]}");
+        Console.WriteLine($"Email: {formData[2]}");
         // Be cautious with logging sensitive data like passwords
-        await JSRuntime.InvokeVoidAsync("console.log", $"Mot de passe: {formData[3]}");
+        Console.WriteLine($"Mot de passe: {formData[3]}");
     }
-
 
     private bool IsValidEmail(string email)
     {
@@ -239,7 +240,4 @@
         var regex = new Regex(@"^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$");
         return regex.IsMatch(postalCode);
     }
-
-
-
 }

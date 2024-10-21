@@ -133,54 +133,71 @@
     private void HandleSubmit()
     {
         // Reset errors
-        errorMessage = string.Empty;
+        ErrorReset();
         var isValid = true;
 
         // Validate all contact fields
         foreach (var contact in contacts)
         {
-            contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
-            contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
-            contact.RoleError = string.IsNullOrWhiteSpace(contact.Role) ? "Le rôle est requis." : string.Empty;
-            contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
-            contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis." : string.Empty;
-            contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
-
-            // Validate Poste
-            if (string.IsNullOrWhiteSpace(contact.Poste))
-            {
-                contact.PosteError = "Le poste est requis.";
-                isValid = false;
-            }
-            else if (!Regex.IsMatch(contact.Poste, @"^\d{1,6}$"))
-            {
-                contact.PosteError = "Le poste doit être numérique et contenir au maximum 6 chiffres.";
-                isValid = false;
-            }
-            else
-            {
-                contact.PosteError = string.Empty; // Clear error if valid
-            }
-
-            // If any errors exist, the form is invalid
-            if (!string.IsNullOrEmpty(contact.PrenomError) || !string.IsNullOrEmpty(contact.NomError) ||
-                !string.IsNullOrEmpty(contact.RoleError) || !string.IsNullOrEmpty(contact.EmailError) ||
-                !string.IsNullOrEmpty(contact.NumeroTelephoneError) || !string.IsNullOrEmpty(contact.TypeTelephoneError) ||
-                !string.IsNullOrEmpty(contact.PosteError))
-            {
-                isValid = false;
-            }
+            ValidateInputs(contact);
         }
+
+        // Check if any contact has errors
+        isValid = contacts.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+                                      string.IsNullOrEmpty(c.NomError) &&
+                                      string.IsNullOrEmpty(c.RoleError) &&
+                                      string.IsNullOrEmpty(c.EmailError) &&
+                                      string.IsNullOrEmpty(c.NumeroTelephoneError) &&
+                                      string.IsNullOrEmpty(c.TypeTelephoneError) &&
+                                      string.IsNullOrEmpty(c.PosteError));
 
         if (isValid)
         {
             // Log contact data
             var contactData = ExportContactData();
-            LogToInspector(contactData);
+            LogToConsole(contactData);
 
             // If all checks pass, navigate to the next page
             Checkpoint.InvokeAsync(3);
             OnPageSelected.InvokeAsync(3);
+        }
+    }
+
+    private void ValidateInputs(Contact contact)
+    {
+        contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
+        contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
+        contact.RoleError = string.IsNullOrWhiteSpace(contact.Role) ? "Le rôle est requis." : string.Empty;
+        contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
+        contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis." : string.Empty;
+        contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
+
+        // Validate Poste
+        if (string.IsNullOrWhiteSpace(contact.Poste))
+        {
+            contact.PosteError = "Le poste est requis.";
+        }
+        else if (!Regex.IsMatch(contact.Poste, @"^\d{1,6}$"))
+        {
+            contact.PosteError = "Le poste doit être numérique et contenir au maximum 6 chiffres.";
+        }
+        else
+        {
+            contact.PosteError = string.Empty; // Clear error if valid
+        }
+    }
+
+    private void ErrorReset()
+    {
+        foreach (var contact in contacts)
+        {
+            contact.PrenomError = string.Empty;
+            contact.NomError = string.Empty;
+            contact.RoleError = string.Empty;
+            contact.EmailError = string.Empty;
+            contact.NumeroTelephoneError = string.Empty;
+            contact.TypeTelephoneError = string.Empty;
+            contact.PosteError = string.Empty;
         }
     }
 
@@ -198,11 +215,11 @@
         }).ToArray();
     }
 
-    private async void LogToInspector(string[][] contactData)
+    private void LogToConsole(string[][] contactData)
     {
         foreach (var contact in contactData)
         {
-            await JSRuntime.InvokeVoidAsync("console.log", $"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
+            Console.WriteLine($"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
         }
     }
 
@@ -219,19 +236,25 @@
             input = input.Substring(0, 10);
         }
 
-        // Insert dashes at the correct positions
-        if (input.Length > 3)
+        // Format as XXX-XXX-XXXX
+        if (input.Length >= 6)
         {
-            input = input.Insert(3, "-");
+            input = $"{input.Substring(0, 3)}-{input.Substring(3, 3)}-{input.Substring(6)}";
         }
-        if (input.Length > 7)
+        else if (input.Length >= 3)
         {
-            input = input.Insert(7, "-");
+            input = $"{input.Substring(0, 3)}-{input.Substring(3)}";
         }
 
-        // Set the formatted value back
-        contacts.Last().NumeroTelephone = input; // Update the last contact's number
+        // Find the first contact with an empty NumeroTelephone
+        var contact = contacts.FirstOrDefault(c => c.NumeroTelephone == input);
+        if (contact != null)
+        {
+            contact.NumeroTelephone = input; // Assign the formatted input to the contact's NumeroTelephone
+        }
     }
+
+
     public class Contact
     {
         public string Prenom { get; set; } = string.Empty;
@@ -242,7 +265,7 @@
         public string TypeTelephone { get; set; } = string.Empty;
         public string Poste { get; set; } = string.Empty;
 
-        // Validation errors
+        // Error messages
         public string PrenomError { get; set; } = string.Empty;
         public string NomError { get; set; } = string.Empty;
         public string RoleError { get; set; } = string.Empty;

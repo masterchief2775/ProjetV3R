@@ -1,5 +1,5 @@
-﻿@using IntegrationV3R_PortailFournisseur.Data.Services;
-﻿@using System.Text.RegularExpressions
+@using IntegrationV3R_PortailFournisseur.Data.Services;
+@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
@@ -83,7 +83,6 @@
             }
         </div>
 
-
         <div class="mb-3">
             <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
             <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
@@ -139,9 +138,7 @@
     private string codePostalError = string.Empty;
     private string numeroTelephoneError = string.Empty;
     private string siteWebError = string.Empty;
-    private string regionError = string.Empty; // Added declaration for regionError
-
-
+    private string regionError = string.Empty;
 
     private List<Regionadministrative> regions = new List<Regionadministrative>();
 
@@ -180,10 +177,27 @@
         BDFetched.InvokeAsync();
     }
 
-
     private void HandleSubmit()
     {
         // Reset errors
+        ResetErrors();
+
+        // Basic validation checks
+        var isValid = ValidateInputs();
+
+        // If valid, export and log data to console
+        if (isValid)
+        {
+            var formData = ExportFormData();
+            LogToConsole(formData);
+
+            Checkpoint.InvokeAsync(2);
+            OnPageSelected.InvokeAsync(2);
+        }
+    }
+
+    private void ResetErrors()
+    {
         numCiviqueError = string.Empty;
         rueError = string.Empty;
         bureauError = string.Empty;
@@ -192,9 +206,11 @@
         codePostalError = string.Empty;
         numeroTelephoneError = string.Empty;
         siteWebError = string.Empty;
-        regionError = string.Empty; // Reset region error
+        regionError = string.Empty;
+    }
 
-        // Basic validation checks
+    private bool ValidateInputs()
+    {
         var isValid = true;
 
         if (string.IsNullOrWhiteSpace(numCiviqueInput))
@@ -202,16 +218,10 @@
             numCiviqueError = "Le numéro civique est requis";
             isValid = false;
         }
-        else
+        else if (!numCiviqueInput.All(char.IsDigit))
         {
-            for (int i = 0; i < numCiviqueInput.Length; i++)
-            {
-                if (!Char.IsDigit(numCiviqueInput[i]))
-                {
-                    numCiviqueError = "Le numéro civique doit être numérique (Si le numéro contient un suffixe, veuillez rentrer le suffixe dans la section Bureau)";
-                    isValid = false;
-                }
-            }
+            numCiviqueError = "Le numéro civique doit être numérique.";
+            isValid = false;
         }
 
         if (string.IsNullOrWhiteSpace(rueInput))
@@ -234,67 +244,45 @@
 
         if (string.IsNullOrWhiteSpace(codePostalInput))
         {
-            codePostalError = "Le code postal est requis et doit être au format valide.";
+            codePostalError = "Le code postal est requis.";
             isValid = false;
         }
 
         if (string.IsNullOrWhiteSpace(numeroTelephoneInput))
         {
-            numeroTelephoneError = "Le numéro de téléphone est requis et doit être au format valide.";
+            numeroTelephoneError = "Le numéro de téléphone est requis.";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(siteWebInput) || !Uri.IsWellFormedUriString(siteWebInput, UriKind.Absolute))
+        if (string.IsNullOrWhiteSpace(siteWebInput))
         {
-            siteWebError = "Le site web est requis et doit être une URL valide.";
+            siteWebError = "Le site web est requis.";
             isValid = false;
         }
 
         if (string.IsNullOrWhiteSpace(regionInput))
         {
-            regionError = "La région administrative est requise."; // Set error for region
+            regionError = "La région est requise.";
             isValid = false;
         }
 
-        if (isValid)
-        {
-            // Export and log data
-            var formData = ExportFormData();
-            LogToInspector(formData);
-
-            // Navigate to the next page
-            Checkpoint.InvokeAsync(2);
-            OnPageSelected.InvokeAsync(2);
-        }
+        return isValid;
     }
 
-    private string[] ExportFormData()
+    private string ExportFormData()
     {
-        return new string[]
-        {
-            numCiviqueInput,
-            bureauInput,
-            rueInput,
-            villeInput,
-            provinceInput,
-            codePostalInput,
-            numeroTelephoneInput,
-            siteWebInput,
-            regionInput // Include region in the exported data
-        };
+        // Create a formatted string of form data
+        return $"Numéro Civique: {numCiviqueInput}, Bureau: {bureauInput}, Rue: {rueInput}, " +
+               $"Ville: {villeInput}, Province: {provinceInput}, Code Postal: {codePostalInput}, " +
+               $"Numéro de Téléphone: {numeroTelephoneInput}, Site Web: {siteWebInput}, " +
+               $"Région: {regionInput}";
     }
 
-    private async void LogToInspector(string[] formData)
+    private void LogToConsole(string formData)
     {
-        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro Civique: {formData[0]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Bureau: {formData[1]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Nom de Rue: {formData[2]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Ville: {formData[3]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Province: {formData[4]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Code Postal: {formData[5]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro de Téléphone: {formData[6]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Site Web: {formData[7]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Région Administrative: {formData[8]}"); // Log region
+        Console.WriteLine(formData);
+        // Optionally, you can use JS interop to log data to the browser console
+        // await JSRuntime.InvokeVoidAsync("console.log", formData);
     }
 
     private void FormatTelephoneNumber(ChangeEventArgs e)
