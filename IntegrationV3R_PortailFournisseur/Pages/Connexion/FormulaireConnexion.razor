@@ -1,10 +1,19 @@
 ﻿@page "/Connexion"
 @page "/"
-@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
-@inject NavigationManager Navigation
+
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Cryptography
 @using System.Text
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components
+
+
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Navigation
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Connexion</PageTitle>
 
@@ -42,46 +51,43 @@
         identifiantError = string.Empty;
         mdpError = string.Empty;
 
-        var isValid = true;
-
         if (string.IsNullOrWhiteSpace(identifiantInput))
         {
             identifiantError = "Un identifiant est requis.";
-            isValid = false;
+            return;
         }
+
         if (string.IsNullOrWhiteSpace(mdpInput))
         {
             mdpError = "Un mot de passe est requis.";
-            isValid = false;
+            return;
         }
 
-        if (isValid)
+        var hashedPassword = ComputeMd5Hash(mdpInput);
+
+        var user = await dbContext.Users
+            .Include(u => u.Motsdepasses)
+            .FirstOrDefaultAsync(u => u.Identifiant == identifiantInput);
+
+        if (user != null)
         {
-            // Recherche dans la base de données pour trouver l'utilisateur avec cet identifiant
-            var user = await dbContext.Users
-                .Include(u => u.Motsdepasses)
-                .FirstOrDefaultAsync(u => u.Identifiant == identifiantInput);
+            var passwordEntry = user.Motsdepasses.FirstOrDefault(m => m.Mdp == hashedPassword);
 
-            if (user != null)
+            if (passwordEntry != null)
             {
-                var encryptedPassword = ComputeMd5Hash(mdpInput);
-
-                var mdpCorrespondant = user.Motsdepasses.FirstOrDefault(m => m.Mdp == encryptedPassword);
-
-                if (mdpCorrespondant != null)
-                {
-                    // Connexion réussie
-                    Navigation.NavigateTo("/formulaire");
-                }
-                else
-                {
-                    mdpError = "Mot de passe incorrect.";
-                }
+                // Connexion réussie : stocker l'ID utilisateur dans le stockage de session sécurisé
+                await sessionStorage.SetItemAsync("UserId", user.UserId);
+                // Redirection vers la page EtatDemande
+                Navigation.NavigateTo("/etat-demande");
             }
             else
             {
-                identifiantError = "Identifiant incorrect.";
+                mdpError = "Mot de passe incorrect.";
             }
+        }
+        else
+        {
+            identifiantError = "Identifiant incorrect.";
         }
     }
 

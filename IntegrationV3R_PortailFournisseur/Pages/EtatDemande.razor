@@ -1,0 +1,92 @@
+@page "/etat-demande"
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+@using Microsoft.EntityFrameworkCore
+@using IntegrationV3R_PortailFournisseur.Data.Models
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+
+<PageTitle>État de la demande</PageTitle>
+
+<div class="container">
+    @if (isUserAuthenticated)
+    {
+        <h3>Suivi de votre demande</h3>
+        @if (fournisseur != null)
+        {
+            <div class="tracking-status">
+                <ul class="progress-bar">
+                    <li class="@GetStatusClass("En attente")">En attente</li>
+                    <li class="@GetStatusClass("Acceptée")">Acceptée</li>
+                    <li class="@GetStatusClass("Rejetée")">Rejetée</li>
+                </ul>
+
+                <p>Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+            </div>
+        }
+        else
+        {
+            <p>Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
+        }
+    }
+    else
+    {
+        <p>Redirection vers la page de connexion...</p>
+    }
+</div>
+
+@code {
+    private bool isUserAuthenticated = false;
+    private Fournisseur fournisseur;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Lire l'ID utilisateur depuis le stockage sécurisé
+        var userId = await sessionStorage.GetItemAsync<int?>("UserId");
+
+        if (userId == null)
+        {
+            // L'utilisateur n'est pas connecté, redirection vers la page de connexion
+            Navigation.NavigateTo("/connexion");
+        }
+        else
+        {
+            isUserAuthenticated = true;
+
+            var user = await dbContext.Users
+                .Include(u => u.Fournisseur)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user != null)
+            {
+                fournisseur = user.Fournisseur;
+            }
+        }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        if (fournisseur != null && fournisseur.EtatDemande == status)
+        {
+            return "active";
+        }
+        else if (IsStatusCompleted(status))
+        {
+            return "completed";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private bool IsStatusCompleted(string status)
+    {
+        var statusOrder = new List<string> { "En attente", "Acceptée", "Rejetée" };
+        var currentIndex = statusOrder.IndexOf(fournisseur.EtatDemande);
+        var statusIndex = statusOrder.IndexOf(status);
+
+        return statusIndex <= currentIndex;
+    }
+}
