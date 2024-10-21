@@ -7,6 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Documents\**" />
+    <Compile Remove="Data\Images\**" />
+    <Compile Remove="Data\NewFolder\**" />
+    <Content Remove="Data\Documents\**" />
+    <Content Remove="Data\Images\**" />
+    <Content Remove="Data\NewFolder\**" />
+    <EmbeddedResource Remove="Data\Documents\**" />
+    <EmbeddedResource Remove="Data\Images\**" />
+    <EmbeddedResource Remove="Data\NewFolder\**" />
+    <None Remove="Data\Documents\**" />
+    <None Remove="Data\Images\**" />
+    <None Remove="Data\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Pages\FormulaireDemandeFinance.razor.css" />
     <None Remove="Pages\FormulaireDemandeRBQ.razor.css" />
     <None Remove="Shared\ComposantsFormulaire\FormulaireDemandeBrochure.razor.css" />
@@ -28,10 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Documents\" />
-    <Folder Include="Data\Images\" />
     <Folder Include="Data\Models\" />
-    <Folder Include="Data\NewFolder\" />
   </ItemGroup>
 
 </Project>
