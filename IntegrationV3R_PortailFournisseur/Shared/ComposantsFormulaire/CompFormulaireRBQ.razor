@@ -1,4 +1,6 @@
-﻿<div class="container-fluid mt-4">
+﻿﻿@using IntegrationV3R_PortailFournisseur.Data
+
+<div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
         <div class="row mb-3">
             <!-- Numéro RBQ -->
@@ -34,8 +36,8 @@
                 <label for="statusSelect" class="form-label">Statut</label>
                 <select class="form-select" id="statusSelect" @bind="selectedStatus">
                     <option value="">Choisissez un statut</option>
-                    <option value="Valide">Valide</option>
-                    <option value="Invalide">Invalide</option>
+                    <option value="Valide" selected="@(_selectionStatut[0] == true)">Valide</option>
+                    <option value="Invalide" selected="@(_selectionStatut[1] == true)">Invalide</option>
                 </select>
                 @if (!string.IsNullOrEmpty(statusError))
                 {
@@ -48,10 +50,8 @@
                 <label for="licenseTypeSelect" class="form-label">Type de licence</label>
                 <select class="form-select" id="licenseTypeSelect" @bind="selectedLicenseType">
                     <option value="">Choisissez un type de licence</option>
-                    @foreach (var type in licenseTypes)
-                    {
-                        <option value="@type">@type</option>
-                    }
+                    <option value="Entrepreneur">Entrepreneur</option>
+                    <option value="Constructeur-Propriétaire">Constructeur-Propriétaire</option>                    
                 </select>
                 @if (!string.IsNullOrEmpty(licenseTypeError))
                 {
@@ -64,8 +64,8 @@
                 <label for="categorySelect" class="form-label">Catégorie</label>
                 <select class="form-select" id="categorySelect" @bind="selectedCategory">
                     <option value="">Choisissez une catégorie</option>
-                    <option value="Général">Général</option>
-                    <option value="Spécialisé">Spécialisé</option>
+                    <option value="General">Général</option>
+                    <option value="Specialisee">Spécialisé</option>
                 </select>
                 @if (!string.IsNullOrEmpty(categoryError))
                 {
@@ -110,8 +110,8 @@
                         <li>
                             <strong>@category</strong>
                             <button type="button" class="btn btn-link text-danger btn-sm"
-                            @onclick="() => RemoveSubCategory(category)"
-                            style="margin-left: 10px; padding: 0;">
+                                    @onclick="() => RemoveSubCategory(category)"
+                                    style="margin-left: 10px; padding: 0;">
                                 &times;
                             </button>
                         </li>
@@ -138,8 +138,7 @@
     public EventCallback<int> Checkpoint { get; set; }
 
     private bool[] _selectionStatut = new bool[2];
-    private bool[] _selectionType = new bool[2];
-
+    private bool[] _selectionType = new bool[2];    
 
     private string rbqNumberInput = string.Empty;
     private string selectedStatus = string.Empty;
@@ -160,36 +159,6 @@
     private List<string> selectedCategories = new List<string>();
     private List<string> filteredSubCategories = new List<string>(); // To hold search results
 
-
-    protected override void OnInitialized()
-    {
-        _selectionStatut[0] = false;
-        _selectionStatut[1] = false;
-
-        _selectionType[0] = false;
-        _selectionType[1] = false;
-    }
-
-    public void LoadSharedData()
-    {
-        rbqNumberInput = SharedData.NumLicence;
-
-        if(SharedData.StatutLicence == "Active")
-        {
-            _selectionStatut[0] = true;
-        }
-        else
-        {
-            _selectionStatut[1] = true;
-        }
-
-
-
-        StateHasChanged();
-    }
-
-    // Property to handle changes in the selectedLicenseType
-    private string SelectedLicenseType
     // Updated sub-categories for testing
     private List<string> allSubCategories = new List<string>
     {
@@ -216,28 +185,39 @@
         "4220 Serrurerie de bâtiment"
     };
 
+    protected override void OnInitialized()
+    {
+        _selectionStatut[0] = false;
+        _selectionStatut[1] = false;
+
+        _selectionType[0] = false;
+        _selectionType[1] = false;
+    }
+
+    public void LoadSharedData()
+    {
+        rbqNumberInput = SharedData.NumLicence;
+
+        if (SharedData.StatutLicence == "Active")
+        {
+            _selectionStatut[0] = true;            
+        }
+        else
+        {
+            _selectionStatut[1] = true;            
+        }
+        selectedStatus = SharedData.StatutLicence;
+
+        selectedLicenseType = SharedData.TypeLicence;
+        selectedCategory = SharedData.CategorieLicence;
+
+        StateHasChanged();
+    }
+
     // Handle submitting the form
     private async Task HandleSubmit()
     {
-        // Clear previous selections
-        selectedCategories.Clear();
-
-        // Populate selected categories based on the selected license type
-        if (selectedLicenseType == "Entrepreneur")
-        {
-            selectedCategories.Add(new Category { Code = "G", Description = "Général" });
-            selectedCategories.Add(new Category { Code = "S", Description = "Spécialisé" });
-        }
-        else if (selectedLicenseType == "Constructeur-Propriétaire")
-        {
-            selectedCategories.Add(new Category { Code = "CR", Description = "Construction résidentielle" });
-        }
-        // Add more conditions as needed for other license types
-    }    
-
-    private void HandleSubmit()
-    {
-        // Reset errors
+        // Reset error messages
         rbqNumberError = string.Empty;
         statusError = string.Empty;
         licenseTypeError = string.Empty;
@@ -320,7 +300,7 @@
         subCategorySearch = e.Value?.ToString() ?? string.Empty;
 
         // Only call SearchSubCategories if there are at least 3 characters
-        if (subCategorySearch.Length >= 3)
+        if (subCategorySearch.Length >= 2)
         {
             SearchSubCategories();
         }

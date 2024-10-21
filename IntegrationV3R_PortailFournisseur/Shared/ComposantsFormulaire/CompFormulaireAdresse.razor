@@ -1,5 +1,4 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data;
-<div class="container-fluid mt-4">    
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
 
@@ -70,23 +69,23 @@
             <label for="regionInput" class="form-label">Région administrative</label>
             <select class="form-select" id="regionInput" @bind="regionInput" required>
                 <option value="">Sélectionner une région</option>
-                <option value="Abitibi-Témiscamingue">Abitibi-Témiscamingue</option>
-                <option value="Bas-Saint-Laurent">Bas-Saint-Laurent</option>
-                <option value="Capitale-Nationale">Capitale-Nationale</option>
-                <option value="Centre-du-Québec">Centre-du-Québec</option>
-                <option value="Chaudière-Appalaches">Chaudière-Appalaches</option>
-                <option value="Côte-Nord">Côte-Nord</option>
-                <option value="Estrie">Estrie</option>
-                <option value="Gaspésie–Îles-de-la-Madeleine">Gaspésie–Îles-de-la-Madeleine</option>
-                <option value="Lanaudière">Lanaudière</option>
-                <option value="Laurentides">Laurentides</option>
-                <option value="Laval">Laval</option>
-                <option value="Mauricie">Mauricie</option>
-                <option value="Montérégie">Montérégie</option>
-                <option value="Montréal">Montréal</option>
-                <option value="Nord-du-Québec">Nord-du-Québec</option>
-                <option value="Outaouais">Outaouais</option>
-                <option value="Saguenay–Lac-Saint-Jean">Saguenay–Lac-Saint-Jean</option>
+                <option value="Abitibi-Témiscamingue" selected="@(_selectionRegionAdministrative[0] == true)">Abitibi-Témiscamingue</option>
+                <option value="Bas-Saint-Laurent" selected="@(_selectionRegionAdministrative[1] == true)">Bas-Saint-Laurent</option>
+                <option value="Capitale-Nationale" selected="@(_selectionRegionAdministrative[2] == true)">Capitale-Nationale</option>
+                <option value="Centre-du-Québec" selected="@(_selectionRegionAdministrative[3] == true)">Centre-du-Québec</option>
+                <option value="Chaudière-Appalaches" selected="@(_selectionRegionAdministrative[4] == true)">Chaudière-Appalaches</option>
+                <option value="Côte-Nord" selected="@(_selectionRegionAdministrative[5] == true)">Côte-Nord</option>
+                <option value="Estrie" selected="@(_selectionRegionAdministrative[6] == true)">Estrie</option>
+                <option value="Gaspésie-–Îles-de-la-Madeleine" selected="@(_selectionRegionAdministrative[7] == true)">Gaspésie–-Îles-de-la-Madeleine</option>
+                <option value="Lanaudière" selected="@(_selectionRegionAdministrative[8] == true)">Lanaudière</option>
+                <option value="Laurentides" selected="@(_selectionRegionAdministrative[9] == true)">Laurentides</option>
+                <option value="Laval" selected="@(_selectionRegionAdministrative[10] == true)">Laval</option>
+                <option value="Mauricie" selected="@(_selectionRegionAdministrative[11] == true)">Mauricie</option>
+                <option value="Montérégie" selected="@(_selectionRegionAdministrative[12] == true)">Montérégie</option>
+                <option value="Montréal" selected="@(_selectionRegionAdministrative[13] == true)">Montréal</option>
+                <option value="Nord-du-Québec" selected="@(_selectionRegionAdministrative[14] == true)">Nord-du-Québec</option>
+                <option value="Outaouais" selected="@(_selectionRegionAdministrative[15] == true)">Outaouais</option>
+                <option value="Saguenay–-Lac-Saint-Jean" selected="@(_selectionRegionAdministrative[16] == true)">Saguenay–-Lac-Saint-Jean</option>
             </select>
             @if (!string.IsNullOrEmpty(regionError))
             {
@@ -125,6 +124,8 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
+    private bool[] _selectionRegionAdministrative = new bool[17];
+
     private string numCiviqueInput = string.Empty;
     private string rueInput = string.Empty;
     private string bureauInput = string.Empty;
@@ -134,6 +135,7 @@
     private string numeroTelephoneInput = string.Empty;
     private string siteWebInput = string.Empty;
     private string regionInput = string.Empty; // Added declaration for regionInput
+    private string regionShared = string.Empty;
 
     private string numCiviqueError = string.Empty;
     private string rueError = string.Empty;
@@ -144,7 +146,15 @@
     private string numeroTelephoneError = string.Empty;
     private string siteWebError = string.Empty;
     private string regionError = string.Empty; // Added declaration for regionError
-    
+
+    protected override void OnInitialized()
+    {
+        for(int i = 0; i<_selectionRegionAdministrative.Length; i++)
+        {
+            _selectionRegionAdministrative[i] = false;
+        }
+    }
+
     public void LoadSharedData()
     {
         numCiviqueInput = SharedData.NumCivique;
@@ -154,6 +164,102 @@
         codePostalInput = SharedData.CodePostal;
         numeroTelephoneInput = SharedData.NumTelephone;
         //regionAdministraviteInput = SharedData.RegionAdministrative
+
+        switch (SharedData.RegionAdministrative)
+        {
+            case "Abitibi-Témiscamingue" :
+                {
+                    _selectionRegionAdministrative[0] = true;
+                    break;
+                }
+            case "Bas-Saint-Laurent":
+                {
+                    _selectionRegionAdministrative[1] = true;
+                    break;
+                }
+            case "Capitale-Nationale":
+                {
+                    _selectionRegionAdministrative[2] = true;
+                    break;
+                }
+            case "Centre-du-Québec":
+                {
+                    _selectionRegionAdministrative[3] = true;
+                    break;
+                }
+            case "Chaudière-Appalaches":
+                {
+                    _selectionRegionAdministrative[4] = true;
+                    break;
+                }
+            case "Côte-Nord":
+                {
+                    _selectionRegionAdministrative[5] = true;
+                    break;
+                }
+            case "Estrie":
+                {
+                    _selectionRegionAdministrative[6] = true;
+                    break;
+                }
+            case "Gaspésie--Îles-de-la-Madeleine":
+                {
+                    _selectionRegionAdministrative[7] = true;
+                    break;
+                }
+            case "Lanaudière":
+                {
+                    _selectionRegionAdministrative[8] = true;
+                    break;
+                }
+            case "Laurentides":
+                {
+                    _selectionRegionAdministrative[9] = true;
+                    break;
+                }
+            case "Laval":
+                {
+                    _selectionRegionAdministrative[10] = true;
+                    break;
+                }
+            case "Mauricie":
+                {
+                    _selectionRegionAdministrative[11] = true;
+                    break;
+                }
+            case "Montérégie":
+                {
+                    _selectionRegionAdministrative[12] = true;
+                    break;
+                }
+            case "Montréal":
+                {
+                    _selectionRegionAdministrative[13] = true;
+                    break;
+                }
+            case "Nord-du-Québec":
+                {
+                    _selectionRegionAdministrative[14] = true;
+                    break;
+                }
+            case "Outaouais":
+                {
+                    _selectionRegionAdministrative[15] = true;
+                    break;
+                }
+            case "Saguenay--Lac-Saint-Jean":
+                {
+                    _selectionRegionAdministrative[16] = true;
+                    break;
+                }
+            default :
+                {
+                    break;
+                }
+        }
+
+        regionInput = SharedData.RegionAdministrative;
+
         StateHasChanged();
     }
    
