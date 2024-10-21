@@ -40,8 +40,8 @@
                 <label for="statusSelect" class="form-label">Statut</label>
                 <select class="form-select" id="statusSelect" @bind="selectedStatus">
                     <option value="">Choisissez un statut</option>
-                    <option value="Valide" selected="@(_selectionStatut[0] == true)">Valide</option>
-                    <option value="Invalide" selected="@(_selectionStatut[1] == true)">Invalide</option>
+                    <option value="Active" >Valide</option>
+                    <option value="Invalide" >Invalide</option>
                 </select>
                 @if (!string.IsNullOrEmpty(statusError))
                 {
@@ -133,8 +133,7 @@
     @foreach (var subCategory in fetchedSousCategories)
     {
         <p>@subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008</p>
-    }
-    <p>@fetchedSousCategories.Count</p>
+    }    
 </div>
 
 @code {
@@ -148,9 +147,6 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
-
-    private bool[] _selectionStatut = new bool[2];
-    private bool[] _selectionType = new bool[2];
 
     private string rbqNumberInput = string.Empty;
     private string selectedStatus = string.Empty;
@@ -192,52 +188,16 @@
     protected override async Task OnInitializedAsync()
     {
         //Revérifier, peut être inutile
-        _selectionStatut[0] = false;
-        _selectionStatut[1] = false;
 
-        _selectionType[0] = false;
-        _selectionType[1] = false;
     }
-
-    // Updated sub-categories for testing
-    private List<string> allSubCategories = new List<string>
-    {
-        "4093.1 Sous-stations pour distribution d’électricité",
-        "4093.2 Lignes aériennes",
-        "4093.3 Lignes souterraines",
-        "4096 Canalisation",
-        "4200 Pieux de fondations spéciales",
-        "4201 Charpente et éléments architecturaux",
-        "4202 Produits réfractaires",
-        "4203 Maçonnerie",
-        "4204 Finition de béton",
-        "4205 Marbre, granito, céramique et terrazzo",
-        "4206 Enduits calcaires",
-        "4207 Systèmes intérieurs",
-        "4208 Piscines",
-        "4209 Ferraillage",
-        "4210.1 Charpenterie",
-        "4210.2 Menuiserie",
-        "4211.1 Coffrage",
-        "4211.2 Coffrage pour assises et murs de fondation",
-        "4212 Revêtements souples",
-        "4213 Parquetage",
-        "4220 Serrurerie de bâtiment"
-    };
 
     public void LoadSharedData()
     {
-        rbqNumberInput = SharedData.NumLicence;
+        rbqNumberInput = SharedData.NumLicence;        
 
-        if (SharedData.StatutLicence == "Active")
-        {
-            _selectionStatut[0] = true;
-        }
-        else
-        {
-            _selectionStatut[1] = true;
-        }
         selectedStatus = SharedData.StatutLicence;
+        if (SharedData.StatutLicence != "Active")
+            selectedStatus = "Invalide";
 
         selectedLicenseType = SharedData.TypeLicence;
         selectedCategory = SharedData.CategorieLicence;
@@ -288,7 +248,52 @@
         }
 
         // Proceed with further logic, e.g., saving the data or navigating to another page
-        await OnPageSelected.InvokeAsync(1); // Adjust the argument as necessary
+        await OnPageSelected.InvokeAsync(5); // Adjust the argument as necessary
+    }
+
+    public async Task HandleSubmitReturn(int pageID)
+    {
+        // Reset error messages
+        rbqNumberError = string.Empty;
+        statusError = string.Empty;
+        licenseTypeError = string.Empty;
+        categoryError = string.Empty;
+        subCategoryError = string.Empty; // Reset sub-category error
+
+        // Validation logic
+        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !IsValidRbqNumber(rbqNumberInput))
+        {
+            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
+        }
+        if (string.IsNullOrWhiteSpace(selectedStatus))
+        {
+            statusError = "Le statut est requis.";
+        }
+        if (string.IsNullOrWhiteSpace(selectedLicenseType))
+        {
+            licenseTypeError = "Le type de licence est requis.";
+        }
+        if (string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            categoryError = "La catégorie est requise.";
+        }
+        if (!selectedCategories.Any()) // Check if at least one sub-category is selected
+        {
+            subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
+        }
+
+        // If there are any errors, do not proceed
+        if (!string.IsNullOrEmpty(rbqNumberError) ||
+            !string.IsNullOrEmpty(statusError) ||
+            !string.IsNullOrEmpty(licenseTypeError) ||
+            !string.IsNullOrEmpty(categoryError) ||
+            !string.IsNullOrEmpty(subCategoryError))
+        {
+            return;
+        }
+
+        // Proceed with further logic, e.g., saving the data or navigating to another page
+        await OnPageSelected.InvokeAsync(pageID); // Adjust the argument as necessary
     }
 
 

@@ -94,7 +94,7 @@
 
         <div class="mb-3">
             <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
-            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput" required>
+            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput" >
             @if (!string.IsNullOrEmpty(siteWebError))
             {
                 <div class="text-danger">@siteWebError</div>
@@ -153,8 +153,7 @@
         {
             regionError = "Erreur lors de la récupération des régions.";
             Console.WriteLine(ex.Message);
-        }
-        Console.WriteLine("IN ADRESSE");
+        }        
         BDFetched.InvokeAsync();
     }
 
@@ -165,16 +164,18 @@
 
     public void LoadSharedData()
     {
+        System.Threading.Thread.Sleep(1000);
         numCiviqueInput = SharedData.NumCivique;
         rueInput = SharedData.NomRue;
         villeInput = SharedData.NomVille;
         provinceInput = SharedData.Province;
         codePostalInput = SharedData.CodePostal;
         numeroTelephoneInput = SharedData.NumTelephone;
-        regionInput = SharedData.RegionAdministrative;
+        regionInput = SharedData.CodeRegionAdministrative;
 
-        StateHasChanged();
-        BDFetched.InvokeAsync();
+        FormatTelephoneNumber(numeroTelephoneInput);
+        StateHasChanged();        
+        //BDFetched.InvokeAsync();
     }
 
     private void HandleSubmit()
@@ -193,6 +194,24 @@
 
             Checkpoint.InvokeAsync(2);
             OnPageSelected.InvokeAsync(2);
+        }
+    }
+
+    public void HandleSubmitReturn(int pageID)
+    {
+        // Reset errors
+        ResetErrors();
+
+        // Basic validation checks
+        var isValid = ValidateInputs();
+
+        // If valid, export and log data to console
+        if (isValid)
+        {
+            var formData = ExportFormData();
+            LogToConsole(formData);
+
+            OnPageSelected.InvokeAsync(pageID);
         }
     }
 
@@ -254,12 +273,6 @@
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(siteWebInput))
-        {
-            siteWebError = "Le site web est requis.";
-            isValid = false;
-        }
-
         if (string.IsNullOrWhiteSpace(regionInput))
         {
             regionError = "La région est requise.";
@@ -288,6 +301,28 @@
     private void FormatTelephoneNumber(ChangeEventArgs e)
     {
         var input = e.Value.ToString();
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        if (input.Length > 10)
+        {
+            input = input.Substring(0, 10);
+        }
+
+        if (input.Length > 3)
+        {
+            input = input.Insert(3, "-");
+        }
+        if (input.Length > 7)
+        {
+            input = input.Insert(7, "-");
+        }
+
+        numeroTelephoneInput = input;
+    }
+
+    private void FormatTelephoneNumber(string e)
+    {
+        var input = e;
         input = new string(input.Where(char.IsDigit).ToArray());
 
         if (input.Length > 10)

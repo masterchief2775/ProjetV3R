@@ -163,6 +163,37 @@
         }
     }
 
+    public void HandleSubmitReturn(int pageID)
+    {
+        // Reset errors
+        ErrorReset();
+        var isValid = true;
+
+        // Validate all contact fields
+        foreach (var contact in contacts)
+        {
+            ValidateInputs(contact);
+        }
+
+        // Check if any contact has errors
+        isValid = contacts.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+                                      string.IsNullOrEmpty(c.NomError) &&
+                                      string.IsNullOrEmpty(c.RoleError) &&
+                                      string.IsNullOrEmpty(c.EmailError) &&
+                                      string.IsNullOrEmpty(c.NumeroTelephoneError) &&
+                                      string.IsNullOrEmpty(c.TypeTelephoneError) &&
+                                      string.IsNullOrEmpty(c.PosteError));
+
+        if (isValid)
+        {
+            // Log contact data
+            var contactData = ExportContactData();
+            LogToConsole(contactData);
+
+            OnPageSelected.InvokeAsync(pageID);
+        }
+    }
+
     private void ValidateInputs(Contact contact)
     {
         contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;

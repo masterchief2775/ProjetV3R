@@ -58,6 +58,9 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services
         [JsonPropertyName("Region administrative")]
         public string RegionAdministrative { get; set; }
 
+        [JsonPropertyName("Code de region administrative")]
+        public string CodeRegionAdministrative { get; set; }
+
         //RBQ
         [JsonPropertyName("Numero de licence")]
         public string NumeroDeLicence { get; set; }

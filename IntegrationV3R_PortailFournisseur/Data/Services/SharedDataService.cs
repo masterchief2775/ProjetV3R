@@ -15,6 +15,7 @@
         public string NomVille { get; set; } = "";
         public string NumTelephone { get; set; } = "";
         public string RegionAdministrative { get; set; } = "";
+        public string CodeRegionAdministrative { get; set; } = "";
 
         //RBQ
         public string NumLicence { get; set; } = "";

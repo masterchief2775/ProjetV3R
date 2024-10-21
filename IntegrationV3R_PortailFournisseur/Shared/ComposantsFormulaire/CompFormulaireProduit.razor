@@ -10,7 +10,7 @@
         <!-- Product Description -->
         <div class="mb-3">
             <label for="productDescriptionInput" class="form-label">Description du produit</label>
-            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3"></textarea>
+            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3" maxlength="500"></textarea>
             @if (!string.IsNullOrEmpty(productDescriptionError))
             {
                 <div class="text-danger">@productDescriptionError</div>
@@ -48,7 +48,7 @@
                     foreach (var product in selectedProducts)
                     {
                         <li>
-                            <strong>@product</strong>
+                            <strong>@product.ComoditeNombre - @product.ComoditeTitreFr</strong>
                             <button type="button" class="btn btn-link text-danger btn-sm" @onclick="() => RemoveProduct(product)" style="margin-left: 10px; padding: 0;">&times;</button>
                         </li>
                     }
@@ -61,12 +61,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Suivant</button>
-    </form>
-    <p>@fetchedProducts.Count</p>
-    @foreach (var item in fetchedProducts)
-    {
-        <p>@item</p>
-    }
+    </form>   
 </div>
 
 @code {
@@ -136,11 +131,43 @@
         }
 
         // Log data to the console
-        await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
+        //await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
 
         // Trigger checkpoint and page change
         await Checkpoint.InvokeAsync(4);
         await OnPageSelected.InvokeAsync(4);
+    }
+
+    public async Task HandleSubmitReturn(int pageID)
+    {
+        // Reset error messages and validation flag
+        productDescriptionError = string.Empty;
+        productSearchError = string.Empty;
+
+        bool isValid = true; // Reset isValid to true
+
+        // Validation logic
+        if (string.IsNullOrWhiteSpace(productDescription))
+        {
+            productDescriptionError = "La description du produit est requise.";
+            isValid = false; // Set isValid to false if validation fails
+        }
+        if (!selectedProducts.Any())
+        {
+            productSearchError = "Au moins un produit doit être sélectionné.";
+            isValid = false; // Set isValid to false if validation fails
+        }
+
+        // If there are any errors, do not proceed
+        if (!isValid)
+        {
+            return;
+        }
+
+        // Log data to the console
+        //await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
+                
+        await OnPageSelected.InvokeAsync(pageID);
     }
 
     // Handle search input dynamically for products

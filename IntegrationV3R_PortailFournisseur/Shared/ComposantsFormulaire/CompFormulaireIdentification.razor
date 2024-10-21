@@ -119,6 +119,25 @@
         }
     }
 
+    //Submit called quand changement par la navbar. Peux aller ailleur que la prochaine page
+    public void HandleSubmitReturn(int pageID)
+    {
+        // Reset errors
+        ResetErrors();
+
+        // Validate inputs
+        var isValid = ValidateInputs();
+
+        // If valid, log the data and navigate
+        if (isValid)
+        {
+            var formData = ExportFormData();
+            LogToConsole(formData);            
+            OnPageSelected.InvokeAsync(pageID);
+            //Navigation.NavigateTo("/formulaireDemandeAdresse");
+        }
+    }
+
     private void ResetErrors()
     {
         neqError = string.Empty;

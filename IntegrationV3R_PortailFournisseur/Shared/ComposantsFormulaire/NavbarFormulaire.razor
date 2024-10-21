@@ -34,6 +34,7 @@
 
     private string[] _onglets = new string[7];
     private int _currentPage;
+    private int _checkpoint;
 
     [Parameter]
     public int CurrentPage
@@ -47,32 +48,47 @@
             }
         }
     }
+   
+    public int Checkpoint{ get; set; }
 
 
     protected override void OnInitialized()
     {
-        ChangePage(0);
+        _onglets[0] = " active";
     }
 
 
     private void ChangePage(int id)
     {
-        _currentPage = id;
-        SetInactive();
-        SetActive();
-        OnPageSelected.InvokeAsync(_currentPage);
+        _currentPage = id;  
+        SetLabels();
+        OnPageSelected.InvokeAsync(_currentPage);        
     }
 
-    private void SetInactive()
+    private void SetLabels()
     {
+        StateHasChanged();
         for (int i =0; i<_onglets.Length; i++)
         {
             _onglets[i] = "";
+
+            if (i == _currentPage)
+            {
+                _onglets[i] = " active";
+            }
+            else if (i < Checkpoint && i != _currentPage)
+            {
+                _onglets[i] = " done";
+            }
+            else if(i == Checkpoint)
+            {
+                _onglets[i] = " checkpoint";
+            }
+            else
+            {
+                _onglets[i] = "";
+            }            
         }
     }
-
-    private void SetActive()
-    {
-        _onglets[_currentPage] = " active";            
-    }
+    
 }
