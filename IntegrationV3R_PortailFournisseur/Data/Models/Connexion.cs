@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntegrationV3R_PortailFournisseur.Data;
+namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class Connexion
 {
@@ -9,7 +9,7 @@ public partial class Connexion
 
     public int UserId { get; set; }
 
-    public string Ipconnexion { get; set; } = null!;
+    public string IpConnexion { get; set; } = null!;
 
     public DateTime Timestamps { get; set; }
 

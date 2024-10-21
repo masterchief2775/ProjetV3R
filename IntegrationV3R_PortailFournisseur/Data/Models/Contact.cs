@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace IntegrationV3R_PortailFournisseur.Data;
+namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class Contact
 {
@@ -15,13 +15,13 @@ public partial class Contact
 
     public string FonctionContact { get; set; } = null!;
 
-    public string Courriel { get; set; } = null!;
+    public string CourrielContact { get; set; } = null!;
 
     public string TypeTel { get; set; } = null!;
 
-    public string NumTel { get; set; } = null!;
+    public string NumTelContact { get; set; } = null!;
 
-    public string? PosteTel { get; set; }
+    public string? PosteTelContact { get; set; }
 
     public DateTime Timestamps { get; set; }
 

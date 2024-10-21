@@ -7,6 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Documents\**" />
+    <Compile Remove="Data\Images\**" />
+    <Compile Remove="Data\NewFolder\**" />
+    <Content Remove="Data\Documents\**" />
+    <Content Remove="Data\Images\**" />
+    <Content Remove="Data\NewFolder\**" />
+    <EmbeddedResource Remove="Data\Documents\**" />
+    <EmbeddedResource Remove="Data\Images\**" />
+    <EmbeddedResource Remove="Data\NewFolder\**" />
+    <None Remove="Data\Documents\**" />
+    <None Remove="Data\Images\**" />
+    <None Remove="Data\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Pages\FormulaireDemandeFinance.razor.css" />
     <None Remove="Pages\FormulaireDemandeRBQ.razor.css" />
     <None Remove="Shared\ComposantsFormulaire\FormulaireDemandeBrochure.razor.css" />
@@ -17,9 +32,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.12" />
     <PackageReference Include="MySql.Data" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\Models\" />
   </ItemGroup>
 
 </Project>
