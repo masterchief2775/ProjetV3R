@@ -42,7 +42,6 @@
         identifiantError = string.Empty;
         mdpError = string.Empty;
 
-        // Validations locales
         var isValid = true;
 
         if (string.IsNullOrWhiteSpace(identifiantInput))
@@ -65,10 +64,8 @@
 
             if (user != null)
             {
-                // Chiffrer le mot de passe utilisateur en MD5 pour la comparaison
                 var encryptedPassword = ComputeMd5Hash(mdpInput);
 
-                // Vérifier si le mot de passe chiffré correspond
                 var mdpCorrespondant = user.Motsdepasses.FirstOrDefault(m => m.Mdp == encryptedPassword);
 
                 if (mdpCorrespondant != null)
@@ -88,7 +85,6 @@
         }
     }
 
-    // Méthode pour chiffrer une chaîne en MD5
     private string ComputeMd5Hash(string input)
     {
         using (MD5 md5 = MD5.Create())
