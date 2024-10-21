@@ -1,4 +1,8 @@
-﻿﻿@using IntegrationV3R_PortailFournisseur.Data
+﻿@using IntegrationV3R_PortailFournisseur.Data.Services;﻿
+@using IntegrationV3R_PortailFournisseur.Data.Models;﻿
+@using Microsoft.EntityFrameworkCore;
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+    
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
@@ -86,7 +90,7 @@
                     @foreach (var subCategory in filteredSubCategories)
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectSubCategory(subCategory)">
-                            @subCategory
+                            @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008
                             <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveSubCategory(subCategory)"></button>
                         </li>
                     }
@@ -126,6 +130,11 @@
 
         <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
+    @foreach(var subCategory in fetchedSousCategories)
+    {
+        <p>@subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008</p>
+    }
+    <p>@fetchedSousCategories.Count</p>
 </div>
 
 @code {
@@ -136,6 +145,9 @@
     public EventCallback<int> OnPageSelected { get; set; }
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+    [Parameter]
+    public EventCallback<bool> BDFetched { get; set; }
+
 
     private bool[] _selectionStatut = new bool[2];
     private bool[] _selectionType = new bool[2];    
@@ -156,8 +168,36 @@
 
     // License types and categories
     private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };
-    private List<string> selectedCategories = new List<string>();
-    private List<string> filteredSubCategories = new List<string>(); // To hold search results
+    private List<Souscategorieafter2008> selectedCategories = new List<Souscategorieafter2008>();
+    private List<Souscategorieafter2008> fetchedSousCategories = new List<Souscategorieafter2008>();
+    private List<Souscategorieafter2008> filteredSubCategories = new List<Souscategorieafter2008>(); // To hold search results
+
+
+    public async Task FetchDataDB()
+    {     // Appel à la base de données pour récupérer les régions
+
+        try
+        {
+            // Appel à la base de données pour récupérer les régions
+            fetchedSousCategories = await dbContext.Souscategorieafter2008s.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            subCategoryError = "Erreur lors de la récupération des régions.";
+            Console.WriteLine(ex.Message);
+        }        
+        BDFetched.InvokeAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {       
+        //Revérifier, peut être inutile
+        _selectionStatut[0] = false;
+        _selectionStatut[1] = false;
+
+        _selectionType[0] = false;
+        _selectionType[1] = false;
+    }
 
     // Updated sub-categories for testing
     private List<string> allSubCategories = new List<string>
@@ -184,15 +224,6 @@
         "4213 Parquetage",
         "4220 Serrurerie de bâtiment"
     };
-
-    protected override void OnInitialized()
-    {
-        _selectionStatut[0] = false;
-        _selectionStatut[1] = false;
-
-        _selectionType[0] = false;
-        _selectionType[1] = false;
-    }
 
     public void LoadSharedData()
     {
@@ -314,13 +345,19 @@
     private void SearchSubCategories()
     {
         // Filter the sub-categories based on the search input
-        filteredSubCategories = allSubCategories
-            .Where(subCategory => subCategory.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        filteredSubCategories.Clear();
+
+        foreach (var categorie in fetchedSousCategories)
+        {
+            if (categorie.NomSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase) || categorie.NumeroSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
+            {
+                filteredSubCategories.Add(categorie);
+            }            
+        }
     }
 
     // Select a sub-category
-    private void SelectSubCategory(string subCategory)
+    private void SelectSubCategory(Souscategorieafter2008 subCategory)
     {
         if (!selectedCategories.Contains(subCategory))
         {
@@ -331,7 +368,7 @@
     }
 
     // Remove a sub-category from the selection
-    private void RemoveSubCategory(string category)
+    private void RemoveSubCategory(Souscategorieafter2008 category)
     {
         selectedCategories.Remove(category);
     }

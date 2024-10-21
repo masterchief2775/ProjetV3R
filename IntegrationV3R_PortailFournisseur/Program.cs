@@ -1,4 +1,5 @@
 using IntegrationV3R_PortailFournisseur.Data.Models;
+using IntegrationV3R_PortailFournisseur.Data.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;

@@ -14,7 +14,7 @@
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
 		<CompFormulaireContact OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -23,7 +23,7 @@
 		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
-		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">		
 		<CompFormulaireBrochure OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -36,11 +36,15 @@
 	private CompFormulaireAdresse compAdresse;
 	private CompFormulaireRBQ compRBQ;
 
+
+
 	private int selectedPageIndex = 0;
 
 	public int _checkpoint = 8;
 
 	public bool _sharedData = false;
+
+	public int _FetchedComp = 1;
 
 	private void SetFormCheckpoint(int pageIndex)
 	{
@@ -63,5 +67,20 @@
 		compIdentification.LoadSharedData();
 		compAdresse.LoadSharedData();
 		compRBQ.LoadSharedData();
+	}
+
+	private void NextBDFetch()
+	{
+		_FetchedComp++;
+
+		switch (_FetchedComp)
+		{
+			case 2 :
+				compRBQ.FetchDataDB();
+				break;
+
+		}
+
+		Console.WriteLine("In FORMULAIRE");
 	}
 }

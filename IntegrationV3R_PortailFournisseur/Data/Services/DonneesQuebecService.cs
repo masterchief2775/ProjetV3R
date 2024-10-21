@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace IntegrationV3R_PortailFournisseur.Data
+namespace IntegrationV3R_PortailFournisseur.Data.Services
 {
     public class DonneesQuebecService
     {
@@ -38,17 +38,17 @@ namespace IntegrationV3R_PortailFournisseur.Data
 
     public class Fiche
     {
-    //Identification
-		[JsonPropertyName("NEQ")]
-		public string NEQ { get; set; }
+        //Identification
+        [JsonPropertyName("NEQ")]
+        public string NEQ { get; set; }
 
-		[JsonPropertyName("Nom de l'intervenant")]
-		public string NomEntreprise { get; set; }
+        [JsonPropertyName("Nom de l'intervenant")]
+        public string NomEntreprise { get; set; }
 
-		[JsonPropertyName("Courriel")]
-		public string Courriel { get; set; }
+        [JsonPropertyName("Courriel")]
+        public string Courriel { get; set; }
 
-    //Adresse
+        //Adresse
         [JsonPropertyName("Adresse")]
         public string Adresse { get; set; }
 
@@ -58,7 +58,7 @@ namespace IntegrationV3R_PortailFournisseur.Data
         [JsonPropertyName("Region administrative")]
         public string RegionAdministrative { get; set; }
 
-    //RBQ
+        //RBQ
         [JsonPropertyName("Numero de licence")]
         public string NumeroDeLicence { get; set; }
 

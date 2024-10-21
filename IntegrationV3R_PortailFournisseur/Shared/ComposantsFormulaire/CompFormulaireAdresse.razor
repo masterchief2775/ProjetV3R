@@ -1,4 +1,4 @@
-﻿@using IntegrationV3R_PortailFournisseur.Data;
+﻿@using IntegrationV3R_PortailFournisseur.Data.Services;
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
 @using Microsoft.EntityFrameworkCore
@@ -115,6 +115,9 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
+    [Parameter]
+    public EventCallback<bool> BDFetched { get; set; }
+
     private bool[] _selectionRegionAdministrative = new bool[17];
 
     private string numCiviqueInput = string.Empty;
@@ -142,8 +145,7 @@
 
     private List<Regionadministrative> regions = new List<Regionadministrative>();
 
-
-    protected override async Task OnInitializedAsync()
+    public async Task FetchDataDB()
     {
         try
         {
@@ -155,6 +157,27 @@
             regionError = "Erreur lors de la récupération des régions.";
             Console.WriteLine(ex.Message);
         }
+        Console.WriteLine("IN ADRESSE");
+        BDFetched.InvokeAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        FetchDataDB();
+    }
+
+    public void LoadSharedData()
+    {
+        numCiviqueInput = SharedData.NumCivique;
+        rueInput = SharedData.NomRue;
+        villeInput = SharedData.NomVille;
+        provinceInput = SharedData.Province;
+        codePostalInput = SharedData.CodePostal;
+        numeroTelephoneInput = SharedData.NumTelephone;
+        regionInput = SharedData.RegionAdministrative;
+
+        StateHasChanged();
+        BDFetched.InvokeAsync();
     }
 
 

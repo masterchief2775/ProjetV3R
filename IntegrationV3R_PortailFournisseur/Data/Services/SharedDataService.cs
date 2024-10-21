@@ -1,13 +1,13 @@
-﻿namespace IntegrationV3R_PortailFournisseur.Data
+﻿namespace IntegrationV3R_PortailFournisseur.Data.Services
 {
     public class SharedDataService
     {
         public bool Fetched { get; set; } = true;
-    //Identification
+        //Identification
         public string NEQ { get; set; } = "";
         public string NomEntreprise { get; set; } = "";
         public string Courriel { get; set; } = "";
-    //Adresse
+        //Adresse
         public string NumCivique { get; set; } = "";
         public string NomRue { get; set; } = "";
         public string CodePostal { get; set; } = "";
@@ -16,11 +16,11 @@
         public string NumTelephone { get; set; } = "";
         public string RegionAdministrative { get; set; } = "";
 
-    //RBQ
+        //RBQ
         public string NumLicence { get; set; } = "";
         public string StatutLicence { get; set; } = "";
         public string TypeLicence { get; set; } = "";
         public string CategorieLicence { get; set; } = "";
-        
+
     }
 }
