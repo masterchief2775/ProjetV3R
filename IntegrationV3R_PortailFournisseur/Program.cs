@@ -1,4 +1,5 @@
 using IntegrationV3R_PortailFournisseur.Data.Models;
+using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,6 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 18))));
-
 
 
 var app = builder.Build();
