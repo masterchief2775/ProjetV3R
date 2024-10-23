@@ -155,7 +155,7 @@
             regionError = "Erreur lors de la récupération des régions.";
             Console.WriteLine(ex.Message);
         }        
-        BDFetched.InvokeAsync();
+        BDFetched.InvokeAsync(true);
     }
 
     protected override async Task OnInitializedAsync()
@@ -164,17 +164,16 @@
     }
 
     public void LoadSharedData()
-    {
-        System.Threading.Thread.Sleep(1000);
-        numCiviqueInput = SharedData.NumCivique;
-        rueInput = SharedData.NomRue;
-        villeInput = SharedData.NomVille;
-        provinceInput = SharedData.Province;
-        codePostalInput = SharedData.CodePostal;
-        numeroTelephoneInput = SharedData.NumTelephone;
-        regionInput = SharedData.CodeRegionAdministrative;
+    {       
+        SingletonForm.NumCiviqueInput = SharedData.NumCivique;
+        SingletonForm.RueInput = SharedData.NomRue;
+        SingletonForm.VilleInput = SharedData.NomVille;
+        SingletonForm.ProvinceInput = SharedData.Province;
+        SingletonForm.CodePostalInput = SharedData.CodePostal;
+        SingletonForm.NumeroTelephoneInput = SharedData.NumTelephone;
+        SingletonForm.RegionInput = SharedData.CodeRegionAdministrative;
 
-        FormatTelephoneNumber(numeroTelephoneInput);
+        FormatTelephoneNumber(SingletonForm.NumeroTelephoneInput);
         StateHasChanged();        
         //BDFetched.InvokeAsync();
     }
@@ -206,10 +205,8 @@
 
         // If valid, export and log data to console
         if (isValid)
-        {
-            var formData = ExportFormData();
-            LogToConsole(formData);
-
+        {            
+            LogToConsole();
             OnPageSelected.InvokeAsync(pageID);
         }
     }
@@ -300,6 +297,28 @@
         Console.WriteLine($"Site Web: {SingletonForm.SiteWebInput}");
     }
 
+    private void FormatTelephoneNumber(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        if (input.Length > 10)
+        {
+            input = input.Substring(0, 10);
+        }
+
+        if (input.Length > 3)
+        {
+            input = input.Insert(3, "-");
+        }
+        if (input.Length > 7)
+        {
+            input = input.Insert(7, "-");
+        }
+
+        SingletonForm.NumeroTelephoneInput = input;
+    }
+
     private void FormatTelephoneNumber(string e)
     {
         var input = e;
@@ -319,7 +338,7 @@
             input = input.Insert(7, "-");
         }
 
-        numeroTelephoneInput = input;
+        SingletonForm.NumeroTelephoneInput = input;
     }
 
     private void FormatCodePostal(ChangeEventArgs e)
@@ -335,17 +354,5 @@
             SingletonForm.CodePostalInput = value;
         }
     }
-
-    private void FormatTelephoneNumber(ChangeEventArgs e)
-    {
-        var value = e.Value.ToString().Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
-        if (value.Length >= 10)
-        {
-            SingletonForm.NumeroTelephoneInput = $"{value.Substring(0, 3)}-{value.Substring(3, 3)}-{value.Substring(6, 4)}";
-        }
-        else
-        {
-            SingletonForm.NumeroTelephoneInput = value;
-        }
-    }
+    
 }

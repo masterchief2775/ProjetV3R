@@ -2,7 +2,7 @@
 @inject NavigationManager Navigation
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 @using Microsoft.JSInterop
-@layout EmptyLayout
+
 
 @inject IJSRuntime JSRuntime
 
@@ -21,7 +21,7 @@
 		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
-		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
 		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />

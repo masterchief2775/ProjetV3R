@@ -76,6 +76,11 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }   
 
+    private string neqInput = string.Empty;
+    private string nomEntrepriseInput = string.Empty;
+    private string emailInput = string.Empty;
+    private string passwordInput = string.Empty;
+    private string repeatPasswordInput = string.Empty;
 
     private string neqError = string.Empty;
     private string nomEntrepriseError = string.Empty;
@@ -86,9 +91,9 @@
 
     public void LoadSharedData()
     {
-        neqInput = SharedData.NEQ;
-        nomEntrepriseInput = SharedData.NomEntreprise;
-        emailInput = SharedData.Courriel;
+        SingletonForm.NeqInput = SharedData.NEQ;
+        SingletonForm.NomEntrepriseInput = SharedData.NomEntreprise;
+        SingletonForm.EmailInput = SharedData.Courriel;
 
         StateHasChanged();
     }
@@ -121,9 +126,8 @@
 
         // If valid, log the data and navigate
         if (isValid)
-        {
-            var formData = ExportFormData();
-            LogToConsole(formData);            
+        {            
+            LogToConsole();            
             OnPageSelected.InvokeAsync(pageID);
             //Navigation.NavigateTo("/formulaireDemandeAdresse");
         }

@@ -55,7 +55,7 @@
                 <select class="form-select" id="licenseTypeSelect" @bind="selectedLicenseType">
                     <option value="">Choisissez un type de licence</option>
                     <option value="Entrepreneur">Entrepreneur</option>
-                    <option value="Constructeur-Propriétaire">Constructeur-Propriétaire</option>
+                    <option value="Constructeur-proprietaire">Constructeur-Propriétaire</option>
                 </select>
                 @if (!string.IsNullOrEmpty(licenseTypeError))
                 {
@@ -112,7 +112,7 @@
                     foreach (var category in selectedCategories)
                     {
                         <li>
-                            <strong>@category</strong>
+                            <strong>@category.NumeroSousCategorieAfter2008 - @category.NomSousCategorieAfter2008</strong>
                             <button type="button" class="btn btn-link text-danger btn-sm"
                             @onclick="() => RemoveSubCategory(category)"
                             style="margin-left: 10px; padding: 0;">
@@ -129,11 +129,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Suivant</button>
-    </form>
-    @foreach (var subCategory in fetchedSousCategories)
-    {
-        <p>@subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008</p>
-    }    
+    </form>    
 </div>
 
 @code {
@@ -248,6 +244,7 @@
         }
 
         // Proceed with further logic, e.g., saving the data or navigating to another page
+        await Checkpoint.InvokeAsync(5);
         await OnPageSelected.InvokeAsync(5); // Adjust the argument as necessary
     }
 
