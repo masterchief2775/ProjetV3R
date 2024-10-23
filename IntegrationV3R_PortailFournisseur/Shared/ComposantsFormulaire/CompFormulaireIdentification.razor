@@ -2,8 +2,6 @@
 @using IntegrationV3R_PortailFournisseur.Data.Services;
 @using Microsoft.JSInterop
 
-@inject IJSRuntime JSRuntime
-
 <div class="container-fluid mt-4">
 
     <form class="form" @onsubmit="HandleSubmit">
@@ -12,7 +10,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="nomEntrepriseInput" class="form-label">Nom de l'entreprise</label>
-                <input type="text" class="form-control" id="nomEntrepriseInput" @bind="nomEntrepriseInput" required>
+                <input type="text" class="form-control" id="nomEntrepriseInput" @bind="SingletonForm.NomEntrepriseInput" required>
                 @if (!string.IsNullOrEmpty(nomEntrepriseError))
                 {
                     <div class="text-danger">@nomEntrepriseError</div>
@@ -21,7 +19,7 @@
 
             <div class="col-md-3">
                 <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
-                <input type="text" class="form-control" id="neqInput" @bind="neqInput" required>
+                <input type="text" class="form-control" id="neqInput" @bind="SingletonForm.NeqInput" required>
                 @if (!string.IsNullOrEmpty(neqError))
                 {
                     <div class="text-danger">@neqError</div>
@@ -35,7 +33,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="emailInput" class="form-label">Adresse courriel</label>
-                <input type="email" class="form-control" id="emailInput" @bind="emailInput" required>
+                <input type="email" class="form-control" id="emailInput" @bind="SingletonForm.EmailInput" required>
                 @if (!string.IsNullOrEmpty(emailError))
                 {
                     <div class="text-danger">@emailError</div>
@@ -48,7 +46,7 @@
         <div class="row mb-3">
             <div class="col-md-3">
                 <label for="passwordInput" class="form-label">Mot de passe</label>
-                <input type="password" class="form-control" id="passwordInput" @bind="passwordInput" required>
+                <input type="password" class="form-control" id="passwordInput" @bind="SingletonForm.PasswordInput" required>
                 @if (!string.IsNullOrEmpty(passwordError))
                 {
                     <div class="text-danger">@passwordError</div>
@@ -56,7 +54,7 @@
             </div>
             <div class="col-md-3">
                 <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe</label>
-                <input type="password" class="form-control" id="repeatPasswordInput" @bind="repeatPasswordInput" required>
+                <input type="password" class="form-control" id="repeatPasswordInput" @bind="SingletonForm.RepeatPasswordInput" required>
                 @if (!string.IsNullOrEmpty(repeatPasswordError))
                 {
                     <div class="text-danger">@repeatPasswordError</div>
@@ -70,6 +68,7 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
@@ -77,12 +76,6 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }   
 
-
-    private string neqInput = string.Empty;
-    private string nomEntrepriseInput = string.Empty;
-    private string emailInput = string.Empty;
-    private string passwordInput = string.Empty;
-    private string repeatPasswordInput = string.Empty;
 
     private string neqError = string.Empty;
     private string nomEntrepriseError = string.Empty;
@@ -111,11 +104,9 @@
         // If valid, log the data and navigate
         if (isValid)
         {
-            var formData = ExportFormData();
-            LogToConsole(formData);
+            LogToConsole();
             Checkpoint.InvokeAsync(1);
             OnPageSelected.InvokeAsync(1);
-            //Navigation.NavigateTo("/formulaireDemandeAdresse");
         }
     }
 
@@ -152,41 +143,41 @@
         var isValid = true;
 
         // Validation for NEQ
-        if (string.IsNullOrWhiteSpace(neqInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.NeqInput))
         {
             neqError = "Le NEQ est requis.";
             isValid = false;
         }
-        else if (!IsNumeric(neqInput) || neqInput.Length != 10 || !IsValidNEQFormat(neqInput))
+        else if (!IsNumeric(SingletonForm.NeqInput) || SingletonForm.NeqInput.Length != 10 || !IsValidNEQFormat(SingletonForm.NeqInput))
         {
             neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88 et ayant le troisième caractère entre 4 et 9.";
             isValid = false;
         }
 
         // Validation for Nom de l'entreprise
-        if (string.IsNullOrWhiteSpace(nomEntrepriseInput) || nomEntrepriseInput.Length > 64)
+        if (string.IsNullOrWhiteSpace(SingletonForm.NomEntrepriseInput) || SingletonForm.NomEntrepriseInput.Length > 64)
         {
             nomEntrepriseError = "Le nom de l'entreprise est requis et doit faire moins de 64 caractères.";
             isValid = false;
         }
 
         // Validation for Email
-        if (string.IsNullOrWhiteSpace(emailInput) || emailInput.Length > 64 || !IsValidEmail(emailInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.EmailInput) || SingletonForm.EmailInput.Length > 64 || !IsValidEmail(SingletonForm.EmailInput))
         {
             emailError = "Une adresse courriel valide de l'entreprise est requise et doit faire moins de 64 caractères.";
             isValid = false;
         }
 
         // Validation for Password
-        if (string.IsNullOrWhiteSpace(passwordInput) || passwordInput.Length < 7 || passwordInput.Length > 12 ||
-            !HasUpperCase(passwordInput) || !HasLowerCase(passwordInput) || !HasDigit(passwordInput) || !HasSpecialChar(passwordInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.PasswordInput) || SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 ||
+            !HasUpperCase(SingletonForm.PasswordInput) || !HasLowerCase(SingletonForm.PasswordInput) || !HasDigit(SingletonForm.PasswordInput) || !HasSpecialChar(SingletonForm.PasswordInput))
         {
             passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
             isValid = false;
         }
 
         // Check if passwords match
-        if (passwordInput != repeatPasswordInput)
+        if (SingletonForm.PasswordInput != SingletonForm.RepeatPasswordInput)
         {
             repeatPasswordError = "Les mots de passe ne correspondent pas.";
             isValid = false;
@@ -195,25 +186,13 @@
         return isValid;
     }
 
-    private string[] ExportFormData()
+    private void LogToConsole()
     {
-        return new string[]
-        {
-            nomEntrepriseInput,
-            neqInput,
-            emailInput,
-            passwordInput,
-            repeatPasswordInput
-        };
-    }
-
-    private void LogToConsole(string[] formData)
-    {
-        Console.WriteLine($"Nom de l'entreprise: {formData[0]}");
-        Console.WriteLine($"NEQ: {formData[1]}");
-        Console.WriteLine($"Email: {formData[2]}");
+        Console.WriteLine($"Nom de l'entreprise: {SingletonForm.NomEntrepriseInput}");
+        Console.WriteLine($"NEQ: {SingletonForm.NeqInput}");
+        Console.WriteLine($"Email: {SingletonForm.EmailInput}");
         // Be cautious with logging sensitive data like passwords
-        Console.WriteLine($"Mot de passe: {formData[3]}");
+        Console.WriteLine($"Mot de passe: {SingletonForm.PasswordInput}");
     }
 
     private bool IsValidEmail(string email)
@@ -251,12 +230,5 @@
     {
         var specialChars = "!@#$%^&*()_+-=[]{}|;':\",.<>?/`~";
         return password.Any(c => specialChars.Contains(c));
-    }
-
-    // Postal code validation
-    private bool IsValidPostalCode(string postalCode)
-    {
-        var regex = new Regex(@"^(?!.*[DFIOQU])[A-VXY][0-9][A-Z] ?[0-9][A-Z][0-9]$");
-        return regex.IsMatch(postalCode);
     }
 }
