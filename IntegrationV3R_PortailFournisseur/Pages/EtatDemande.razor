@@ -5,6 +5,7 @@
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject ApplicationDbContext _context
 
 
 <PageTitle>État de la demande</PageTitle>
@@ -17,12 +18,6 @@
         @if (fournisseur != null)
         {
             <div class="tracking-status">
-                <ul class="progress-bar">
-                    <li class="@GetStatusClass("En attente")">En attente</li>
-                    <li class="@GetStatusClass("Acceptée")">Acceptée</li>
-                    <li class="@GetStatusClass("Rejetée")">Rejetée</li>
-                </ul>
-
                 <p>Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
             </div>
         }
@@ -30,6 +25,39 @@
         {
             <p>Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
         }
+
+        <div class="container mt-5">
+            <h3 class="text-center mb-4">État de votre demande :</h3>
+
+            <div class="d-flex justify-content-center align-items-center tracking-status">
+                <!-- Demande reçue -->
+                <div class="step-container text-center">
+                    <i class="fas fa-file-alt fa-4x step-icon"></i>
+                    <p>Demande reçue</p>
+                </div>
+
+                <!-- Ligne reliant les icônes -->
+                <div class="line"></div>
+
+                <!-- En cours de traitement -->
+                <div class="step-container text-center">
+                    <i class="fas fa-clock fa-4x step-icon"></i>
+                    <p>En cours de traitement</p>
+                </div>
+
+                @if (statut == "Approuvée" || statut == "Rejetée")
+                {
+                    <!-- Ligne reliant les icônes -->
+                    <div class="line"></div>
+
+                    <!-- Demande approuvée ou refusée -->
+                    <div class="step-container text-center">
+                        <i class="@GetFinalStepIcon() fa-4x step-icon"></i>
+                        <p>@GetFinalStepText()</p>
+                    </div>
+                }
+            </div>
+        </div>
     }
     else
     {
@@ -37,9 +65,15 @@
     }
 </div>
 
+
+
 @code {
     private bool isUserAuthenticated = false;
     private Fournisseur fournisseur;
+
+    // Statut de la demande
+    private string statut = "En attente"; // Par défaut, il vaut mieux utiliser "En attente"
+    private int fournisseurId = 1; // Exemple de fournisseurId
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,6 +96,24 @@
             if (user != null)
             {
                 fournisseur = user.Fournisseur;
+                if (fournisseur != null)
+                {
+                    // Récupérer le statut de la demande
+                    statut = fournisseur.EtatDemande;
+                }
+                else
+                {
+                    // Gérer le cas où le fournisseur est nul
+                    Console.WriteLine("Le fournisseur est null pour cet utilisateur.");
+                    Navigation.NavigateTo("/erreur");
+                    return;
+                }
+            }
+            else
+            {
+                // Gérer le cas où l'utilisateur n'est pas trouvé
+                Console.WriteLine("L'utilisateur n'est pas trouvé dans la base de données.");
+                Navigation.NavigateTo("/erreur");
             }
         }
     }
@@ -84,10 +136,23 @@
 
     private bool IsStatusCompleted(string status)
     {
-        var statusOrder = new List<string> { "En attente", "Acceptée", "Rejetée" };
+        var statusOrder = new List<string> { "En attente", "Approuvée", "Rejetée" };
         var currentIndex = statusOrder.IndexOf(fournisseur.EtatDemande);
         var statusIndex = statusOrder.IndexOf(status);
 
         return statusIndex <= currentIndex;
     }
+
+    private string GetFinalStepIcon()
+    {
+        return statut == "Approuvée" ? "fas fa-check-circle" : "fas fa-times-circle";
+    }
+
+    private string GetFinalStepText()
+    {
+        return statut == "Approuvée" ? "Demande Approuvée" : "Demande Rejetée";
+    }
 }
+
+
+
