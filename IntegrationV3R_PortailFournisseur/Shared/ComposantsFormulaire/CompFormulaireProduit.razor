@@ -10,7 +10,7 @@
         <!-- Product Description -->
         <div class="mb-3">
             <label for="productDescriptionInput" class="form-label">Description du produit</label>
-            <textarea class="form-control" id="productDescriptionInput" @bind="productDescription" rows="3" maxlength="500"></textarea>
+            <textarea class="form-control" id="productDescriptionInput" @bind="SingletonForm.DescriptionProduitsServicesInput" rows="3" maxlength="500"></textarea>
             @if (!string.IsNullOrEmpty(productDescriptionError))
             {
                 <div class="text-danger">@productDescriptionError</div>
@@ -43,9 +43,9 @@
         <div class="mb-3">
             <h5>Produits sélectionnés</h5>
             <ul>
-                @if (selectedProducts.Any())
+                @if (SingletonForm.ProduitsServicesSelectionnesInput.Any())
                 {
-                    foreach (var product in selectedProducts)
+                    foreach (var product in SingletonForm.ProduitsServicesSelectionnesInput)
                     {
                         <li>
                             <strong>@product.ComoditeNombre - @product.ComoditeTitreFr</strong>
@@ -72,7 +72,9 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
-    private string productDescription = string.Empty;
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+
+    //private string productDescription = string.Empty;
     private string productSearch = string.Empty;
 
     private string productDescriptionError = string.Empty;
@@ -85,7 +87,7 @@
     };
 
     private List<UnspscComodite> filteredProducts = new List<UnspscComodite>();
-    private List<UnspscComodite> selectedProducts = new List<UnspscComodite>();
+//private List<UnspscComodite> selectedProducts = new List<UnspscComodite>();
     private List<UnspscComodite> fetchedProducts = new List<UnspscComodite>();
 
     public async Task FetchDataDB()
@@ -135,13 +137,13 @@
     {
         bool isValid = true;
 
-        if (string.IsNullOrWhiteSpace(productDescription))
+        if (string.IsNullOrWhiteSpace(SingletonForm.DescriptionProduitsServicesInput))
         {
             productDescriptionError = "La description du produit est requise.";
             isValid = false;
         }
 
-        if (!selectedProducts.Any())
+        if (!SingletonForm.ProduitsServicesSelectionnesInput.Any())
         {
             productSearchError = "Au moins un produit doit être sélectionné.";
             isValid = false;
@@ -155,8 +157,8 @@
     {
         return new string[]
         {
-            productDescription,
-            string.Join(", ", selectedProducts)
+            SingletonForm.DescriptionProduitsServicesInput,
+            string.Join(", ", SingletonForm.ProduitsServicesSelectionnesInput)
         };
     }
 
@@ -169,12 +171,12 @@
         bool isValid = true; // Reset isValid to true
 
         // Validation logic
-        if (string.IsNullOrWhiteSpace(productDescription))
+        if (string.IsNullOrWhiteSpace(SingletonForm.DescriptionProduitsServicesInput))
         {
             productDescriptionError = "La description du produit est requise.";
             isValid = false; // Set isValid to false if validation fails
         }
-        if (!selectedProducts.Any())
+        if (!SingletonForm.ProduitsServicesSelectionnesInput.Any())
         {
             productSearchError = "Au moins un produit doit être sélectionné.";
             isValid = false; // Set isValid to false if validation fails
@@ -225,9 +227,9 @@
     // Select a product from the search results
     private void SelectProduct(UnspscComodite product)
     {
-        if (!selectedProducts.Contains(product))
+        if (!SingletonForm.ProduitsServicesSelectionnesInput.Contains(product))
         {
-            selectedProducts.Add(product);
+            SingletonForm.ProduitsServicesSelectionnesInput.Add(product);
             productSearch = string.Empty; // Clear the search input after selection
             filteredProducts.Clear(); // Clear search results after selection
         }
@@ -236,7 +238,7 @@
     // Remove a product from the selected list
     private void RemoveProduct(UnspscComodite product)
     {
-        selectedProducts.Remove(product);
+        SingletonForm.ProduitsServicesSelectionnesInput.Remove(product);
     }
 
     // Log data to the console using Console.WriteLine

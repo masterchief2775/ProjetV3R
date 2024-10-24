@@ -2,15 +2,16 @@
 @inject DonneesQuebecService DonnéesQuébecService
 
 <div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
-    <div style="width:auto; margin:auto;" >
+    <div class="modal-boxSize" >
         <div >
             
             <form class="form row col-12" @onsubmit="HandleSubmit">
                 
-                <div class="modal-content" style="display:flex; justify-content:space-evenly; flex-direction:row">                    
-                    <div class="" style="width:50%; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start">
-                        <span class="close" @onclick="CloseModal">&times;</span>
+                <div class="modal-content" >                    
+                    <div class="modal-leftSide" >
+                        
                         <div>
+                            <span class="close" @onclick="CloseModal">&times;</span>
                             <h5>
                             Pré-remplissage
                             </h5>
@@ -21,7 +22,7 @@
                         </div>
                         <div></div>
                         <div>
-                            <div style="width:40%">
+                            <div style="width:70%">
                                 <label>Code RBQ</label>
                                 <input type="text" class="form-control mb-2" id="codeRBQ" @bind-value="codeRBQ" @oninput="FormatCodeRBQ" maxlength="12">
                                 @if (!string.IsNullOrEmpty(codeRBQError))
@@ -39,8 +40,8 @@
                     
                     
 
-                    <div style="width:40%">
-                        <img style="width:100%;height:100%" src="https://thumbs.dreamstime.com/z/man-helping-his-colleague-work-computer-office-151327460.jpg" />
+                    <div style="width:40%; margin:auto;">
+                        <img class="modal-img"  src="https://thumbs.dreamstime.com/z/man-helping-his-colleague-work-computer-office-151327460.jpg" />
                     </div>
                     
 

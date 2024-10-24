@@ -11,7 +11,7 @@
             <div class="col-md-4">
                 <label for="rbqNumberInput" class="form-label">Numéro RBQ</label>
                 <input type="text" class="form-control" id="rbqNumberInput"
-                       @bind="rbqNumberInput" maxlength="12" placeholder="Format: ####-####-##"
+                       @bind="SingletonForm.RBQNumberInput" maxlength="12" placeholder="Format: ####-####-##"
                        @oninput="FormatRbqNumber">
                 @if (!string.IsNullOrEmpty(rbqNumberError))
                 {
@@ -23,14 +23,14 @@
             <div class="col-md-4">
                 <label for="startDateInput" class="form-label">Date de début</label>
                 <input type="date" class="form-control" id="startDateInput"
-                       @bind="startDate">
+                       @bind="SingletonForm.StartDateInput">
             </div>
 
             <!-- Date de fin -->
             <div class="col-md-4">
                 <label for="endDateInput" class="form-label">Date de fin</label>
                 <input type="date" class="form-control" id="endDateInput"
-                       @bind="endDate">
+                       @bind="SingletonForm.EndDateInput">
             </div>
         </div>
 
@@ -38,7 +38,7 @@
             <!-- Statut -->
             <div class="col-md-4">
                 <label for="statusSelect" class="form-label">Statut</label>
-                <select class="form-select" id="statusSelect" @bind="selectedStatus">
+                <select class="form-select" id="statusSelect" @bind="SingletonForm.SelectedStatus">
                     <option value="">Choisissez un statut</option>
                     <option value="Active" >Valide</option>
                     <option value="Invalide" >Invalide</option>
@@ -52,7 +52,7 @@
             <!-- Type de licence -->
             <div class="col-md-4">
                 <label for="licenseTypeSelect" class="form-label">Type de licence</label>
-                <select class="form-select" id="licenseTypeSelect" @bind="selectedLicenseType">
+                <select class="form-select" id="licenseTypeSelect" @bind="SingletonForm.SelectedLicenseType">
                     <option value="">Choisissez un type de licence</option>
                     <option value="Entrepreneur">Entrepreneur</option>
                     <option value="Constructeur-proprietaire">Constructeur-Propriétaire</option>
@@ -66,7 +66,7 @@
             <!-- Catégorie -->
             <div class="col-md-4">
                 <label for="categorySelect" class="form-label">Catégorie</label>
-                <select class="form-select" id="categorySelect" @bind="selectedCategory">
+                <select class="form-select" id="categorySelect" @bind="SingletonForm.SelectedCategory">
                     <option value="">Choisissez une catégorie</option>
                     <option value="General">Général</option>
                     <option value="Specialisee">Spécialisé</option>
@@ -107,9 +107,9 @@
         <div class="mb-3">
             <h5>Catégories et Sous-catégories sélectionnées</h5>
             <ul>
-                @if (selectedCategories.Any())
+                @if (SingletonForm.SelectedSubCategories.Any())
                 {
-                    foreach (var category in selectedCategories)
+                    foreach (var category in SingletonForm.SelectedSubCategories)
                     {
                         <li>
                             <strong>@category.NumeroSousCategorieAfter2008 - @category.NomSousCategorieAfter2008</strong>
@@ -134,6 +134,7 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
     // Parameters and Variables
     [Parameter]
@@ -143,13 +144,7 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
-
-    private string rbqNumberInput = string.Empty;
-    private string selectedStatus = string.Empty;
-    private string selectedLicenseType = string.Empty;
-    private string selectedCategory = string.Empty;
-    private DateTime startDate = DateTime.Now;
-    private DateTime endDate = DateTime.Now;
+    
     private string subCategorySearch = string.Empty;
 
     private string rbqNumberError = string.Empty;
@@ -159,8 +154,7 @@
     private string subCategoryError = string.Empty; // New error message for sub-categories
 
     // License types and categories
-    private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };
-    private List<Souscategorieafter2008> selectedCategories = new List<Souscategorieafter2008>();
+    private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };   
     private List<Souscategorieafter2008> fetchedSousCategories = new List<Souscategorieafter2008>();
     private List<Souscategorieafter2008> filteredSubCategories = new List<Souscategorieafter2008>(); // To hold search results
 
@@ -189,14 +183,14 @@
 
     public void LoadSharedData()
     {
-        rbqNumberInput = SharedData.NumLicence;        
+        SingletonForm.RBQNumberInput = SharedData.NumLicence;
 
-        selectedStatus = SharedData.StatutLicence;
+        SingletonForm.SelectedStatus = SharedData.StatutLicence;
         if (SharedData.StatutLicence != "Active")
-            selectedStatus = "Invalide";
+            SingletonForm.SelectedStatus = "Invalide";
 
-        selectedLicenseType = SharedData.TypeLicence;
-        selectedCategory = SharedData.CategorieLicence;
+        SingletonForm.SelectedLicenseType = SharedData.TypeLicence;
+        SingletonForm.SelectedCategory = SharedData.CategorieLicence;
 
         StateHasChanged();
     }
@@ -212,23 +206,23 @@
         subCategoryError = string.Empty; // Reset sub-category error
 
         // Validation logic
-        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !IsValidRbqNumber(rbqNumberInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) || !IsValidRbqNumber(SingletonForm.RBQNumberInput))
         {
             rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
         }
-        if (string.IsNullOrWhiteSpace(selectedStatus))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedStatus))
         {
             statusError = "Le statut est requis.";
         }
-        if (string.IsNullOrWhiteSpace(selectedLicenseType))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedLicenseType))
         {
             licenseTypeError = "Le type de licence est requis.";
         }
-        if (string.IsNullOrWhiteSpace(selectedCategory))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedCategory))
         {
             categoryError = "La catégorie est requise.";
         }
-        if (!selectedCategories.Any()) // Check if at least one sub-category is selected
+        if (!SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
         {
             subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
         }
@@ -258,23 +252,23 @@
         subCategoryError = string.Empty; // Reset sub-category error
 
         // Validation logic
-        if (string.IsNullOrWhiteSpace(rbqNumberInput) || !IsValidRbqNumber(rbqNumberInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) || !IsValidRbqNumber(SingletonForm.RBQNumberInput))
         {
             rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
         }
-        if (string.IsNullOrWhiteSpace(selectedStatus))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedStatus))
         {
             statusError = "Le statut est requis.";
         }
-        if (string.IsNullOrWhiteSpace(selectedLicenseType))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedLicenseType))
         {
             licenseTypeError = "Le type de licence est requis.";
         }
-        if (string.IsNullOrWhiteSpace(selectedCategory))
+        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedCategory))
         {
             categoryError = "La catégorie est requise.";
         }
-        if (!selectedCategories.Any()) // Check if at least one sub-category is selected
+        if (!SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
         {
             subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
         }
@@ -324,7 +318,7 @@
             input = input.Substring(0, Math.Min(input.Length, 12));
         }
 
-        rbqNumberInput = input; // Update the input value
+        SingletonForm.RBQNumberInput = input; // Update the input value
     }
 
     // Search sub-categories dynamically
@@ -361,9 +355,9 @@
     // Select a sub-category
     private void SelectSubCategory(Souscategorieafter2008 subCategory)
     {
-        if (!selectedCategories.Contains(subCategory))
+        if (!SingletonForm.SelectedSubCategories.Contains(subCategory))
         {
-            selectedCategories.Add(subCategory);
+            SingletonForm.SelectedSubCategories.Add(subCategory);
             subCategorySearch = string.Empty; // Clear the search box after selection
             filteredSubCategories.Clear(); // Clear the search results
         }
@@ -372,6 +366,6 @@
     // Remove a sub-category from the selection
     private void RemoveSubCategory(Souscategorieafter2008 category)
     {
-        selectedCategories.Remove(category);
+        SingletonForm.SelectedSubCategories.Remove(category);
     }
 }

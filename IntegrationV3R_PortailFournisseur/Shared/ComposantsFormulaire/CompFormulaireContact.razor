@@ -1,5 +1,6 @@
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
+@using IntegrationV3R_PortailFournisseur.Data.Models;﻿
 
 @inject IJSRuntime JSRuntime
 
@@ -10,9 +11,9 @@
             <div class="text-danger">@errorMessage</div>
         }
 
-        @for (int i = 0; i < contacts.Count; i++)
+        @for (int i = 0; i < SingletonForm.ContactsInput.Count; i++)
         {
-            var contact = contacts[i];
+            Contact contact = SingletonForm.ContactsInput[i];
             <div class="contact-entry mb-3 row">
                 <div class="col-6 mb-3">
                     <label for="prenomInput" class="form-label">Prénom</label>
@@ -106,28 +107,29 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
-    private List<Contact> contacts = new List<Contact>();
+    //private List<Contact> contacts = new List<Contact>();
     private string errorMessage = string.Empty;
 
     protected override void OnInitialized()
     {
         // Initialize with one contact
-        contacts.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new Contact());
     }
 
     private void AddContact()
     {
-        contacts.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new Contact());
         errorMessage = string.Empty; // Clear error message when a contact is added
     }
 
     private void RemoveContact(Contact contact)
     {
         // Only allow removal if more than one contact exists
-        if (contacts.Count > 1)
+        if (SingletonForm.ContactsInput.Count > 1)
         {
-            contacts.Remove(contact);
+            SingletonForm.ContactsInput.Remove(contact);
             errorMessage = string.Empty; // Clear error message when a contact is removed
         }
     }
@@ -139,13 +141,13 @@
         var isValid = true;
 
         // Validate all contact fields
-        foreach (var contact in contacts)
+        foreach (var contact in SingletonForm.ContactsInput)
         {
             ValidateInputs(contact);
         }
 
         // Check if any contact has errors
-        isValid = contacts.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+        isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
                                       string.IsNullOrEmpty(c.NomError) &&
                                       string.IsNullOrEmpty(c.RoleError) &&
                                       string.IsNullOrEmpty(c.EmailError) &&
@@ -172,13 +174,13 @@
         var isValid = true;
 
         // Validate all contact fields
-        foreach (var contact in contacts)
+        foreach (var contact in SingletonForm.ContactsInput)
         {
             ValidateInputs(contact);
         }
 
         // Check if any contact has errors
-        isValid = contacts.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+        isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
                                       string.IsNullOrEmpty(c.NomError) &&
                                       string.IsNullOrEmpty(c.RoleError) &&
                                       string.IsNullOrEmpty(c.EmailError) &&
@@ -254,7 +256,7 @@
 
     private void ErrorReset()
     {
-        foreach (var contact in contacts)
+        foreach (var contact in SingletonForm.ContactsInput)
         {
             contact.PrenomError = string.Empty;
             contact.NomError = string.Empty;
@@ -268,7 +270,7 @@
 
     private string[][] ExportFormData()
     {
-        return contacts.Select(c => new string[]
+        return SingletonForm.ContactsInput.Select(c => new string[]
         {
             c.Prenom,
             c.Nom,
@@ -288,7 +290,7 @@
         }
     }
 
-
+    /*
     public class Contact
     {
         public string Prenom { get; set; } = string.Empty;
@@ -307,5 +309,5 @@
         public string NumeroTelephoneError { get; set; } = string.Empty;
         public string TypeTelephoneError { get; set; } = string.Empty;
         public string PosteError { get; set; } = string.Empty;
-    }
+    }*/
 }
