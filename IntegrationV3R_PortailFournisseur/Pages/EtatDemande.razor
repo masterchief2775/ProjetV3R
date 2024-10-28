@@ -58,6 +58,7 @@
                     </div>
                 }
             </div>
+            <button @onclick="NavigateToProfile">Profile</button>
         </div>
     }
     else
@@ -162,6 +163,11 @@
     private string GetFinalStepText()
     {
         return statut == "Approuvée" ? "Demande Approuvée" : "Demande Rejetée";
+    }
+
+    private void NavigateToProfile()
+    {
+        Navigation.NavigateTo("/profile");
     }
 }
 

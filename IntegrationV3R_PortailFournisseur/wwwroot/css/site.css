@@ -127,6 +127,19 @@ a, .btn-link {
     font-weight: bolder;
 }
 
+/* CSS GLOBALE POUR LE PROFILE */
+.profile-container {
+    background-color: #a6a6a6;
+    border-radius: 10px;
+    border: groove 3px #1861ac;
+    padding: 15px;
+}
+
+
+
+
+
+
 .modal {
     display: none;
     position: fixed;
