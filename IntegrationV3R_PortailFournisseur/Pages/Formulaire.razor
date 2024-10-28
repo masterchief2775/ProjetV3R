@@ -3,51 +3,124 @@
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 @using Microsoft.JSInterop
 
+
 @inject IJSRuntime JSRuntime
 
+<CompPreremplissage OnDataFetched="HandleSharedData" />
+
 <div class="container-fluid  formulaire-container">
-	<NavbarFormulaire OnPageSelected="HandlePageSelected" CurrentPage="selectedPageIndex" />
+	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
-		<CompFormulaireIdentification OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
+		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
-		<CompFormulaireContact OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
-		<CompFormulaireProduit OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
-		<CompFormulaireRBQ OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
-	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireBrochure OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">		
+		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
 
 
 @code {
+	private NavbarFormulaire compNavbar;
+	private CompFormulaireIdentification compIdentification;
+	private CompFormulaireAdresse compAdresse;
+	private CompFormulaireContact compContact;
+	private CompFormulaireProduit compProduit;
+	private CompFormulaireRBQ compRBQ;
+	private CompFormulaireBrochure compBrochure;
+
+
+
 	private int selectedPageIndex = 0;
 
-	public int _checkpoint = 5; // Remettre à 0 pour le release, permet de ce deplacer entre pages pour tester
+	public int _checkpoint = 0;
+
+	public bool _sharedData = false;
+
+	public int _FetchedComp = 1;
 
 	private void SetFormCheckpoint(int pageIndex)
 	{
 		if(pageIndex > _checkpoint)
 		{
 			_checkpoint = pageIndex;
+			compNavbar.Checkpoint = pageIndex;
 		}
 	}
 
 	private void HandlePageSelected(int pageIndex)
-	{
+	{	
 		if (pageIndex <= _checkpoint)
-		{
+		{		
 			selectedPageIndex = pageIndex;
 		}
 	}
 
+	private void HandlePageSelectedNavbar(int pageIndex)
+	{
+		if(pageIndex < selectedPageIndex && selectedPageIndex == _checkpoint)
+		{
+			selectedPageIndex = pageIndex;
+		}
+		else
+		{
+			switch (selectedPageIndex)
+			{
+				case 0:
+					compIdentification.HandleSubmitReturn(pageIndex);
+					break;
+				case 1:
+					compAdresse.HandleSubmitReturn(pageIndex);					
+					break;
+				case 2:
+					compContact.HandleSubmitReturn(pageIndex);					
+					break;
+				case 3:
+					compProduit.HandleSubmitReturn(pageIndex);					
+					break;
+				case 4:
+					compRBQ.HandleSubmitReturn(pageIndex);					
+					break;
+			}
+		}
+		
+		
+	}
+
+	private void HandleSharedData(bool value)
+	{
+		compIdentification.LoadSharedData();
+		compAdresse.LoadSharedData();
+		compRBQ.LoadSharedData();
+	}
+
+	//Mettre les compossants qui fetch dans la BD en ordre de loading
+	private void NextBDFetch()
+	{
+		_FetchedComp++;
+
+		switch (_FetchedComp)
+		{
+			case 2 :
+				compProduit.FetchDataDB();
+				break;
+			case 3:
+				compRBQ.FetchDataDB();
+				break;
+		}
+
+		Console.WriteLine("In FORMULAIRE");
+	}
 }

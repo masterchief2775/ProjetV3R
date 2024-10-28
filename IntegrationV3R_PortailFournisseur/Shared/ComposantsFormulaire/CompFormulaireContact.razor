@@ -1,5 +1,6 @@
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
+@using IntegrationV3R_PortailFournisseur.Data.Models;﻿
 
 @inject IJSRuntime JSRuntime
 
@@ -10,9 +11,9 @@
             <div class="text-danger">@errorMessage</div>
         }
 
-        @for (int i = 0; i < contacts.Count; i++)
+        @for (int i = 0; i < SingletonForm.ContactsInput.Count; i++)
         {
-            var contact = contacts[i];
+            Contact contact = SingletonForm.ContactsInput[i];
             <div class="contact-entry mb-3 row">
                 <div class="col-6 mb-3">
                     <label for="prenomInput" class="form-label">Prénom</label>
@@ -52,12 +53,14 @@
 
                 <div class="col-6 mb-3">
                     <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone</label>
-                    <input type="tel" class="form-control" @bind="contact.NumeroTelephone" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
+                    <input type="tel" class="form-control" value="@contact.NumeroTelephone" placeholder="Ex: 123-456-7890"
+                       @oninput="e => FormatTelephoneNumber(e, contact)" maxlength="12" required>
                     @if (!string.IsNullOrEmpty(contact.NumeroTelephoneError))
                     {
                         <div class="text-danger">@contact.NumeroTelephoneError</div>
                     }
                 </div>
+
 
                 <div class="col-6 mb-3">
                     <label for="typeTelephoneInput" class="form-label">Type de téléphone</label>
@@ -104,28 +107,29 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
-    private List<Contact> contacts = new List<Contact>();
+    //private List<Contact> contacts = new List<Contact>();
     private string errorMessage = string.Empty;
 
     protected override void OnInitialized()
     {
         // Initialize with one contact
-        contacts.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new Contact());
     }
 
     private void AddContact()
     {
-        contacts.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new Contact());
         errorMessage = string.Empty; // Clear error message when a contact is added
     }
 
     private void RemoveContact(Contact contact)
     {
         // Only allow removal if more than one contact exists
-        if (contacts.Count > 1)
+        if (SingletonForm.ContactsInput.Count > 1)
         {
-            contacts.Remove(contact);
+            SingletonForm.ContactsInput.Remove(contact);
             errorMessage = string.Empty; // Clear error message when a contact is removed
         }
     }
@@ -133,50 +137,29 @@
     private void HandleSubmit()
     {
         // Reset errors
-        errorMessage = string.Empty;
+        ErrorReset();
         var isValid = true;
 
         // Validate all contact fields
-        foreach (var contact in contacts)
+        foreach (var contact in SingletonForm.ContactsInput)
         {
-            contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
-            contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
-            contact.RoleError = string.IsNullOrWhiteSpace(contact.Role) ? "Le rôle est requis." : string.Empty;
-            contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
-            contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis." : string.Empty;
-            contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
-
-            // Validate Poste
-            if (string.IsNullOrWhiteSpace(contact.Poste))
-            {
-                contact.PosteError = "Le poste est requis.";
-                isValid = false;
-            }
-            else if (!Regex.IsMatch(contact.Poste, @"^\d{1,6}$"))
-            {
-                contact.PosteError = "Le poste doit être numérique et contenir au maximum 6 chiffres.";
-                isValid = false;
-            }
-            else
-            {
-                contact.PosteError = string.Empty; // Clear error if valid
-            }
-
-            // If any errors exist, the form is invalid
-            if (!string.IsNullOrEmpty(contact.PrenomError) || !string.IsNullOrEmpty(contact.NomError) ||
-                !string.IsNullOrEmpty(contact.RoleError) || !string.IsNullOrEmpty(contact.EmailError) ||
-                !string.IsNullOrEmpty(contact.NumeroTelephoneError) || !string.IsNullOrEmpty(contact.TypeTelephoneError) ||
-                !string.IsNullOrEmpty(contact.PosteError))
-            {
-                isValid = false;
-            }
+            ValidateInputs(contact);
         }
+
+        // Check if any contact has errors
+        isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+                                      string.IsNullOrEmpty(c.NomError) &&
+                                      string.IsNullOrEmpty(c.RoleError) &&
+                                      string.IsNullOrEmpty(c.EmailError) &&
+                                      string.IsNullOrEmpty(c.NumeroTelephoneError) &&
+                                      string.IsNullOrEmpty(c.TypeTelephoneError) &&
+                                      string.IsNullOrEmpty(c.PosteError));
 
         if (isValid)
         {
             // Log contact data
-            var contactData = ExportContactData();
-            LogToInspector(contactData);
+            var contactData = ExportFormData();
+            LogToConsole(contactData);
 
             // If all checks pass, navigate to the next page
             Checkpoint.InvokeAsync(3);
@@ -184,9 +167,110 @@
         }
     }
 
-    private string[][] ExportContactData()
+    public void HandleSubmitReturn(int pageID)
     {
-        return contacts.Select(c => new string[]
+        // Reset errors
+        ErrorReset();
+        var isValid = true;
+
+        // Validate all contact fields
+        foreach (var contact in SingletonForm.ContactsInput)
+        {
+            ValidateInputs(contact);
+        }
+
+        // Check if any contact has errors
+        isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
+                                      string.IsNullOrEmpty(c.NomError) &&
+                                      string.IsNullOrEmpty(c.RoleError) &&
+                                      string.IsNullOrEmpty(c.EmailError) &&
+                                      string.IsNullOrEmpty(c.NumeroTelephoneError) &&
+                                      string.IsNullOrEmpty(c.TypeTelephoneError) &&
+                                      string.IsNullOrEmpty(c.PosteError));
+
+        if (isValid)
+        {
+            // Log contact data
+            var contactData = ExportFormData();
+            LogToConsole(contactData);
+
+            OnPageSelected.InvokeAsync(pageID);
+        }
+    }
+    
+    private void FormatTelephoneNumber(ChangeEventArgs e, Contact contact)
+    {
+        var input = e.Value?.ToString() ?? string.Empty;
+
+        // Remove any non-digit characters
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        // Limit to a maximum of 10 digits
+        if (input.Length > 10)
+        {
+            input = input.Substring(0, 10);
+        }
+
+        // Format as XXX-XXX-XXXX
+        if (input.Length >= 6)
+        {
+            input = $"{input.Substring(0, 3)}-{input.Substring(3, 3)}-{input.Substring(6)}";
+        }
+        else if (input.Length >= 3)
+        {
+            input = $"{input.Substring(0, 3)}-{input.Substring(3)}";
+        }
+
+        // Update the contact's NumeroTelephone directly
+        contact.NumeroTelephone = input;
+    }
+
+
+    private void ValidateInputs(Contact contact)
+    {
+        contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
+        contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
+        contact.RoleError = string.IsNullOrWhiteSpace(contact.Role) ? "Le rôle est requis." : string.Empty;
+        contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
+
+        // Updated phone number validation
+        contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis (format: XXX-XXX-XXXX)." : string.Empty;
+
+        contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
+
+        // Validate Poste
+        if (string.IsNullOrWhiteSpace(contact.Poste))
+        {
+            contact.PosteError = "Le poste est requis.";
+        }
+        else if (!Regex.IsMatch(contact.Poste, @"^\d{1,6}$"))
+        {
+            contact.PosteError = "Le poste doit être numérique et contenir au maximum 6 chiffres.";
+        }
+        else
+        {
+            contact.PosteError = string.Empty; // Clear error if valid
+        }
+    }
+
+
+    private void ErrorReset()
+    {
+        foreach (var contact in SingletonForm.ContactsInput)
+        {
+            contact.PrenomError = string.Empty;
+            contact.NomError = string.Empty;
+            contact.RoleError = string.Empty;
+            contact.EmailError = string.Empty;
+            contact.NumeroTelephoneError = string.Empty;
+            contact.TypeTelephoneError = string.Empty;
+            contact.PosteError = string.Empty;
+        }
+    }
+
+    private string[][] ExportFormData()
+    {
+        return SingletonForm.ContactsInput.Select(c => new string[]
         {
             c.Prenom,
             c.Nom,
@@ -198,40 +282,15 @@
         }).ToArray();
     }
 
-    private async void LogToInspector(string[][] contactData)
+    private void LogToConsole(string[][] contactData)
     {
         foreach (var contact in contactData)
         {
-            await JSRuntime.InvokeVoidAsync("console.log", $"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
+            Console.WriteLine($"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
         }
     }
 
-    private void FormatTelephoneNumber(ChangeEventArgs e)
-    {
-        var input = e.Value.ToString();
-
-        // Remove any non-digit characters
-        input = new string(input.Where(char.IsDigit).ToArray());
-
-        // Limit to a maximum of 10 digits
-        if (input.Length > 10)
-        {
-            input = input.Substring(0, 10);
-        }
-
-        // Insert dashes at the correct positions
-        if (input.Length > 3)
-        {
-            input = input.Insert(3, "-");
-        }
-        if (input.Length > 7)
-        {
-            input = input.Insert(7, "-");
-        }
-
-        // Set the formatted value back
-        contacts.Last().NumeroTelephone = input; // Update the last contact's number
-    }
+    /*
     public class Contact
     {
         public string Prenom { get; set; } = string.Empty;
@@ -242,7 +301,7 @@
         public string TypeTelephone { get; set; } = string.Empty;
         public string Poste { get; set; } = string.Empty;
 
-        // Validation errors
+        // Error messages
         public string PrenomError { get; set; } = string.Empty;
         public string NomError { get; set; } = string.Empty;
         public string RoleError { get; set; } = string.Empty;
@@ -250,5 +309,5 @@
         public string NumeroTelephoneError { get; set; } = string.Empty;
         public string TypeTelephoneError { get; set; } = string.Empty;
         public string PosteError { get; set; } = string.Empty;
-    }
+    }*/
 }

@@ -1,4 +1,5 @@
-﻿@using System.Text.RegularExpressions
+@using IntegrationV3R_PortailFournisseur.Data.Services;
+@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
@@ -12,7 +13,7 @@
         <div class="row mb-3">
             <div class="mb-3 col-6">
                 <label for="numCiviqueInput" class="form-label">Numéro Civique</label>
-                <input type="text" class="form-control" id="numCiviqueInput" @bind="numCiviqueInput" required>
+                <input type="text" class="form-control" id="numCiviqueInput" @bind="SingletonForm.NumCiviqueInput" required>
                 @if (!string.IsNullOrEmpty(numCiviqueError))
                 {
                     <div class="text-danger">@numCiviqueError</div>
@@ -21,7 +22,7 @@
 
             <div class="mb-3 col-6">
                 <label for="bureauInput" class="form-label">Numéro de Bureau (optionnel)</label>
-                <input type="text" class="form-control" id="bureauInput" @bind="bureauInput" maxlength="8">
+                <input type="text" class="form-control" id="bureauInput" @bind="SingletonForm.BureauInput" maxlength="8">
                 @if (!string.IsNullOrEmpty(bureauError))
                 {
                     <div class="text-danger">@bureauError</div>
@@ -30,7 +31,7 @@
 
             <div class="mb-3 col-6">
                 <label for="rueInput" class="form-label">Nom de rue</label>
-                <input type="text" class="form-control" id="rueInput" @bind="rueInput" required>
+                <input type="text" class="form-control" id="rueInput" @bind="SingletonForm.RueInput" required>
                 @if (!string.IsNullOrEmpty(rueError))
                 {
                     <div class="text-danger">@rueError</div>
@@ -39,7 +40,7 @@
 
             <div class="mb-3 col-6">
                 <label for="villeInput" class="form-label">Nom Ville</label>
-                <input type="text" class="form-control" id="villeInput" @bind="villeInput" required>
+                <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.VilleInput" required>
                 @if (!string.IsNullOrEmpty(villeError))
                 {
                     <div class="text-danger">@villeError</div>
@@ -48,7 +49,7 @@
 
             <div class="mb-3 col-6">
                 <label for="provinceInput" class="form-label">Province</label>
-                <input type="text" class="form-control" id="provinceInput" @bind="provinceInput" required>
+                <input type="text" class="form-control" id="provinceInput" @bind="SingletonForm.ProvinceInput" required>
                 @if (!string.IsNullOrEmpty(provinceError))
                 {
                     <div class="text-danger">@provinceError</div>
@@ -57,7 +58,7 @@
 
             <div class="mb-3 col-6">
                 <label for="codePostalInput" class="form-label">Code postal</label>
-                <input type="text" class="form-control" id="codePostalInput" @bind="codePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7" required>
+                <input type="text" class="form-control" id="codePostalInput" @bind="SingletonForm.CodePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7" required>
                 @if (!string.IsNullOrEmpty(codePostalError))
                 {
                     <div class="text-danger">@codePostalError</div>
@@ -69,7 +70,7 @@
         <h5>Informations supplémentaires</h5>
         <div class="mb-3">
             <label for="regionInput" class="form-label">Région administrative</label>
-            <select class="form-select" id="regionInput" @bind="regionInput" required>
+            <select class="form-select" id="regionInput" @bind="SingletonForm.RegionInput" required>
                 <option value="">Sélectionner une région</option>
                 @foreach (var region in regions)
                 {
@@ -82,10 +83,9 @@
             }
         </div>
 
-
         <div class="mb-3">
             <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
-            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="numeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
+            <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="SingletonForm.NumeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
             @if (!string.IsNullOrEmpty(numeroTelephoneError))
             {
                 <div class="text-danger">@numeroTelephoneError</div>
@@ -94,7 +94,7 @@
 
         <div class="mb-3">
             <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
-            <input type="url" class="form-control" id="siteWebInput" @bind="siteWebInput" required>
+            <input type="url" class="form-control" id="siteWebInput" @bind="SingletonForm.SiteWebInput">
             @if (!string.IsNullOrEmpty(siteWebError))
             {
                 <div class="text-danger">@siteWebError</div>
@@ -106,22 +106,21 @@
 </div>
 
 @code {
+    [Inject] private SharedDataService SharedData { get; set; }
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
-    private string numCiviqueInput = string.Empty;
-    private string rueInput = string.Empty;
-    private string bureauInput = string.Empty;
-    private string provinceInput = string.Empty;
-    private string villeInput = string.Empty;
-    private string codePostalInput = string.Empty;
-    private string numeroTelephoneInput = string.Empty;
-    private string siteWebInput = string.Empty;
-    private string regionInput = string.Empty; // Added declaration for regionInput
+    [Parameter]
+    public EventCallback<bool> BDFetched { get; set; }
 
+    private bool[] _selectionRegionAdministrative = new bool[17];
+
+    
     private string numCiviqueError = string.Empty;
     private string rueError = string.Empty;
     private string bureauError = string.Empty;
@@ -130,14 +129,11 @@
     private string codePostalError = string.Empty;
     private string numeroTelephoneError = string.Empty;
     private string siteWebError = string.Empty;
-    private string regionError = string.Empty; // Added declaration for regionError
-
-
+    private string regionError = string.Empty;
 
     private List<Regionadministrative> regions = new List<Regionadministrative>();
 
-
-    protected override async Task OnInitializedAsync()
+    public async Task FetchDataDB()
     {
         try
         {
@@ -148,13 +144,65 @@
         {
             regionError = "Erreur lors de la récupération des régions.";
             Console.WriteLine(ex.Message);
-        }
+        }        
+        BDFetched.InvokeAsync(true);
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        FetchDataDB();
+    }
+
+    public void LoadSharedData()
+    {       
+        SingletonForm.NumCiviqueInput = SharedData.NumCivique;
+        SingletonForm.RueInput = SharedData.NomRue;
+        SingletonForm.VilleInput = SharedData.NomVille;
+        SingletonForm.ProvinceInput = SharedData.Province;
+        SingletonForm.CodePostalInput = SharedData.CodePostal;
+        SingletonForm.NumeroTelephoneInput = SharedData.NumTelephone;
+        SingletonForm.RegionInput = SharedData.CodeRegionAdministrative;
+
+        FormatTelephoneNumber(SingletonForm.NumeroTelephoneInput);
+        StateHasChanged();        
+        //BDFetched.InvokeAsync();
+    }
 
     private void HandleSubmit()
     {
         // Reset errors
+        ResetErrors();
+
+        // Basic validation checks
+        var isValid = ValidateInputs();
+
+        // If valid, log the data and navigate
+        if (isValid)
+        {
+            LogToConsole();
+            Checkpoint.InvokeAsync(2);
+            OnPageSelected.InvokeAsync(2);
+        }
+    }
+
+    public void HandleSubmitReturn(int pageID)
+    {
+        // Reset errors
+        ResetErrors();
+
+        // Basic validation checks
+        var isValid = ValidateInputs();
+
+        // If valid, export and log data to console
+        if (isValid)
+        {            
+            LogToConsole();
+            OnPageSelected.InvokeAsync(pageID);
+        }
+    }
+
+    private void ResetErrors()
+    {
         numCiviqueError = string.Empty;
         rueError = string.Empty;
         bureauError = string.Empty;
@@ -163,109 +211,80 @@
         codePostalError = string.Empty;
         numeroTelephoneError = string.Empty;
         siteWebError = string.Empty;
-        regionError = string.Empty; // Reset region error
+        regionError = string.Empty;
+    }
 
-        // Basic validation checks
+    private bool ValidateInputs()
+    {
         var isValid = true;
 
-        if (string.IsNullOrWhiteSpace(numCiviqueInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.NumCiviqueInput))
         {
             numCiviqueError = "Le numéro civique est requis";
             isValid = false;
         }
-        else
+        else if (!SingletonForm.NumCiviqueInput.All(char.IsDigit))
         {
-            for (int i = 0; i < numCiviqueInput.Length; i++)
-            {
-                if (!Char.IsDigit(numCiviqueInput[i]))
-                {
-                    numCiviqueError = "Le numéro civique doit être numérique (Si le numéro contient un suffixe, veuillez rentrer le suffixe dans la section Bureau)";
-                    isValid = false;
-                }
-            }
+            numCiviqueError = "Le numéro civique doit être numérique.";
+            isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(rueInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.RueInput))
         {
             rueError = "Le nom de rue est requis";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(villeInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.VilleInput))
         {
             villeError = "Le nom de la ville est requis";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(provinceInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.ProvinceInput))
         {
             provinceError = "Le nom de la province est requis";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(codePostalInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.CodePostalInput))
         {
-            codePostalError = "Le code postal est requis et doit être au format valide.";
+            codePostalError = "Le code postal est requis.";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(numeroTelephoneInput))
+        // Validate phone number format
+        if (string.IsNullOrWhiteSpace(SingletonForm.NumeroTelephoneInput))
         {
-            numeroTelephoneError = "Le numéro de téléphone est requis et doit être au format valide.";
+            numeroTelephoneError = "Le numéro de téléphone est requis.";
+            isValid = false;
+        }
+        else if (!Regex.IsMatch(SingletonForm.NumeroTelephoneInput, @"^\d{3}-\d{3}-\d{4}$"))
+        {
+            numeroTelephoneError = "Le numéro de téléphone doit être au format XXX-XXX-XXXX.";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(siteWebInput) || !Uri.IsWellFormedUriString(siteWebInput, UriKind.Absolute))
+        if (string.IsNullOrWhiteSpace(SingletonForm.RegionInput))
         {
-            siteWebError = "Le site web est requis et doit être une URL valide.";
+            regionError = "La région est requise.";
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(regionInput))
-        {
-            regionError = "La région administrative est requise."; // Set error for region
-            isValid = false;
-        }
-
-        if (isValid)
-        {
-            // Export and log data
-            var formData = ExportFormData();
-            LogToInspector(formData);
-
-            // Navigate to the next page
-            Checkpoint.InvokeAsync(2);
-            OnPageSelected.InvokeAsync(2);
-        }
+        return isValid;
     }
 
-    private string[] ExportFormData()
+    private void LogToConsole()
     {
-        return new string[]
-        {
-            numCiviqueInput,
-            bureauInput,
-            rueInput,
-            villeInput,
-            provinceInput,
-            codePostalInput,
-            numeroTelephoneInput,
-            siteWebInput,
-            regionInput // Include region in the exported data
-        };
-    }
-
-    private async void LogToInspector(string[] formData)
-    {
-        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro Civique: {formData[0]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Bureau: {formData[1]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Nom de Rue: {formData[2]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Ville: {formData[3]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Province: {formData[4]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Code Postal: {formData[5]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Numéro de Téléphone: {formData[6]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Site Web: {formData[7]}");
-        await JSRuntime.InvokeVoidAsync("console.log", $"Région Administrative: {formData[8]}"); // Log region
+        Console.WriteLine($"Numéro Civique: {SingletonForm.NumCiviqueInput}");
+        Console.WriteLine($"Bureau: {SingletonForm.BureauInput}");
+        Console.WriteLine($"Rue: {SingletonForm.RueInput}");
+        Console.WriteLine($"Ville: {SingletonForm.VilleInput}");
+        Console.WriteLine($"Province: {SingletonForm.ProvinceInput}");
+        Console.WriteLine($"Code Postal: {SingletonForm.CodePostalInput}");
+        Console.WriteLine($"Région: {SingletonForm.RegionInput}");
+        Console.WriteLine($"Numéro de téléphone: {SingletonForm.NumeroTelephoneInput}");
+        Console.WriteLine($"Site Web: {SingletonForm.SiteWebInput}");
     }
 
     private void FormatTelephoneNumber(ChangeEventArgs e)
@@ -287,24 +306,43 @@
             input = input.Insert(7, "-");
         }
 
-        numeroTelephoneInput = input;
+        SingletonForm.NumeroTelephoneInput = input;
     }
 
-    private void FormatCodePostal(ChangeEventArgs e)
+    private void FormatTelephoneNumber(string e)
     {
-        var input = e.Value.ToString();
-        input = new string(input.Where(char.IsLetterOrDigit).ToArray());
+        var input = e;
+        input = new string(input.Where(char.IsDigit).ToArray());
 
-        if (input.Length > 6)
+        if (input.Length > 10)
         {
-            input = input.Substring(0, 6);
+            input = input.Substring(0, 10);
         }
 
         if (input.Length > 3)
         {
-            input = input.Insert(3, " ");
+            input = input.Insert(3, "-");
+        }
+        if (input.Length > 7)
+        {
+            input = input.Insert(7, "-");
         }
 
-        codePostalInput = input;
+        SingletonForm.NumeroTelephoneInput = input;
     }
+
+    private void FormatCodePostal(ChangeEventArgs e)
+    {
+        // Format the postal code as the user types
+        var value = e.Value.ToString().ToUpper().Replace(" ", "").Replace("-", "");
+        if (value.Length >= 6)
+        {
+            SingletonForm.CodePostalInput = $"{value.Substring(0, 3)} {value.Substring(3, 3)}";
+        }
+        else
+        {
+            SingletonForm.CodePostalInput = value;
+        }
+    }
+    
 }
