@@ -1,4 +1,5 @@
 using IntegrationV3R_PortailFournisseur.Data.Models;
+using IntegrationV3R_PortailFournisseur.Data.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -6,20 +7,29 @@ using Blazored.SessionStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ajouter les services à l'application.
+// Ajouter les services ï¿½ l'application.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredSessionStorage();
 
 
 // Configuration des sessions
-builder.Services.AddHttpContextAccessor(); // Nécessaire pour accéder à HttpContext
+builder.Services.AddHttpContextAccessor(); // Nï¿½cessaire pour accï¿½der ï¿½ HttpContext
 builder.Services.AddSession(); // Ajouter la gestion des sessions
 
-// Configuration de la base de données avec MySQL
+// Configuration de la base de donnï¿½es avec MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 18))));
+
+
+builder.Services.AddSingleton<SharedDataService>();
+
+builder.Services.AddHttpClient<DonneesQuebecService>(client =>
+{
+    client.BaseAddress = new Uri("https://www.donneesquebec.ca/");
+});
+
 
 var app = builder.Build();
 

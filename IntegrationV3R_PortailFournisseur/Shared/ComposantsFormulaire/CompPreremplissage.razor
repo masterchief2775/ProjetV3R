@@ -1,0 +1,212 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Services;
+@inject DonneesQuebecService DonnéesQuébecService
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize" >
+        <div >
+            
+            <form class="form row col-12" @onsubmit="HandleSubmit">
+                
+                <div class="modal-content" >                    
+                    <div class="modal-leftSide" >
+                        
+                        <div>
+                            <span class="close" @onclick="CloseModal">&times;</span>
+                            <h5>
+                            Pré-remplissage
+                            </h5>
+
+                            <p style="">
+                                Vous avez un code RBQ ? Entré le pour qu'on puisse pré-remplir certaines informations !
+                            </p>
+                        </div>
+                        <div></div>
+                        <div>
+                            <div style="width:70%">
+                                <label>Code RBQ</label>
+                                <input type="text" class="form-control mb-2" id="codeRBQ" @bind-value="codeRBQ" @oninput="FormatCodeRBQ" maxlength="12">
+                                @if (!string.IsNullOrEmpty(codeRBQError))
+                                {
+                                    <div class="text-danger">@codeRBQError</div>
+                                }
+
+                            </div>
+                            <button type="submit" style="" class="btn btn-primary">Suivant</button>
+                        </div>
+                        
+
+                        
+                    </div>
+                    
+                    
+
+                    <div style="width:40%; margin:auto;">
+                        <img class="modal-img"  src="https://thumbs.dreamstime.com/z/man-helping-his-colleague-work-computer-office-151327460.jpg" />
+                    </div>
+                    
+
+                </div>
+                
+            </form>
+        </div>
+        
+        
+    </div>
+    
+    
+</div>
+
+@code {
+    [Inject] private SharedDataService SharedData { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnDataFetched { get; set; }
+    //[Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsVisible { get; set; } = true;
+
+    public string codeRBQ = string.Empty;
+
+    public string codeRBQError = string.Empty;
+
+    public void ShowModal()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    public void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    public void HandleSubmit()
+    {
+        codeRBQError = string.Empty;
+
+        var isValid = true;
+
+        if (string.IsNullOrWhiteSpace(codeRBQ) || codeRBQ.Length != 12)
+        {
+            codeRBQError = "Veuillez entrer un code RBQ valide";
+            isValid = false;
+        }        
+
+        if (isValid)
+        {
+            FetchRecord();
+        }
+    }
+
+    public void FormatCodeRBQ(ChangeEventArgs e)
+    {
+        char last = '0';
+        var input = e.Value?.ToString() ?? string.Empty;
+
+        // Remove any character that is not a digit or a dash ('-')
+        //input = new string(input.Where(c => char.IsDigit(c) || c == '-').ToArray());
+
+        // Remove existing dashes to properly reformat
+        input = input.Replace("-", "");
+
+        // Limit to a maximum of 10 digits (excluding dashes)
+        if (input.Length > 10)
+        {
+            input = input.Substring(0, 10);
+        }
+
+        try
+        {
+            last = input[input.Length - 1];
+        }
+        catch{}
+
+        if (!char.IsDigit(last) && last != '-')
+        {
+            input.Remove(input.Length - 1);
+        }
+
+        // Insert dashes at the correct positions
+        if (input.Length > 3)
+        {
+            input = input.Insert(4, "-");
+        }
+        if (input.Length > 8)
+        {
+            input = input.Insert(9, "-");
+        }
+
+        // Set the formatted value back
+        codeRBQ = input;
+    }
+    //Traite l'information de l'adresse
+    public Fiche? record;
+
+    string numLicence;
+    string statutLicence;
+
+    string numCivique;
+    string nomRue;
+    string codePostal;
+    string province;
+    string nomVille;
+
+    protected async Task FetchRecord()
+    {
+        record = await DonnéesQuébecService.GetRecordByLicenceAsync(codeRBQ);
+        try
+        {
+            string test = record.NumeroDeLicence;
+        }
+        catch
+        {
+            FetchError();
+            return;
+        }
+        //Identification
+        SharedData.NEQ = record.NEQ;
+        SharedData.NomEntreprise = record.NomEntreprise;
+        SharedData.Courriel = record.Courriel;
+
+        //Adresse  
+        string[] parts = record.Adresse.Split(' ');
+
+        int numParts = parts.Length;
+
+        SharedData.NumCivique = parts[0];
+        SharedData.CodePostal = parts[parts.Length - 2] + ' ' + parts[parts.Length - 1];
+        SharedData.Province = parts[parts.Length - 4];
+        SharedData.NomVille = parts[parts.Length - 5];
+        numParts -= 5;
+
+        for (int i = 1; i < numParts; i++)
+        {
+            nomRue += parts[i];
+            if (i != numParts)
+                nomRue += ' ';
+        }
+        SharedData.NomRue = nomRue;
+        SharedData.NumTelephone = record.NumTelephone;
+        SharedData.RegionAdministrative = record.RegionAdministrative;
+        SharedData.CodeRegionAdministrative = record. CodeRegionAdministrative;
+
+        //RBQ
+        SharedData.NumLicence = record.NumeroDeLicence;
+        SharedData.StatutLicence = record.StatutLicence;
+        SharedData.TypeLicence = record.TypeLicence;
+        SharedData.CategorieLicence = record.CategorieLicence;
+
+        
+        
+        await OnDataFetched.InvokeAsync(true);
+
+        CloseModal();
+    }    
+
+    private void FetchError()
+    {
+        codeRBQError = "Ce code RBQ n'est pas valide";
+        StateHasChanged();
+    }
+}
