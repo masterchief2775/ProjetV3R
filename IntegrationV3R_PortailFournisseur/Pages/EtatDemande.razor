@@ -14,11 +14,12 @@
     @if (isUserAuthenticated)
     {
         <h3>Suivi de votre demande</h3>
-        <p>Bonjour @fournisseur.FournisseurId </p>
+        <p>Bonjour @fournisseur.NomEntreprise </p>
         @if (fournisseur != null)
         {
             <div class="tracking-status">
                 <p>Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+                <p>Votre compte est actuellement : <strong>@etat</strong></p>
             </div>
         }
         else
@@ -72,8 +73,9 @@
     private Fournisseur fournisseur;
 
     // Statut de la demande
-    private string statut = "En attente"; // Par défaut, il vaut mieux utiliser "En attente"
-    private int fournisseurId = 1; // Exemple de fournisseurId
+    private string statut = "En attente";
+    private string etat = "Désactivé";
+    private int fournisseurId = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,8 +100,17 @@
                 fournisseur = user.Fournisseur;
                 if (fournisseur != null)
                 {
-                    // Récupérer le statut de la demande
+                    // Récupérer le statut de la demande et l'état du compte
                     statut = fournisseur.EtatDemande;
+                    if (fournisseur.EtatCompte == true)
+                    {
+                        etat = "Activé";
+                    }
+                    else
+                    {
+                        etat = "Désactivé";
+                    }
+
                 }
                 else
                 {
