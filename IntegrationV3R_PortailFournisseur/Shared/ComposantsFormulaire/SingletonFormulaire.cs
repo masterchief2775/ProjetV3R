@@ -1,10 +1,104 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
+
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
     public class SingletonFormulaire
     {
+        // Méthode principale pour sauvegarder toutes les données
+        public void SaveToDatabase()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                int fournisseurId = SaveFournisseur(context);
+                SaveAdresse(context, fournisseurId);
+                SaveContacts(context, fournisseurId);
+                SaveProduitsServices(context, fournisseurId);
+                SaveRBQ(context, fournisseurId);
+                context.SaveChanges();
+            }
+        }
+
+        private int SaveFournisseur(ApplicationDbContext context)
+        {
+            var fournisseur = new Fournisseur
+            {
+                NomEntreprise = NomEntrepriseInput,
+                Neq = NeqInput,
+                CourrielEntreprise = EmailInput,
+                DetailsEntreprise = DescriptionProduitsServicesInput,
+                EtatCompte = false,
+            };
+
+            context.Fournisseurs.Add(fournisseur);
+            context.SaveChanges(); // Important pour générer l'ID de fournisseur
+            return fournisseur.FournisseurId;
+        }
+
+        private void SaveAdresse(ApplicationDbContext context, int fournisseurId)
+        {
+            var adresse = new Adress
+            {
+                FournisseurId = fournisseurId,
+                NumeroCivique = NumCiviqueInput,
+                Bureau = BureauInput,
+                Rue = RueInput,
+                Ville = VilleInput,
+                Province = ProvinceInput,
+                CodePostal = CodePostalInput,
+                CodeRegionAdministrative = RegionInput,
+                NumTel = NumeroTelephoneInput,
+            };
+            context.Adresses.Add(adresse);
+        }
+
+        private void SaveContacts(ApplicationDbContext context, int fournisseurId)
+        {
+            foreach (var contactInput in ContactsInput)
+            {
+                var contact = new Contact
+                {
+                    Prenom = contactInput.Prenom,
+                    Nom = contactInput.Nom,
+                    Role = contactInput.Role,
+                    Email = contactInput.Email,
+                    NumeroTelephone = contactInput.NumeroTelephone,
+                    Poste = contactInput.Poste,
+                    TypeTelephone = contactInput.TypeTelephone,
+                };
+                context.Contacts.Add(contact);
+            }
+        }
+
+        private void SaveProduitsServices(ApplicationDbContext context, int fournisseurId)
+        {
+            foreach (var produit in ProduitsServicesSelectionnesInput)
+            {
+                var produitService = new Produitsservice
+                {
+                    FournisseurId = fournisseurId,
+                    ComoditeId = produit.ComoditeId,
+                    Details = produit.ComoditeTitreFr,
+                };
+                context.Produitsservices.Add(produitService);
+            }
+        }
+
+        private void SaveRBQ(ApplicationDbContext context, int fournisseurId)
+        {
+            var rbq = new Rbq
+            {
+                FournisseurId = fournisseurId,
+                NumLicence = RBQNumberInput,
+                StatutLicence = SelectedStatus,
+                Categorie = SelectedCategory
+            };
+            context.Rbqs.Add(rbq);
+        }
+
+
         private static SingletonFormulaire _instance;
         private static readonly object _lock = new object();
 

@@ -109,7 +109,6 @@
         // If valid, log the data and navigate
         if (isValid)
         {
-            LogToConsole();
             Checkpoint.InvokeAsync(1);
             OnPageSelected.InvokeAsync(1);
         }
@@ -126,8 +125,7 @@
 
         // If valid, log the data and navigate
         if (isValid)
-        {            
-            LogToConsole();            
+        {      
             OnPageSelected.InvokeAsync(pageID);
             //Navigation.NavigateTo("/formulaireDemandeAdresse");
         }
@@ -188,15 +186,6 @@
         }
 
         return isValid;
-    }
-
-    private void LogToConsole()
-    {
-        Console.WriteLine($"Nom de l'entreprise: {SingletonForm.NomEntrepriseInput}");
-        Console.WriteLine($"NEQ: {SingletonForm.NeqInput}");
-        Console.WriteLine($"Email: {SingletonForm.EmailInput}");
-        // Be cautious with logging sensitive data like passwords
-        Console.WriteLine($"Mot de passe: {SingletonForm.PasswordInput}");
     }
 
     private bool IsValidEmail(string email)

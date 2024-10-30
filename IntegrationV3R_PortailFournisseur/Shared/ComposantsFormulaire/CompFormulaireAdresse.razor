@@ -179,7 +179,6 @@
         // If valid, log the data and navigate
         if (isValid)
         {
-            LogToConsole();
             Checkpoint.InvokeAsync(2);
             OnPageSelected.InvokeAsync(2);
         }
@@ -196,7 +195,6 @@
         // If valid, export and log data to console
         if (isValid)
         {            
-            LogToConsole();
             OnPageSelected.InvokeAsync(pageID);
         }
     }
@@ -274,18 +272,6 @@
         return isValid;
     }
 
-    private void LogToConsole()
-    {
-        Console.WriteLine($"Numéro Civique: {SingletonForm.NumCiviqueInput}");
-        Console.WriteLine($"Bureau: {SingletonForm.BureauInput}");
-        Console.WriteLine($"Rue: {SingletonForm.RueInput}");
-        Console.WriteLine($"Ville: {SingletonForm.VilleInput}");
-        Console.WriteLine($"Province: {SingletonForm.ProvinceInput}");
-        Console.WriteLine($"Code Postal: {SingletonForm.CodePostalInput}");
-        Console.WriteLine($"Région: {SingletonForm.RegionInput}");
-        Console.WriteLine($"Numéro de téléphone: {SingletonForm.NumeroTelephoneInput}");
-        Console.WriteLine($"Site Web: {SingletonForm.SiteWebInput}");
-    }
 
     private void FormatTelephoneNumber(ChangeEventArgs e)
     {

@@ -159,7 +159,6 @@
         {
             // Log contact data
             var contactData = ExportFormData();
-            LogToConsole(contactData);
 
             // If all checks pass, navigate to the next page
             Checkpoint.InvokeAsync(3);
@@ -192,7 +191,6 @@
         {
             // Log contact data
             var contactData = ExportFormData();
-            LogToConsole(contactData);
 
             OnPageSelected.InvokeAsync(pageID);
         }
@@ -281,33 +279,4 @@
             c.Poste
         }).ToArray();
     }
-
-    private void LogToConsole(string[][] contactData)
-    {
-        foreach (var contact in contactData)
-        {
-            Console.WriteLine($"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
-        }
-    }
-
-    /*
-    public class Contact
-    {
-        public string Prenom { get; set; } = string.Empty;
-        public string Nom { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string NumeroTelephone { get; set; } = string.Empty;
-        public string TypeTelephone { get; set; } = string.Empty;
-        public string Poste { get; set; } = string.Empty;
-
-        // Error messages
-        public string PrenomError { get; set; } = string.Empty;
-        public string NomError { get; set; } = string.Empty;
-        public string RoleError { get; set; } = string.Empty;
-        public string EmailError { get; set; } = string.Empty;
-        public string NumeroTelephoneError { get; set; } = string.Empty;
-        public string TypeTelephoneError { get; set; } = string.Empty;
-        public string PosteError { get; set; } = string.Empty;
-    }*/
 }

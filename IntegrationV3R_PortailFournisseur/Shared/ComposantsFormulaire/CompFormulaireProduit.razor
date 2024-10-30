@@ -118,7 +118,6 @@
         if (isValid)
         {
             var formData = ExportFormData();
-            LogToConsole(formData);
 
             Checkpoint.InvokeAsync(4);
             OnPageSelected.InvokeAsync(4);
@@ -239,12 +238,5 @@
     private void RemoveProduct(UnspscComodite product)
     {
         SingletonForm.ProduitsServicesSelectionnesInput.Remove(product);
-    }
-
-    // Log data to the console using Console.WriteLine
-    private void LogToConsole(string[] formData)
-    {
-        Console.WriteLine($"Description du produit: {formData[0]}");
-        Console.WriteLine($"Produits sélectionnés: {formData[1]}");
     }
 }
