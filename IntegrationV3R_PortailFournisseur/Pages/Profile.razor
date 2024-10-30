@@ -2,56 +2,99 @@
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
 
-@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+@inject ApplicationDbContext dbContext
 @inject NavigationManager Navigation
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 <PageTitle>Profile</PageTitle>
 
 <div class="container-fluid mt-4">
-    <div class=" profile-container">
-            <h5>Identification</h5>
-       <div class="row mb-3">
-            <div class="col-md-2">
-                @neq
-            </div>
-            <div class="col-md-2">
-                @nomEntreprise
-            </div>
-            <div class="col-md-2">
-                @courrielEntreprise
-            </div>
-            <!--J'ai pas trouvé comment appelé l'icon avec bootstrap-->
-            <div class="col-md-2">
-                <a href="/test">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
-                  <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
-                  <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
-                  </svg>
-                </a>
+    <div class="profile-container">
+        <!-- Identification Section -->
+        <h5>Identification</h5>
+        <div class="row mb-3">
+            <div class="col-md-2">@neq</div>
+            <div class="col-md-2">@nomEntreprise</div>
+            <div class="col-md-2">@courrielEntreprise</div>
+            <div class="col-md-auto">
+                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
             </div>
         </div>
+
+        <!-- Adresse Section -->
         <h5>Adresse</h5>
         <div class="row mb-3">
-            <div class="col-md-2">
-                @rue
-            </div>
-            <div class="col-md-2">
-                @numeroCiv
-            </div>
-            <div class="col-md-2">
-                
-            </div>
-            <!--J'ai pas trouvé comment appelé l'icon avec bootstrap-->
-            <div class="col-md-2">
-                <a href="/test">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
-                  <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
-                  <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
-                  </svg>
-                </a>
+            <div class="col-md-2">@numeroCiv</div>
+            <div class="col-md-2">@rue</div>
+            <div class="col-md-2">@ville</div>
+            <div class="col-md-2">@province</div>
+            <div class="col-md-2">@codePostal</div>
+            <div class="col-md-2">@regionAdministrative</div>
+            <div class="col-md-2">@numeroTelephone</div>
+            <div class="col-md-2">@siteWeb</div>
+            <div class="col-md-auto">
+                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
             </div>
         </div>
+
+        <!-- Contacts Section -->
+        <h5>Contacts</h5>
+        @if (contacts != null && contacts.Any())
+        {
+            @foreach (var contact in contacts)
+            {
+                <div class="contact-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Nom:</strong> @contact.NomContact<br>
+                        <strong>Téléphone:</strong> @contact.NumTelContact<br>
+                        <strong>Email:</strong> @contact.CourrielContact<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No contacts available.</div>
+        }
+
+        <!-- Products/Services Section -->
+        <h5>Products/Services</h5>
+        @if (products != null && products.Any())
+        {
+            @foreach (var product in products)
+            {
+                <div class="product-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Comodite: </strong> @product.ComoditeId<br>
+                        <strong>Details:</strong> @product.Details<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No products/services available.</div>
+        }
+
+        <!-- RBQ Section -->
+        <h5>RBQ Details</h5>
+        @if (rbqDetails != null && rbqDetails.Any())
+        {
+            @foreach (var rbq in rbqDetails)
+            {
+                <div class="rbq-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Numéro RBQ:</strong> @rbq.NumLicence<br>
+                        <strong>Nom Sous-catégorie:</strong> @rbq.SousCategorie<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No RBQ details available.</div>
+        }
+
     </div>
 </div>
 
@@ -60,6 +103,7 @@
     private Fournisseur fournisseur;
     public Adress Adresse { get; set; }
 
+    [Parameter] public EventCallback<bool> BDFetched { get; set; }
 
     private string neq = "";
     private string nomEntreprise = "";
@@ -67,51 +111,96 @@
 
     private string numeroCiv = "";
     private string rue = "";
+    private string ville = "";
+    private string province = "";
+    private string codePostal = "";
+    private string regionAdministrative = "";
+    private string numeroTelephone = "";
+    private string siteWeb = "";
+
+    private List<Contact> contacts = new List<Contact>();
+    private List<Produitsservice> products = new List<Produitsservice>();
+    private List<Rbq> rbqDetails = new List<Rbq>(); // RBQ list for display
 
     protected override async Task OnInitializedAsync()
     {
-        // Lire l'ID utilisateur depuis le stockage sécurisé
+        await FetchDataDB();
+
         var userId = await sessionStorage.GetItemAsync<int?>("UserId");
 
         if (userId == null)
         {
-            // L'utilisateur n'est pas connecté, redirection vers la page de connexion
             Navigation.NavigateTo("/connexion");
         }
         else
         {
             isUserAuthenticated = true;
-
-            // Récupérer les données de l'utilisateur, incluant Fournisseur et Adresses
             var user = await dbContext.Users
                 .Include(u => u.Fournisseur)
-                    .ThenInclude(f => f.Adresses) // Assurez-vous que la relation existe dans le modèle
+                    .ThenInclude(f => f.Adresses)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Contacts)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Produitsservices)
+                .Include(u => u.Fournisseur) // Include RBQ entities
+                    .ThenInclude(f => f.Rbqs) // Assuming this is the navigation property
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
             {
                 fournisseur = user.Fournisseur;
-
                 if (fournisseur != null)
                 {
-                    neq = fournisseur.Neq.ToString();
-                    nomEntreprise = fournisseur.NomEntreprise;
-                    courrielEntreprise = fournisseur.CourrielEntreprise;
+                    // Set identification fields
+                    neq = fournisseur.Neq; // Assuming Fournisseur has a property for NEQ
+                    nomEntreprise = fournisseur.NomEntreprise; // Assuming Fournisseur has a property for the company name
+                    courrielEntreprise = fournisseur.CourrielEntreprise; // Assuming Fournisseur has a property for the email
 
-                    if (fournisseur.Adresses != null && fournisseur.Adresses.Any())
+                    // Set address fields
+                    var address = fournisseur.Adresses.FirstOrDefault(); // Assuming there is at least one address
+                    if (address != null)
                     {
-                        // Select the first address in the collection
-                        Adresse = fournisseur.Adresses.First();
-                        rue = Adresse.Rue;
-                        numeroCiv = Adresse.NumeroCivique;
+                        numeroCiv = address.NumeroCivique; // Ensure you have these properties in your address model
+                        rue = address.Rue;
+                        ville = address.Ville;
+                        province = address.Province;
+                        codePostal = address.CodePostal;
+                        regionAdministrative = GetRegionName(address.CodeRegionAdministrative); // Assuming RegionCode maps to your region list
+                        numeroTelephone = address.NumTel;
                     }
-                    else
-                    {
-                        rue = "Adresse non disponible";
-                        numeroCiv = "Adresse non disponible";
-                    }
+
+                    // Fetch products/services
+                    products = fournisseur.Produitsservices.ToList(); // Assuming this is correctly populated
+
+                    // Fetch RBQ details
+                    rbqDetails = fournisseur.Rbqs.ToList(); // Adjust as per your model
+
+                    // Fetch contacts
+                    contacts = fournisseur.Contacts.ToList(); // Fetching contacts from fournisseur
                 }
             }
         }
+    }
+
+    private List<Regionadministrative> regions = new List<Regionadministrative>();
+
+    private string GetRegionName(string code)
+    {
+        var region = regions.FirstOrDefault(r => r.CodeRegionAdministrative == code);
+        return region != null ? region.NomRegionAmdin : "Région non disponible";
+    }
+
+    public async Task FetchDataDB()
+    {
+        try
+        {
+            regions = await dbContext.Regionadministratives.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            regionAdministrative = "Erreur lors de la récupération des régions.";
+            Console.WriteLine(ex.Message);
+        }
+        BDFetched.InvokeAsync(true);
     }
 }
