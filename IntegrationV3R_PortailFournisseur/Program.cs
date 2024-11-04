@@ -15,11 +15,6 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddSingleton<SingletonFormulaire>();
 
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
-
-
 
 // Configuration des sessions
 builder.Services.AddHttpContextAccessor(); // N�cessaire pour acc�der � HttpContext

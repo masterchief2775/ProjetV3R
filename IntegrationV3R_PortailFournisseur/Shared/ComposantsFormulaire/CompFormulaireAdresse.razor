@@ -6,6 +6,8 @@
 
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 @inject IJSRuntime JSRuntime
+@inject SingletonFormulaire SingletonForm
+
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
@@ -107,7 +109,6 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
@@ -150,7 +151,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        FetchDataDB();
+        await FetchDataDB();
     }
 
     public void LoadSharedData()
