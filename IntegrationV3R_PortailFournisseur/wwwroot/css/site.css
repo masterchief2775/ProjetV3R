@@ -146,7 +146,7 @@ a, .btn-link {
 
 /* width */
 ::-webkit-scrollbar {
-    width: 20px;
+    width: 10px;
 }
 
 /* Track */
@@ -157,14 +157,14 @@ a, .btn-link {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-    background: red;
+    background: grey;
     border-radius: 10px;
 }
 
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #b30000;
-    }
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: black;
+}
 
 
 /* RESPONSIVE */
