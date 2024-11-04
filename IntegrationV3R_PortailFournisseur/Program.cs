@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Blazored.SessionStorage;
+using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazoredSessionStorage();
+builder.Services.AddSingleton<SingletonFormulaire>();
+
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+
 
 
 // Configuration des sessions

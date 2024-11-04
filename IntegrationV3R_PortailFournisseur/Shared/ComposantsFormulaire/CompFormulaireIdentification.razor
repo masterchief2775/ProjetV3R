@@ -2,6 +2,8 @@
 @using IntegrationV3R_PortailFournisseur.Data.Services;
 @using Microsoft.JSInterop
 
+@inject SingletonFormulaire SingletonForm
+
 <div class="container-fluid mt-4">
 
     <form class="form" @onsubmit="HandleSubmit">
@@ -68,7 +70,6 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
 
     private string nomEntreprise;

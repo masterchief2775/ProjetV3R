@@ -5,7 +5,6 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
     public class SingletonFormulaire
     {
-        private static SingletonFormulaire _instance;
         private static readonly object _lock = new object();
 
         // Properties to hold form data for identification
@@ -27,7 +26,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string SiteWebInput { get; set; } = string.Empty;
 
         //Properties to hold data from contacts
-        public List<Contact> ContactsInput = new List<Contact>();
+        public List<ContactFormulaire> ContactsInput = new List<ContactFormulaire>();
+
 
 
         // Properties to holld data from produits/services 
@@ -45,26 +45,6 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public List<Souscategorieafter2008> SelectedSubCategories = new List<Souscategorieafter2008>();
 
-
-        private SingletonFormulaire() { }
-
-        public static SingletonFormulaire Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new SingletonFormulaire();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
 
         public void LogDataToConsole()
         {
@@ -91,10 +71,10 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Site Web: {SiteWebInput}");
 
             // Log Contacts
-            Console.WriteLine("\n***LISTE DES CONTACTS***");
+            /*Console.WriteLine("\n***LISTE DES CONTACTS***");
             foreach (Contact contact in ContactsInput)
             {
-                Console.WriteLine($"\n\tNom complet: {contact.Prenom} {contact.Nom} \n\tFonction: {contact.Role} \n\tEmail: {contact.Email} \n\t" +
+                Console.WriteLine($"\n\tNom complet: {ContactFormulaire.Prenom} {contact.Nom} \n\tFonction: {contact.Role} \n\tEmail: {contact.Email} \n\t" +
                     $"Telephone: {contact.NumeroTelephone} Poste {contact.Poste} - {contact.TypeTelephone}");
             }
             // Log Produits
@@ -104,7 +84,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             foreach (UnspscComodite produit in ProduitsServicesSelectionnesInput)
             {
                 Console.WriteLine($"\t{produit.ComoditeNombre} - {produit.ComoditeTitreFr}");
-            }
+            }*/
 
             // Log RBQ
             Console.WriteLine("\n***RBQ***");
@@ -119,9 +99,79 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             Console.WriteLine("----------------------------------------------------------------------------------------------");
         }
+
+
+        public async Task SaveDataAsync(ApplicationDbContext dbContext)
+        {
+            // Création de l'entité Fournisseur
+            var fournisseur = new Fournisseur
+            {
+                NomEntreprise = this.NomEntrepriseInput,
+                Neq = this.NeqInput,
+                CourrielEntreprise = this.EmailInput,
+                EtatDemande = "En attente",
+                DateInscription = DateTime.Now
+            };
+            dbContext.Fournisseurs.Add(fournisseur);
+            await dbContext.SaveChangesAsync();
+
+            // Création de l'adresse
+            var adresse = new Adress
+            {
+                NumeroCivique = this.NumCiviqueInput,
+                Bureau = this.BureauInput,
+                Rue = this.RueInput,
+                Ville = this.VilleInput,
+                Province = this.ProvinceInput,
+                CodePostal = this.CodePostalInput,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Adresses.Add(adresse);
+
+
+            // Ajouter les contacts
+            foreach (var contactInput in this.ContactsInput)
+            {
+                var contact = new Contact
+                {
+                    PrenomContact = contactInput.Prenom,
+                    NomContact = contactInput.Nom,
+                    FonctionContact = contactInput.Role,
+                    CourrielContact = contactInput.Email,
+                    NumTelContact = contactInput.NumeroTelephone,
+                    TypeTel = contactInput.TypeTelephone,
+                    PosteTelContact = contactInput.Poste,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Contacts.Add(contact);
+            }
+
+                // Ajouter les produits/services
+                foreach (var produit in this.ProduitsServicesSelectionnesInput)
+            {
+                var produitService = new Produitsservice
+                {
+                    Details = this.DescriptionProduitsServicesInput,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Produitsservices.Add(produitService);
+            }
+
+            // Ajouter les informations RBQ
+            var rbq = new Rbq
+            {
+                NumLicence = this.RBQNumberInput,
+                StatutLicence = this.SelectedStatus,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Rbqs.Add(rbq);
+
+            // Sauvegarder les modifications
+            await dbContext.SaveChangesAsync();
+        }
     }
 
-    public class Contact
+    public class ContactFormulaire
     {
         public string Prenom { get; set; } = string.Empty;
         public string Nom { get; set; } = string.Empty;
@@ -140,4 +190,5 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string TypeTelephoneError { get; set; } = string.Empty;
         public string PosteError { get; set; } = string.Empty;
     }
+
 }

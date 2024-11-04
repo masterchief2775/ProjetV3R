@@ -1,9 +1,15 @@
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
 @using System.IO
+@using IntegrationV3R_PortailFournisseur.Data.Models
+@inject IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire.SingletonFormulaire SingletonForm
+
 
 @inject IJSRuntime JSRuntime
 @inject IWebHostEnvironment Environment
+@inject SingletonFormulaire SingletonForm
+@inject ApplicationDbContext DbContext
+
 
 <div class="container-fluid mt-4">
     <h3>Insérez vos fichiers</h3>
@@ -58,7 +64,11 @@
     [Parameter]
     public string NomEntrepriseInput { get; set; }
 
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
 
     private IBrowserFile brochureFile;
     private IBrowserFile carteVisiteFile;
@@ -121,6 +131,9 @@
             fileError = null;
             uploadedFiles.Add(brochureFile);
             uploadedFiles.Add(carteVisiteFile);
+
+            await SingletonForm.SaveDataAsync(DbContext);
+
         }
         else
         {
@@ -128,9 +141,5 @@
         }
     }
 
-    [Parameter]
-    public EventCallback<int> OnPageSelected { get; set; }
 
-    [Parameter]
-    public EventCallback<int> Checkpoint { get; set; }
 }

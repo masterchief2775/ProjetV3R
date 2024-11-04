@@ -1,8 +1,10 @@
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
-@using IntegrationV3R_PortailFournisseur.Data.Models;﻿
+@using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;﻿
 
 @inject IJSRuntime JSRuntime
+@inject SingletonFormulaire SingletonForm
+
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
@@ -13,7 +15,7 @@
 
         @for (int i = 0; i < SingletonForm.ContactsInput.Count; i++)
         {
-            Contact contact = SingletonForm.ContactsInput[i];
+            ContactFormulaire contact = SingletonForm.ContactsInput[i];
             <div class="contact-entry mb-3 row">
                 <div class="col-6 mb-3">
                     <label for="prenomInput" class="form-label">Prénom</label>
@@ -61,7 +63,6 @@
                     }
                 </div>
 
-
                 <div class="col-6 mb-3">
                     <label for="typeTelephoneInput" class="form-label">Type de téléphone</label>
                     <select class="form-control" @bind="contact.TypeTelephone" required>
@@ -85,12 +86,12 @@
                     }
                 </div>
 
-                @if (i > 0) // Only show the button for contacts after the first one
+                @if (i > 0)
                 {
                     <button type="button" class="btn btn-danger mt-2" @onclick="() => RemoveContact(contact)">Supprimer</button>
                 }
             </div>
-            <hr /> <!-- Separator line between contacts -->
+            <hr />
         }
 
         <div class="d-flex align-items-center mb-3">
@@ -107,46 +108,39 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
-    //private List<Contact> contacts = new List<Contact>();
     private string errorMessage = string.Empty;
 
     protected override void OnInitialized()
     {
-        // Initialize with one contact
-        SingletonForm.ContactsInput.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new ContactFormulaire());
     }
 
     private void AddContact()
     {
-        SingletonForm.ContactsInput.Add(new Contact());
-        errorMessage = string.Empty; // Clear error message when a contact is added
+        SingletonForm.ContactsInput.Add(new ContactFormulaire());
+        errorMessage = string.Empty;
     }
 
-    private void RemoveContact(Contact contact)
+    private void RemoveContact(ContactFormulaire contact)
     {
-        // Only allow removal if more than one contact exists
         if (SingletonForm.ContactsInput.Count > 1)
         {
             SingletonForm.ContactsInput.Remove(contact);
-            errorMessage = string.Empty; // Clear error message when a contact is removed
+            errorMessage = string.Empty;
         }
     }
 
     private void HandleSubmit()
     {
-        // Reset errors
         ErrorReset();
         var isValid = true;
 
-        // Validate all contact fields
         foreach (var contact in SingletonForm.ContactsInput)
         {
             ValidateInputs(contact);
         }
 
-        // Check if any contact has errors
         isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
                                       string.IsNullOrEmpty(c.NomError) &&
                                       string.IsNullOrEmpty(c.RoleError) &&
@@ -157,61 +151,24 @@
 
         if (isValid)
         {
-            // Log contact data
             var contactData = ExportFormData();
             LogToConsole(contactData);
 
-            // If all checks pass, navigate to the next page
             Checkpoint.InvokeAsync(3);
             OnPageSelected.InvokeAsync(3);
         }
     }
 
-    public void HandleSubmitReturn(int pageID)
-    {
-        // Reset errors
-        ErrorReset();
-        var isValid = true;
-
-        // Validate all contact fields
-        foreach (var contact in SingletonForm.ContactsInput)
-        {
-            ValidateInputs(contact);
-        }
-
-        // Check if any contact has errors
-        isValid = SingletonForm.ContactsInput.All(c => string.IsNullOrEmpty(c.PrenomError) &&
-                                      string.IsNullOrEmpty(c.NomError) &&
-                                      string.IsNullOrEmpty(c.RoleError) &&
-                                      string.IsNullOrEmpty(c.EmailError) &&
-                                      string.IsNullOrEmpty(c.NumeroTelephoneError) &&
-                                      string.IsNullOrEmpty(c.TypeTelephoneError) &&
-                                      string.IsNullOrEmpty(c.PosteError));
-
-        if (isValid)
-        {
-            // Log contact data
-            var contactData = ExportFormData();
-            LogToConsole(contactData);
-
-            OnPageSelected.InvokeAsync(pageID);
-        }
-    }
-
-    private void FormatTelephoneNumber(ChangeEventArgs e, Contact contact)
+    private void FormatTelephoneNumber(ChangeEventArgs e, ContactFormulaire contact)
     {
         var input = e.Value?.ToString() ?? string.Empty;
-
-        // Remove any non-digit characters
         input = new string(input.Where(char.IsDigit).ToArray());
 
-        // Limit to a maximum of 10 digits
         if (input.Length > 10)
         {
             input = input.Substring(0, 10);
         }
 
-        // Format as XXX-XXX-XXXX
         if (input.Length >= 6)
         {
             input = $"{input.Substring(0, 3)}-{input.Substring(3, 3)}-{input.Substring(6)}";
@@ -221,24 +178,20 @@
             input = $"{input.Substring(0, 3)}-{input.Substring(3)}";
         }
 
-        // Update the contact's NumeroTelephone directly
         contact.NumeroTelephone = input;
     }
 
-
-    private void ValidateInputs(Contact contact)
+    private void ValidateInputs(ContactFormulaire contact)
     {
         contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
         contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
         contact.RoleError = string.IsNullOrWhiteSpace(contact.Role) ? "Le rôle est requis." : string.Empty;
         contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
 
-        // Updated phone number validation
         contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis (format: XXX-XXX-XXXX)." : string.Empty;
 
         contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
 
-        // Validate Poste
         if (string.IsNullOrWhiteSpace(contact.Poste))
         {
             contact.PosteError = "Le poste est requis.";
@@ -249,10 +202,9 @@
         }
         else
         {
-            contact.PosteError = string.Empty; // Clear error if valid
+            contact.PosteError = string.Empty;
         }
     }
-
 
     private void ErrorReset()
     {
@@ -289,25 +241,4 @@
             Console.WriteLine($"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
         }
     }
-
-    /*
-    public class Contact
-        {
-        public string Prenom { get; set; } = string.Empty;
-        public string Nom { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string NumeroTelephone { get; set; } = string.Empty;
-        public string TypeTelephone { get; set; } = string.Empty;
-        public string Poste { get; set; } = string.Empty;
-
-        // Error messages
-        public string PrenomError { get; set; } = string.Empty;
-        public string NomError { get; set; } = string.Empty;
-        public string RoleError { get; set; } = string.Empty;
-        public string EmailError { get; set; } = string.Empty;
-        public string NumeroTelephoneError { get; set; } = string.Empty;
-        public string TypeTelephoneError { get; set; } = string.Empty;
-        public string PosteError { get; set; } = string.Empty;
-    }*/
 }
