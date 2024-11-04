@@ -20,24 +20,30 @@
         <!-- Product Search -->
         <div class="mb-3">
             <label for="productSearchInput" class="form-label">Rechercher des produits</label>
-            <input type="text" class="form-control" id="productSearchInput" @bind="productSearch" @oninput="OnProductSearchInput" placeholder="Recherchez des produits..."/>
+            <input type="text" class="form-control" id="productSearchInput" @bind="productSearch" @oninput="OnProductSearchInput" placeholder="Recherchez des produits..." />
+
             @if (filteredProducts != null && filteredProducts.Any())
             {
-                <ul class="list-group" id="productResults">
-                    @foreach (var product in filteredProducts)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectProduct(product)">
-                            @product.ComoditeNombre - @product.ComoditeTitreFr
-                            <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveProduct(product)"></button>
-                        </li>
-                    }
-                </ul>
+                <!-- Add a div wrapper with a fixed height and overflow-y to enable scrolling -->
+                <div class="overflow-auto" style="max-height: 200px;">
+                    <ul class="list-group" id="productResults">
+                        @foreach (var product in filteredProducts)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectProduct(product)">
+                                @product.ComoditeNombre - @product.ComoditeTitreFr
+                                <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveProduct(product)"></button>
+                            </li>
+                        }
+                    </ul>
+                </div>
             }
+
             @if (!string.IsNullOrEmpty(productSearchError))
             {
                 <div class="text-danger">@productSearchError</div>
             }
         </div>
+
 
         <!-- Selected Products -->
         <div class="mb-3">

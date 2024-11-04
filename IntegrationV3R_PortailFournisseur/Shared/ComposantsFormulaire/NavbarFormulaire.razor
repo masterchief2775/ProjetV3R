@@ -1,38 +1,72 @@
 ﻿@inject NavigationManager Navigation
 
 <div class="nav nav-tabs" role="tablist">
-        <div class="nav-item " @onclick="() => ChangePage(0)">
-            <span class="nav-link @_onglets[0]">Identification</span>
-        </div>
-
-        <div class="nav-item " @onclick="() => ChangePage(1)">
-            <span class="nav-link @_onglets[1]">Adresse</span>
-        </div>
-
-        <div class="nav-item" @onclick="() => ChangePage(2)">
-            <span class="nav-link @_onglets[2]" >Contacts</span>
-        </div>
-
-        <div class="nav-item" @onclick="() => ChangePage(3)">
-            <span class="nav-link @_onglets[3]" >Produits/Services</span>
-        </div>
-        <div class="nav-item" @onclick="() => ChangePage(4)">
-            <span class="nav-link @_onglets[4]" >Lisence RBQ</span>
-        </div>
-        <div class="nav-item" @onclick="() => ChangePage(5)">
-            <span class="nav-link @_onglets[5]">Brochure</span>
-        </div>
+    <div class="nav-item" @onclick="() => ChangePage(0)">
+        <span class="nav-link @_onglets[0]">
+            Identification
+            @if (!string.IsNullOrEmpty(GetIcon(0)))
+            {
+                <img src="@GetIcon(0)" alt="" class="me-1 icon" />
+            }
+        </span>
     </div>
 
-    @code 
-{
+    <div class="nav-item" @onclick="() => ChangePage(1)">
+        <span class="nav-link @_onglets[1]">
+            Adresse
+            @if (!string.IsNullOrEmpty(GetIcon(1)))
+            {
+                <img src="@GetIcon(1)" alt="" class="me-1 icon" />
+            }
+        </span>
+    </div>
+
+    <div class="nav-item" @onclick="() => ChangePage(2)">
+        <span class="nav-link @_onglets[2]">
+            Contacts
+            @if (!string.IsNullOrEmpty(GetIcon(2)))
+            {
+                <img src="@GetIcon(2)" alt="" class="me-1 icon" />
+            }
+        </span>
+    </div>
+
+    <div class="nav-item" @onclick="() => ChangePage(3)">
+        <span class="nav-link @_onglets[3]">
+            Produits/Services
+            @if (!string.IsNullOrEmpty(GetIcon(3)))
+            {
+                <img src="@GetIcon(3)" alt="" class="me-1 icon" />
+            }
+        </span>
+    </div>
+
+    <div class="nav-item" @onclick="() => ChangePage(4)">
+        <span class="nav-link @_onglets[4]">
+            Licence RBQ
+            @if (!string.IsNullOrEmpty(GetIcon(4)))
+            {
+                <img src="@GetIcon(4)" alt="" class="me-1 icon" />
+            }
+        </span>
+    </div>
+
+    <div class="nav-item" @onclick="() => ChangePage(5)">
+        <span class="nav-link @_onglets[5]">
+            Brochure
+            @if (!string.IsNullOrEmpty(GetIcon(5)))
+            {
+                <img src="@GetIcon(5)" alt="" class="me-1 icon" />
+            }
+        </span>
+    </div>
+</div>
+
+@code {
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
-
-    //private int _pointer;
-
-    private string[] _onglets = new string[7];
+    private string[] _onglets = new string[6];
     private int _currentPage;
     private int _checkpoint;
 
@@ -48,27 +82,25 @@
             }
         }
     }
-   
-    public int Checkpoint{ get; set; }
 
+    public int Checkpoint { get; set; }
 
     protected override void OnInitialized()
     {
-        _onglets[0] = " active";
+        _onglets[0] = "active";
     }
-
 
     private void ChangePage(int id)
     {
-        _currentPage = id;  
+        _currentPage = id;
         SetLabels();
-        OnPageSelected.InvokeAsync(_currentPage);        
+        OnPageSelected.InvokeAsync(_currentPage);
     }
 
     private void SetLabels()
     {
         StateHasChanged();
-        for (int i =0; i<_onglets.Length; i++)
+        for (int i = 0; i < _onglets.Length; i++)
         {
             _onglets[i] = "";
 
@@ -80,15 +112,34 @@
             {
                 _onglets[i] = " done";
             }
-            else if(i == Checkpoint)
+            else if (i == Checkpoint)
             {
                 _onglets[i] = " checkpoint";
             }
             else
             {
                 _onglets[i] = "";
-            }            
+            }
         }
     }
-    
+
+    private string GetIcon(int index)
+    {
+        if (index == _currentPage)
+        {
+            return "/icons/clock.png";  // Path to your active icon
+        }
+        else if (index < Checkpoint)
+        {
+            return "/icons/check-mark.png";  // Path to your "done" checkmark icon
+        }
+        else if (index == Checkpoint)
+        {
+            return "/icons/check.png";  // Path to your checkpoint icon
+        }
+        else
+        {
+            return "";  // No icon for tabs that are neither done nor active
+        }
+    }
 }
