@@ -56,7 +56,9 @@
 
 @code {
     [Parameter]
-    public string NomEntreprise { get; set; } // Nom de l'entreprise passé en paramètre
+    public string NomEntrepriseInput { get; set; }
+
+    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
     private IBrowserFile brochureFile;
     private IBrowserFile carteVisiteFile;
@@ -99,7 +101,7 @@
 
             // Récupération de l'extension du fichier pour la brochure
             var brochureExtension = Path.GetExtension(brochureFile.Name);
-            var brochureFileName = $"Brochure_{NomEntreprise}{brochureExtension}";
+            var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
             var brochurePath = Path.Combine(uploadDirectory, brochureFileName);
             using (var stream = new FileStream(brochurePath, FileMode.Create))
             {
@@ -108,7 +110,7 @@
 
             // Récupération de l'extension du fichier pour la carte de visite
             var carteVisiteExtension = Path.GetExtension(carteVisiteFile.Name);
-            var carteVisiteFileName = $"CarteAffaire_{NomEntreprise}{carteVisiteExtension}";
+            var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
             var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFileName);
             using (var stream = new FileStream(carteVisitePath, FileMode.Create))
             {
