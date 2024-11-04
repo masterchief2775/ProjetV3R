@@ -1,7 +1,9 @@
 ﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
+@using System.IO
 
 @inject IJSRuntime JSRuntime
+@inject IWebHostEnvironment Environment
 
 <div class="container-fluid mt-4">
     <h3>Insérez vos fichiers</h3>
@@ -53,65 +55,10 @@
 </div>
 
 @code {
-    private List<UploadedFile> uploadedFiles = new();
+    private IBrowserFile brochureFile;
+    private IBrowserFile carteVisiteFile;
+    private List<IBrowserFile> uploadedFiles = new(); // Changement de List<string> vers List<IBrowserFile>
     private string fileError = string.Empty;
-    private bool brochureUploaded = false;  // Track if a brochure has been uploaded
-    private bool carteVisiteUploaded = false; // Track if a business card has been uploaded
-
-    private async Task HandleBrochureUpload(InputFileChangeEventArgs e)
-    {
-        await HandleFileUpload(e, "Brochure", true);
-    }
-
-    private async Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
-    {
-        await HandleFileUpload(e, "Carte de visite", false);
-    }
-
-    private async Task HandleFileUpload(InputFileChangeEventArgs e, string fileType, bool isBrochure)
-    {
-        foreach (var file in e.GetMultipleFiles())
-        {
-            // Validate file type
-            if (!IsValidFileType(file.ContentType))
-            {
-                fileError = $"Type de fichier non valide pour {fileType}. Veuillez sélectionner des fichiers doc, docx, pdf, jpg, jpeg, ou png.";
-                return;
-            }
-
-            // Validate file size
-            if (file.Size > 75 * 1024 * 1024)
-            {
-                fileError = $"{fileType} doit être inférieur à 75 Mo.";
-                return;
-            }
-
-            // Check if we need to update the existing file in the list
-            var existingFile = uploadedFiles.FirstOrDefault(f => (isBrochure && f.Type == "Brochure") || (!isBrochure && f.Type == "Carte de visite"));
-
-            if (existingFile != null)
-            {
-                // Update the existing file
-                existingFile.Name = file.Name;
-                existingFile.Size = file.Size;
-            }
-            else
-            {
-                // Add new file to the list
-                uploadedFiles.Add(new UploadedFile { Name = file.Name, Size = file.Size, Type = isBrochure ? "Brochure" : "Carte de visite" });
-            }
-
-            // Mark as uploaded
-            if (isBrochure)
-            {
-                brochureUploaded = true;
-            }
-            else
-            {
-                carteVisiteUploaded = true;
-            }
-        }
-    }
 
     private bool IsValidFileType(string contentType)
     {
@@ -126,22 +73,53 @@
         };
     }
 
-    private void HandleSubmit()
+    private async Task HandleBrochureUpload(InputFileChangeEventArgs e)
     {
-        if (!uploadedFiles.Any())
-        {
-            fileError = "Veuillez sélectionner au moins un fichier.";
-            return;
-        }
-
-        // You can add processing logic here after the files are validated.
+        brochureFile = e.File;
     }
 
-    private class UploadedFile
+    private async Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
     {
-        public string Name { get; set; }
-        public long Size { get; set; } // Size in bytes
-        public string Type { get; set; } // Type of file: Brochure or Carte de visite
+        carteVisiteFile = e.File;
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Vérifie que les fichiers ont été téléchargés
+        if (brochureFile != null && carteVisiteFile != null)
+        {
+            // Définir le répertoire où les fichiers seront enregistrés
+            var uploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
+
+            // Créer le répertoire s'il n'existe pas
+            if (!Directory.Exists(uploadDirectory))
+            {
+                Directory.CreateDirectory(uploadDirectory);
+            }
+
+            // Traiter le téléchargement de la brochure
+            var brochurePath = Path.Combine(uploadDirectory, brochureFile.Name);
+            using (var stream = new FileStream(brochurePath, FileMode.Create))
+            {
+                await brochureFile.OpenReadStream(75000000).CopyToAsync(stream);
+            }
+
+            // Traiter le téléchargement de la carte de visite
+            var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFile.Name);
+            using (var stream = new FileStream(carteVisitePath, FileMode.Create))
+            {
+                await carteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
+            }
+
+            // Confirmation de l'upload
+            fileError = null;
+            uploadedFiles.Add(brochureFile); // Ajout des fichiers téléchargés à la liste
+            uploadedFiles.Add(carteVisiteFile);
+        }
+        else
+        {
+            fileError = "Veuillez sélectionner les deux fichiers avant de soumettre le formulaire.";
+        }
     }
 
     [Parameter]
