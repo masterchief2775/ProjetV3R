@@ -9,8 +9,8 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="nomEntrepriseInput" class="form-label">Nom de l'entreprise</label>
-                <input type="text" class="form-control" id="nomEntrepriseInput" @bind="SingletonForm.NomEntrepriseInput" required>
+                <label for="nomEntrepriseInput" class="form-label">Nom de l'entreprise*</label>
+                <input type="text" class="form-control" id="nomEntrepriseInput" @bind="SingletonForm.NomEntrepriseInput">
                 @if (!string.IsNullOrEmpty(nomEntrepriseError))
                 {
                     <div class="text-danger">@nomEntrepriseError</div>
@@ -19,7 +19,7 @@
 
             <div class="col-md-3">
                 <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
-                <input type="text" class="form-control" id="neqInput" @bind="SingletonForm.NeqInput" required>
+                <input type="text" class="form-control" id="neqInput" @bind="SingletonForm.NeqInput">
                 @if (!string.IsNullOrEmpty(neqError))
                 {
                     <div class="text-danger">@neqError</div>
@@ -32,8 +32,8 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <label for="emailInput" class="form-label">Adresse courriel</label>
-                <input type="email" class="form-control" id="emailInput" @bind="SingletonForm.EmailInput" required>
+                <label for="emailInput" class="form-label">Adresse courriel*</label>
+                <input type="text" class="form-control" id="emailInput" @bind="SingletonForm.EmailInput">
                 @if (!string.IsNullOrEmpty(emailError))
                 {
                     <div class="text-danger">@emailError</div>
@@ -45,16 +45,16 @@
 
         <div class="row mb-3">
             <div class="col-md-3">
-                <label for="passwordInput" class="form-label">Mot de passe</label>
-                <input type="password" class="form-control" id="passwordInput" @bind="SingletonForm.PasswordInput" required>
+                <label for="passwordInput" class="form-label">Mot de passe*</label>
+                <input type="password" class="form-control" id="passwordInput" @bind="SingletonForm.PasswordInput">
                 @if (!string.IsNullOrEmpty(passwordError))
                 {
                     <div class="text-danger">@passwordError</div>
                 }
             </div>
             <div class="col-md-3">
-                <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe</label>
-                <input type="password" class="form-control" id="repeatPasswordInput" @bind="SingletonForm.RepeatPasswordInput" required>
+                <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe*</label>
+                <input type="password" class="form-control" id="repeatPasswordInput" @bind="SingletonForm.RepeatPasswordInput">
                 @if (!string.IsNullOrEmpty(repeatPasswordError))
                 {
                     <div class="text-danger">@repeatPasswordError</div>
@@ -146,34 +146,47 @@
     {
         var isValid = true;
 
-        // Validation for NEQ
-        if (string.IsNullOrWhiteSpace(SingletonForm.NeqInput))
+        // Validation for NEQ      
+        if(!string.IsNullOrWhiteSpace(SingletonForm.NeqInput))
         {
-            neqError = "Le NEQ est requis.";
-            isValid = false;
-        }
-        else if (!IsNumeric(SingletonForm.NeqInput) || SingletonForm.NeqInput.Length != 10 || !IsValidNEQFormat(SingletonForm.NeqInput))
-        {
-            neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88 et ayant le troisième caractère entre 4 et 9.";
-            isValid = false;
-        }
+            if (!IsNumeric(SingletonForm.NeqInput) || SingletonForm.NeqInput.Length != 10 || !IsValidNEQFormat(SingletonForm.NeqInput))
+            {
+                neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88.";
+                isValid = false;
+            }
+        }        
 
         // Validation for Nom de l'entreprise
-        if (string.IsNullOrWhiteSpace(SingletonForm.NomEntrepriseInput) || SingletonForm.NomEntrepriseInput.Length > 64)
+        if (string.IsNullOrWhiteSpace(SingletonForm.NomEntrepriseInput))
         {
-            nomEntrepriseError = "Le nom de l'entreprise est requis et doit faire moins de 64 caractères.";
+            nomEntrepriseError = "Le nom de l'entreprise est requis.";
+            isValid = false;
+        }
+        else if (SingletonForm.NomEntrepriseInput.Length > 64)
+        {
+            nomEntrepriseError = "Le nom de l'entreprise doit faire moins de 64 caractères.";
             isValid = false;
         }
 
         // Validation for Email
-        if (string.IsNullOrWhiteSpace(SingletonForm.EmailInput) || SingletonForm.EmailInput.Length > 64 || !IsValidEmail(SingletonForm.EmailInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.EmailInput))
         {
-            emailError = "Une adresse courriel valide de l'entreprise est requise et doit faire moins de 64 caractères.";
+            emailError = "Une adresse courriel valide de l'entreprise est requise.";
+            isValid = false;
+        }
+        else if (SingletonForm.EmailInput.Length > 64 || !IsValidEmail(SingletonForm.EmailInput))
+        {
+            emailError = "L'adresse courriel doit être valide et faire moins de 64 caractères.";
             isValid = false;
         }
 
         // Validation for Password
-        if (string.IsNullOrWhiteSpace(SingletonForm.PasswordInput) || SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 ||
+        if (SingletonForm.PasswordInput == string.Empty)
+        {
+            passwordError = "Un mot de passe est requis";
+            isValid = false;
+        }
+        else if (string.IsNullOrWhiteSpace(SingletonForm.PasswordInput) || SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 ||
             !HasUpperCase(SingletonForm.PasswordInput) || !HasLowerCase(SingletonForm.PasswordInput) || !HasDigit(SingletonForm.PasswordInput) || !HasSpecialChar(SingletonForm.PasswordInput))
         {
             passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
@@ -201,7 +214,26 @@
 
     private bool IsValidEmail(string email)
     {
-        return email.Contains("@") && email.Contains("."); // Simple check, can be improved
+        string trimmedMail = email.Trim();
+
+        if (trimmedMail.Contains("@") && trimmedMail.Contains(".") && !trimmedMail.Contains(" ") && !trimmedMail.EndsWith("."))
+        {
+            try
+            {
+                var testAddress = new System.Net.Mail.MailAddress(trimmedMail);
+                return testAddress.Address == trimmedMail;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+
+        //return email.Contains("@") && email.Contains("."); // Simple check, can be improved
     }
 
     private bool IsNumeric(string input)
@@ -211,8 +243,7 @@
 
     private bool IsValidNEQFormat(string neq)
     {
-        return (neq.StartsWith("11") || neq.StartsWith("22") || neq.StartsWith("33") || neq.StartsWith("88")) &&
-               (char.IsDigit(neq[2]) && "456789".Contains(neq[2]));
+        return (neq.StartsWith("11") || neq.StartsWith("22") || neq.StartsWith("33") || neq.StartsWith("88"));
     }
 
     private bool HasUpperCase(string password)

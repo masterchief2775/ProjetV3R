@@ -80,11 +80,6 @@
     private string productDescriptionError = string.Empty;
     private string productSearchError = string.Empty;
 
-    // Simulated products for testing purposes
-    private List<string> allProducts = new List<string>
-    {
-        "Produit A", "Produit B", "Produit C", "Produit D", "Produit E", "Produit F", "Produit G"
-    };
 
     private List<UnspscComodite> filteredProducts = new List<UnspscComodite>();
 //private List<UnspscComodite> selectedProducts = new List<UnspscComodite>();
@@ -99,7 +94,7 @@
         }
         catch (Exception ex)
         {
-            productSearchError = "Erreur lors de la récupération des régions.";
+            productSearchError = "Erreur lors de la récupération des produits.";
             Console.WriteLine(ex.Message);
         }
         BDFetched.InvokeAsync();
@@ -116,14 +111,25 @@
 
         // If valid, export and log data to console
         if (isValid)
-        {
-            var formData = ExportFormData();
-            LogToConsole(formData);
-
+        {    
             Checkpoint.InvokeAsync(4);
             OnPageSelected.InvokeAsync(4);
         }
     }
+
+    public async Task HandleSubmitReturn(int pageID)
+    {
+        ResetErrors(); 
+
+        var isValid = ValidateInputs();
+
+        
+        if (isValid)
+        {
+            await OnPageSelected.InvokeAsync(pageID);
+        }        
+    }
+
 
     // Reset error messages
     private void ResetErrors()
@@ -162,38 +168,7 @@
         };
     }
 
-    public async Task HandleSubmitReturn(int pageID)
-    {
-        // Reset error messages and validation flag
-        productDescriptionError = string.Empty;
-        productSearchError = string.Empty;
-
-        bool isValid = true; // Reset isValid to true
-
-        // Validation logic
-        if (string.IsNullOrWhiteSpace(SingletonForm.DescriptionProduitsServicesInput))
-        {
-            productDescriptionError = "La description du produit est requise.";
-            isValid = false; // Set isValid to false if validation fails
-        }
-        if (!SingletonForm.ProduitsServicesSelectionnesInput.Any())
-        {
-            productSearchError = "Au moins un produit doit être sélectionné.";
-            isValid = false; // Set isValid to false if validation fails
-        }
-
-        // If there are any errors, do not proceed
-        if (!isValid)
-        {
-            return;
-        }
-
-        // Log data to the console
-        //await JSRuntime.InvokeVoidAsync("exportFormDataToConsole", productDescription, selectedProducts);
-                
-        await OnPageSelected.InvokeAsync(pageID);
-    }
-
+   
     // Handle search input dynamically for products
     private void OnProductSearchInput(ChangeEventArgs e)
     {

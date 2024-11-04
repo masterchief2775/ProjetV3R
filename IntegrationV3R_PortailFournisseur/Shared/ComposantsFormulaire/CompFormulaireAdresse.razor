@@ -12,7 +12,7 @@
         <h5>Adresse de l'entreprise</h5>
         <div class="row mb-3">
             <div class="mb-3 col-6">
-                <label for="numCiviqueInput" class="form-label">Numéro Civique</label>
+                <label for="numCiviqueInput" class="form-label">Numéro Civique*</label>
                 <input type="text" class="form-control" id="numCiviqueInput" @bind="SingletonForm.NumCiviqueInput" required>
                 @if (!string.IsNullOrEmpty(numCiviqueError))
                 {
@@ -21,7 +21,7 @@
             </div>
 
             <div class="mb-3 col-6">
-                <label for="bureauInput" class="form-label">Numéro de Bureau (optionnel)</label>
+                <label for="bureauInput" class="form-label">Numéro de Bureau</label>
                 <input type="text" class="form-control" id="bureauInput" @bind="SingletonForm.BureauInput" maxlength="8">
                 @if (!string.IsNullOrEmpty(bureauError))
                 {
@@ -30,7 +30,7 @@
             </div>
 
             <div class="mb-3 col-6">
-                <label for="rueInput" class="form-label">Nom de rue</label>
+                <label for="rueInput" class="form-label">Nom de rue*</label>
                 <input type="text" class="form-control" id="rueInput" @bind="SingletonForm.RueInput" required>
                 @if (!string.IsNullOrEmpty(rueError))
                 {
@@ -39,7 +39,7 @@
             </div>
 
             <div class="mb-3 col-6">
-                <label for="villeInput" class="form-label">Nom Ville</label>
+                <label for="villeInput" class="form-label">Nom Ville*</label>
                 <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.VilleInput" required>
                 @if (!string.IsNullOrEmpty(villeError))
                 {
@@ -48,7 +48,7 @@
             </div>
 
             <div class="mb-3 col-6">
-                <label for="provinceInput" class="form-label">Province</label>
+                <label for="provinceInput" class="form-label">Province*</label>
                 <input type="text" class="form-control" id="provinceInput" @bind="SingletonForm.ProvinceInput" required>
                 @if (!string.IsNullOrEmpty(provinceError))
                 {
@@ -57,7 +57,7 @@
             </div>
 
             <div class="mb-3 col-6">
-                <label for="codePostalInput" class="form-label">Code postal</label>
+                <label for="codePostalInput" class="form-label">Code postal*</label>
                 <input type="text" class="form-control" id="codePostalInput" @bind="SingletonForm.CodePostalInput" placeholder="Ex: A1B 2C3" @oninput="FormatCodePostal" maxlength="7" required>
                 @if (!string.IsNullOrEmpty(codePostalError))
                 {
@@ -69,7 +69,7 @@
         <br />
         <h5>Informations supplémentaires</h5>
         <div class="mb-3">
-            <label for="regionInput" class="form-label">Région administrative</label>
+            <label for="regionInput" class="form-label">Région administrative*</label>
             <select class="form-select" id="regionInput" @bind="SingletonForm.RegionInput" required>
                 <option value="">Sélectionner une région</option>
                 @foreach (var region in regions)
@@ -84,7 +84,7 @@
         </div>
 
         <div class="mb-3">
-            <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise</label>
+            <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise*</label>
             <input type="tel" class="form-control" id="numeroTelephoneInput" @bind="SingletonForm.NumeroTelephoneInput" placeholder="Ex: 123-456-7890" @oninput="FormatTelephoneNumber" maxlength="12" required>
             @if (!string.IsNullOrEmpty(numeroTelephoneError))
             {

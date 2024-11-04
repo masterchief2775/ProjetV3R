@@ -17,21 +17,8 @@
                 {
                     <div class="text-danger">@rbqNumberError</div>
                 }
-            </div>
-
-            <!-- Date de début -->
-            <div class="col-md-4">
-                <label for="startDateInput" class="form-label">Date de début</label>
-                <input type="date" class="form-control" id="startDateInput"
-                       @bind="SingletonForm.StartDateInput">
-            </div>
-
-            <!-- Date de fin -->
-            <div class="col-md-4">
-                <label for="endDateInput" class="form-label">Date de fin</label>
-                <input type="date" class="form-control" id="endDateInput"
-                       @bind="SingletonForm.EndDateInput">
-            </div>
+            </div>            
+            
         </div>
 
         <div class="row mb-3">
@@ -144,7 +131,7 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
-    
+
     private string subCategorySearch = string.Empty;
 
     private string rbqNumberError = string.Empty;
@@ -198,95 +185,91 @@
     // Handle submitting the form
     private async Task HandleSubmit()
     {
-        // Reset error messages
-        rbqNumberError = string.Empty;
-        statusError = string.Empty;
-        licenseTypeError = string.Empty;
-        categoryError = string.Empty;
-        subCategoryError = string.Empty; // Reset sub-category error
+        var isValid = ValidateInputs();
 
-        // Validation logic
-        if (string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) || !IsValidRbqNumber(SingletonForm.RBQNumberInput))
+        if (isValid)
         {
-            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
+            CheckForEmptyRBQ();
+            
+            // Proceed with further logic, e.g., saving the data or navigating to another page
+            await Checkpoint.InvokeAsync(5);
+            await OnPageSelected.InvokeAsync(5); // Adjust the argument as necessary
         }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedStatus))
-        {
-            statusError = "Le statut est requis.";
-        }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedLicenseType))
-        {
-            licenseTypeError = "Le type de licence est requis.";
-        }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedCategory))
-        {
-            categoryError = "La catégorie est requise.";
-        }
-        if (!SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
-        {
-            subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
-        }
-
-        // If there are any errors, do not proceed
-        if (!string.IsNullOrEmpty(rbqNumberError) ||
-            !string.IsNullOrEmpty(statusError) ||
-            !string.IsNullOrEmpty(licenseTypeError) ||
-            !string.IsNullOrEmpty(categoryError) ||
-            !string.IsNullOrEmpty(subCategoryError))
-        {
-            return;
-        }
-
-        // Proceed with further logic, e.g., saving the data or navigating to another page
-        await Checkpoint.InvokeAsync(5);
-        await OnPageSelected.InvokeAsync(5); // Adjust the argument as necessary
     }
 
     public async Task HandleSubmitReturn(int pageID)
     {
-        // Reset error messages
+        var isValid = ValidateInputs();
+
+        if (isValid)
+        {
+            CheckForEmptyRBQ();
+
+            // Proceed with further logic, e.g., saving the data or navigating to another page
+            await OnPageSelected.InvokeAsync(pageID); // Adjust the argument as necessary  
+        }
+
+    }    
+
+    private bool ValidateInputs()
+    {
+        ResetErrors();
+
+        var isValid = true;
+
+        // Validation logic
+        if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput))
+        {
+            if (!IsValidRbqNumber(SingletonForm.RBQNumberInput))
+            {
+                rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
+                isValid = false;
+            }
+        }
+
+
+        if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && string.IsNullOrEmpty(SingletonForm.SelectedStatus))
+        {
+            statusError = "Le statut est requis.";
+            isValid = false;
+        }
+        if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && string.IsNullOrEmpty(SingletonForm.SelectedLicenseType))
+        {
+            licenseTypeError = "Le type de licence est requis.";
+            isValid = false;
+        }
+        if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && string.IsNullOrWhiteSpace(SingletonForm.SelectedCategory))
+        {
+            categoryError = "La catégorie est requise.";
+            isValid = false;
+        }
+        if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && !SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
+        {
+            subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private void ResetErrors()
+    {
         rbqNumberError = string.Empty;
         statusError = string.Empty;
         licenseTypeError = string.Empty;
         categoryError = string.Empty;
         subCategoryError = string.Empty; // Reset sub-category error
-
-        // Validation logic
-        if (string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) || !IsValidRbqNumber(SingletonForm.RBQNumberInput))
-        {
-            rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
-        }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedStatus))
-        {
-            statusError = "Le statut est requis.";
-        }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedLicenseType))
-        {
-            licenseTypeError = "Le type de licence est requis.";
-        }
-        if (string.IsNullOrWhiteSpace(SingletonForm.SelectedCategory))
-        {
-            categoryError = "La catégorie est requise.";
-        }
-        if (!SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
-        {
-            subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
-        }
-
-        // If there are any errors, do not proceed
-        if (!string.IsNullOrEmpty(rbqNumberError) ||
-            !string.IsNullOrEmpty(statusError) ||
-            !string.IsNullOrEmpty(licenseTypeError) ||
-            !string.IsNullOrEmpty(categoryError) ||
-            !string.IsNullOrEmpty(subCategoryError))
-        {
-            return;
-        }
-
-        // Proceed with further logic, e.g., saving the data or navigating to another page
-        await OnPageSelected.InvokeAsync(pageID); // Adjust the argument as necessary
     }
 
+    private void CheckForEmptyRBQ()
+    {
+        if (SingletonForm.RBQNumberInput == string.Empty)
+        {
+            SingletonForm.SelectedStatus = "";
+            SingletonForm.SelectedLicenseType = "";
+            SingletonForm.SelectedCategory = "";
+        }
+    }
 
     // Check if the RBQ number is valid
     private bool IsValidRbqNumber(string value)
