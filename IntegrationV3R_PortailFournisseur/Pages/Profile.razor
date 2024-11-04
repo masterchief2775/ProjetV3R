@@ -1,0 +1,206 @@
+﻿@page "/profile"
+@using Microsoft.EntityFrameworkCore
+@using IntegrationV3R_PortailFournisseur.Data.Models
+
+@inject ApplicationDbContext dbContext
+@inject NavigationManager Navigation
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<PageTitle>Profile</PageTitle>
+
+<div class="container-fluid mt-4">
+    <div class="profile-container">
+        <!-- Identification Section -->
+        <h5>Identification</h5>
+        <div class="row mb-3">
+            <div class="col-md-2">@neq</div>
+            <div class="col-md-2">@nomEntreprise</div>
+            <div class="col-md-2">@courrielEntreprise</div>
+            <div class="col-md-auto">
+                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
+            </div>
+        </div>
+
+        <!-- Adresse Section -->
+        <h5>Adresse</h5>
+        <div class="row mb-3">
+            <div class="col-md-2">@numeroCiv</div>
+            <div class="col-md-2">@rue</div>
+            <div class="col-md-2">@ville</div>
+            <div class="col-md-2">@province</div>
+            <div class="col-md-2">@codePostal</div>
+            <div class="col-md-2">@regionAdministrative</div>
+            <div class="col-md-2">@numeroTelephone</div>
+            <div class="col-md-2">@siteWeb</div>
+            <div class="col-md-auto">
+                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
+            </div>
+        </div>
+
+        <!-- Contacts Section -->
+        <h5>Contacts</h5>
+        @if (contacts != null && contacts.Any())
+        {
+            @foreach (var contact in contacts)
+            {
+                <div class="contact-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Nom:</strong> @contact.NomContact<br>
+                        <strong>Téléphone:</strong> @contact.NumTelContact<br>
+                        <strong>Email:</strong> @contact.CourrielContact<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No contacts available.</div>
+        }
+
+        <!-- Products/Services Section -->
+        <h5>Products/Services</h5>
+        @if (products != null && products.Any())
+        {
+            @foreach (var product in products)
+            {
+                <div class="product-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Comodite: </strong> @product.ComoditeId<br>
+                        <strong>Details:</strong> @product.Details<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No products/services available.</div>
+        }
+
+        <!-- RBQ Section -->
+        <h5>RBQ Details</h5>
+        @if (rbqDetails != null && rbqDetails.Any())
+        {
+            @foreach (var rbq in rbqDetails)
+            {
+                <div class="rbq-entry mb-3 row">
+                    <div class="col-6 mb-3">
+                        <strong>Numéro RBQ:</strong> @rbq.NumLicence<br>
+                        <strong>Nom Sous-catégorie:</strong> @rbq.SousCategorie<br>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div>No RBQ details available.</div>
+        }
+
+    </div>
+</div>
+
+@code {
+    private bool isUserAuthenticated = false;
+    private Fournisseur fournisseur;
+    public Adress Adresse { get; set; }
+
+    [Parameter] public EventCallback<bool> BDFetched { get; set; }
+
+    private string neq = "";
+    private string nomEntreprise = "";
+    private string courrielEntreprise = "";
+
+    private string numeroCiv = "";
+    private string rue = "";
+    private string ville = "";
+    private string province = "";
+    private string codePostal = "";
+    private string regionAdministrative = "";
+    private string numeroTelephone = "";
+    private string siteWeb = "";
+
+    private List<Contact> contacts = new List<Contact>();
+    private List<Produitsservice> products = new List<Produitsservice>();
+    private List<Rbq> rbqDetails = new List<Rbq>(); // RBQ list for display
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchDataDB();
+
+        var userId = await sessionStorage.GetItemAsync<int?>("UserId");
+
+        if (userId == null)
+        {
+            Navigation.NavigateTo("/connexion");
+        }
+        else
+        {
+            isUserAuthenticated = true;
+            var user = await dbContext.Users
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Adresses)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Contacts)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Produitsservices)
+                .Include(u => u.Fournisseur) // Include RBQ entities
+                    .ThenInclude(f => f.Rbqs) // Assuming this is the navigation property
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user != null)
+            {
+                fournisseur = user.Fournisseur;
+                if (fournisseur != null)
+                {
+                    // Set identification fields
+                    neq = fournisseur.Neq; // Assuming Fournisseur has a property for NEQ
+                    nomEntreprise = fournisseur.NomEntreprise; // Assuming Fournisseur has a property for the company name
+                    courrielEntreprise = fournisseur.CourrielEntreprise; // Assuming Fournisseur has a property for the email
+
+                    // Set address fields
+                    var address = fournisseur.Adresses.FirstOrDefault(); // Assuming there is at least one address
+                    if (address != null)
+                    {
+                        numeroCiv = address.NumeroCivique; // Ensure you have these properties in your address model
+                        rue = address.Rue;
+                        ville = address.Ville;
+                        province = address.Province;
+                        codePostal = address.CodePostal;
+                        regionAdministrative = GetRegionName(address.CodeRegionAdministrative); // Assuming RegionCode maps to your region list
+                        numeroTelephone = address.NumTel;
+                    }
+
+                    // Fetch products/services
+                    products = fournisseur.Produitsservices.ToList(); // Assuming this is correctly populated
+
+                    // Fetch RBQ details
+                    rbqDetails = fournisseur.Rbqs.ToList(); // Adjust as per your model
+
+                    // Fetch contacts
+                    contacts = fournisseur.Contacts.ToList(); // Fetching contacts from fournisseur
+                }
+            }
+        }
+    }
+
+    private List<Regionadministrative> regions = new List<Regionadministrative>();
+
+    private string GetRegionName(string code)
+    {
+        var region = regions.FirstOrDefault(r => r.CodeRegionAdministrative == code);
+        return region != null ? region.NomRegionAmdin : "Région non disponible";
+    }
+
+    public async Task FetchDataDB()
+    {
+        try
+        {
+            regions = await dbContext.Regionadministratives.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            regionAdministrative = "Erreur lors de la récupération des régions.";
+            Console.WriteLine(ex.Message);
+        }
+        BDFetched.InvokeAsync(true);
+    }
+}

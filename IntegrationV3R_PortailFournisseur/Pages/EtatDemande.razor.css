@@ -1,0 +1,74 @@
+/* Conteneur pour les étapes */
+.step-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 30px;
+}
+
+.step-icon {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+    .step-icon.completed {
+        color: #28a745; /* Vert pour les étapes complétées */
+    }
+
+    .step-icon.rejected {
+        color: #dc3545; /* Rouge pour les étapes refusées */
+    }
+
+/* Ligne reliant les étapes */
+.line {
+    height: 4px;
+    width: 100px;
+    background-color: #007bff;
+    margin: 0 15px;
+}
+
+    /* Ligne complétée */
+    .line.completed {
+        background-color: #28a745; /* Vert pour les étapes complétées */
+    }
+
+/* Étape complétée */
+.completed .step-icon {
+    color: #28a745; /* Vert pour les icônes complétées */
+}
+
+.active .step-icon {
+    color: #ffc107; /* Jaune pour l'étape active */
+}
+
+.rejected .step-icon {
+    color: #dc3545; /* Rouge pour l'étape refusée */
+}
+
+/* Liste des étapes de la demande */
+ul.progress-bar {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+    ul.progress-bar li {
+        position: relative;
+        text-align: center;
+        flex: 1;
+        font-weight: bold;
+    }
+
+        ul.progress-bar li.active {
+            color: #ffc107; /* Couleur jaune pour l'étape active */
+        }
+
+        ul.progress-bar li.completed {
+            color: #28a745; /* Couleur verte pour les étapes complétées */
+        }
+
+        ul.progress-bar li.rejected {
+            color: #dc3545; /* Couleur rouge pour une étape refusée */
+        }

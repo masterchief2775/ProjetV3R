@@ -1,0 +1,175 @@
+@page "/etat-demande"
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+@using Microsoft.EntityFrameworkCore
+@using IntegrationV3R_PortailFournisseur.Data.Models
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject ApplicationDbContext _context
+
+
+<PageTitle>État de la demande</PageTitle>
+
+<div class="container">
+    @if (isUserAuthenticated)
+    {
+        <h3>Suivi de votre demande</h3>
+        <p>Bonjour @fournisseur.NomEntreprise </p>
+        @if (fournisseur != null)
+        {
+            <div class="tracking-status">
+                <p>Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+                <p>Votre compte est actuellement : <strong>@etat</strong></p>
+            </div>
+        }
+        else
+        {
+            <p>Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
+        }
+
+        <div class="container mt-5">
+            <h3 class="text-center mb-4">État de votre demande :</h3>
+
+            <div class="d-flex justify-content-center align-items-center tracking-status">
+                <!-- Demande reçue -->
+                <div class="step-container text-center">
+                    <i class="fas fa-file-alt fa-4x step-icon"></i>
+                    <p>Demande reçue</p>
+                </div>
+
+                <!-- Ligne reliant les icônes -->
+                <div class="line"></div>
+
+                <!-- En cours de traitement -->
+                <div class="step-container text-center">
+                    <i class="fas fa-clock fa-4x step-icon"></i>
+                    <p>En cours de traitement</p>
+                </div>
+
+                @if (statut == "Approuvée" || statut == "Rejetée")
+                {
+                    <!-- Ligne reliant les icônes -->
+                    <div class="line"></div>
+
+                    <!-- Demande approuvée ou refusée -->
+                    <div class="step-container text-center">
+                        <i class="@GetFinalStepIcon() fa-4x step-icon"></i>
+                        <p>@GetFinalStepText()</p>
+                    </div>
+                }
+            </div>
+            <button @onclick="NavigateToProfile">Profile</button>
+        </div>
+    }
+    else
+    {
+        <p>Redirection vers la page de connexion...</p>
+    }
+</div>
+
+
+
+@code {
+    private bool isUserAuthenticated = false;
+    private Fournisseur fournisseur;
+
+    // Statut de la demande
+    private string statut = "En attente";
+    private string etat = "Désactivé";
+    private int fournisseurId = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Lire l'ID utilisateur depuis le stockage sécurisé
+        var userId = await sessionStorage.GetItemAsync<int?>("UserId");
+
+        if (userId == null)
+        {
+            // L'utilisateur n'est pas connecté, redirection vers la page de connexion
+            Navigation.NavigateTo("/connexion");
+        }
+        else
+        {
+            isUserAuthenticated = true;
+
+            var user = await dbContext.Users
+                .Include(u => u.Fournisseur)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user != null)
+            {
+                fournisseur = user.Fournisseur;
+                if (fournisseur != null)
+                {
+                    // Récupérer le statut de la demande et l'état du compte
+                    statut = fournisseur.EtatDemande;
+                    if (fournisseur.EtatCompte == true)
+                    {
+                        etat = "Activé";
+                    }
+                    else
+                    {
+                        etat = "Désactivé";
+                    }
+
+                }
+                else
+                {
+                    // Gérer le cas où le fournisseur est nul
+                    Console.WriteLine("Le fournisseur est null pour cet utilisateur.");
+                    Navigation.NavigateTo("/erreur");
+                    return;
+                }
+            }
+            else
+            {
+                // Gérer le cas où l'utilisateur n'est pas trouvé
+                Console.WriteLine("L'utilisateur n'est pas trouvé dans la base de données.");
+                Navigation.NavigateTo("/erreur");
+            }
+        }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        if (fournisseur != null && fournisseur.EtatDemande == status)
+        {
+            return "active";
+        }
+        else if (IsStatusCompleted(status))
+        {
+            return "completed";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private bool IsStatusCompleted(string status)
+    {
+        var statusOrder = new List<string> { "En attente", "Approuvée", "Rejetée" };
+        var currentIndex = statusOrder.IndexOf(fournisseur.EtatDemande);
+        var statusIndex = statusOrder.IndexOf(status);
+
+        return statusIndex <= currentIndex;
+    }
+
+    private string GetFinalStepIcon()
+    {
+        return statut == "Approuvée" ? "fas fa-check-circle" : "fas fa-times-circle";
+    }
+
+    private string GetFinalStepText()
+    {
+        return statut == "Approuvée" ? "Demande Approuvée" : "Demande Rejetée";
+    }
+
+    private void NavigateToProfile()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+}
+
+
+

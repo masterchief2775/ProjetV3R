@@ -71,23 +71,29 @@
             <input type="text" class="form-control" id="subCategorySearch"
                    @bind="@subCategorySearch" @oninput="@OnSubCategoryInput"
                    placeholder="Recherchez des sous-catégories..." />
+
             @if (filteredSubCategories != null && filteredSubCategories.Any())
             {
-                <ul class="list-group" id="subCategoryResults">
-                    @foreach (var subCategory in filteredSubCategories)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectSubCategory(subCategory)">
-                            @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008
-                            <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveSubCategory(subCategory)"></button>
-                        </li>
-                    }
-                </ul>
+                <!-- Wrapper div to add scrollbar functionality -->
+                <div class="overflow-auto" style="max-height: 200px;">
+                    <ul class="list-group" id="subCategoryResults">
+                        @foreach (var subCategory in filteredSubCategories)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectSubCategory(subCategory)">
+                                @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008
+                                <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveSubCategory(subCategory)"></button>
+                            </li>
+                        }
+                    </ul>
+                </div>
             }
+
             @if (!string.IsNullOrEmpty(subCategoryError))
             {
                 <div class="text-danger">@subCategoryError</div> <!-- Display the error message here -->
             }
         </div>
+
 
 
         <!-- Catégories sélectionnées -->
