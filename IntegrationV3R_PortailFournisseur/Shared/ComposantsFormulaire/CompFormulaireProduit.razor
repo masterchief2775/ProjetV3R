@@ -10,7 +10,7 @@
         <!-- Product Description -->
         <div class="mb-3">
             <label for="productDescriptionInput" class="form-label">Description du produit</label>
-            <textarea class="form-control" id="productDescriptionInput" @bind="SingletonForm.DescriptionProduitsServicesInput" rows="3" maxlength="500"></textarea>
+            <textarea class="form-control" id="productDescriptionInput" @bind="SingletonForm.DescriptionProduitsServicesInput" maxlength="500"></textarea>
             @if (!string.IsNullOrEmpty(productDescriptionError))
             {
                 <div class="text-danger">@productDescriptionError</div>
@@ -30,8 +30,7 @@
                         @foreach (var product in filteredProducts)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectProduct(product)">
-                                @product.ComoditeNombre - @product.ComoditeTitreFr
-                                <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveProduct(product)"></button>
+                                @product.ComoditeNombre - @product.ComoditeTitreFr                                
                             </li>
                         }
                     </ul>
@@ -88,7 +87,7 @@
 
 
     private List<UnspscComodite> filteredProducts = new List<UnspscComodite>();
-//private List<UnspscComodite> selectedProducts = new List<UnspscComodite>();
+    //private List<UnspscComodite> selectedProducts = new List<UnspscComodite>();
     private List<UnspscComodite> fetchedProducts = new List<UnspscComodite>();
 
     public async Task FetchDataDB()
@@ -129,7 +128,7 @@
 
         var isValid = ValidateInputs();
 
-        
+
         if (isValid)
         {
             await OnPageSelected.InvokeAsync(pageID);
@@ -148,12 +147,6 @@
     private bool ValidateInputs()
     {
         bool isValid = true;
-
-        if (string.IsNullOrWhiteSpace(SingletonForm.DescriptionProduitsServicesInput))
-        {
-            productDescriptionError = "La description du produit est requise.";
-            isValid = false;
-        }
 
         if (!SingletonForm.ProduitsServicesSelectionnesInput.Any())
         {
@@ -174,7 +167,7 @@
         };
     }
 
-   
+
     // Handle search input dynamically for products
     private void OnProductSearchInput(ChangeEventArgs e)
     {
@@ -200,7 +193,10 @@
         {
             if (produit.ComoditeTitreFr.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeNombre.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeTitreEn.Contains(productSearch, StringComparison.OrdinalIgnoreCase))
             {
-                filteredProducts.Add(produit);
+                if (!SingletonForm.ProduitsServicesSelectionnesInput.Contains(produit))
+                {
+                    filteredProducts.Add(produit);
+                }                
             }
         }
     }
