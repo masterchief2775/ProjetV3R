@@ -3,6 +3,7 @@
 
 @inject IJSRuntime JSRuntime
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
+@inject SingletonFormulaire SingletonForm
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
@@ -71,8 +72,6 @@
     public EventCallback<int> Checkpoint { get; set; }
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
-
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
     //private string productDescription = string.Empty;
     private string productSearch = string.Empty;
