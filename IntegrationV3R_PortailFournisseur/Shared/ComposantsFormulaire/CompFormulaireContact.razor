@@ -78,7 +78,7 @@
 
                 <div class="col-6 mb-3">
                     <label for="posteInput" class="form-label">Poste</label>
-                    <input type="text" class="form-control" @bind="contact.Poste" maxlength="6" required>
+                    <input type="text" class="form-control" @bind="contact.Poste" maxlength="6">
                     @if (!string.IsNullOrEmpty(contact.PosteError))
                     {
                         <div class="text-danger">@contact.PosteError</div>
