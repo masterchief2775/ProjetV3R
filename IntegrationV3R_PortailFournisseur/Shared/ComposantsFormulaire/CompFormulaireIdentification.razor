@@ -70,6 +70,19 @@
     [Inject] private SharedDataService SharedData { get; set; }
     private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
 
+
+    private string nomEntreprise;
+
+    // Déclare un EventCallback pour transmettre le nom de l'entreprise
+    [Parameter]
+    public EventCallback<string> OnNomEntrepriseChanged { get; set; }
+
+    private async Task HandleNomEntrepriseChange(ChangeEventArgs e)
+    {
+        nomEntreprise = e.Value.ToString();
+        await OnNomEntrepriseChanged.InvokeAsync(nomEntrepriseInput); // Envoie la valeur mise à jour
+    }
+
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 

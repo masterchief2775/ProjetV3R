@@ -55,9 +55,12 @@
 </div>
 
 @code {
+    [Parameter]
+    public string NomEntreprise { get; set; } // Nom de l'entreprise passé en paramètre
+
     private IBrowserFile brochureFile;
     private IBrowserFile carteVisiteFile;
-    private List<IBrowserFile> uploadedFiles = new(); // Changement de List<string> vers List<IBrowserFile>
+    private List<IBrowserFile> uploadedFiles = new();
     private string fileError = string.Empty;
 
     private bool IsValidFileType(string contentType)
@@ -85,35 +88,36 @@
 
     private async Task HandleSubmit()
     {
-        // Vérifie que les fichiers ont été téléchargés
         if (brochureFile != null && carteVisiteFile != null)
         {
-            // Définir le répertoire où les fichiers seront enregistrés
-            var uploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
 
-            // Créer le répertoire s'il n'existe pas
+            var uploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
             if (!Directory.Exists(uploadDirectory))
             {
                 Directory.CreateDirectory(uploadDirectory);
             }
 
-            // Traiter le téléchargement de la brochure
-            var brochurePath = Path.Combine(uploadDirectory, brochureFile.Name);
+            // Récupération de l'extension du fichier pour la brochure
+            var brochureExtension = Path.GetExtension(brochureFile.Name);
+            var brochureFileName = $"Brochure_{NomEntreprise}{brochureExtension}";
+            var brochurePath = Path.Combine(uploadDirectory, brochureFileName);
             using (var stream = new FileStream(brochurePath, FileMode.Create))
             {
                 await brochureFile.OpenReadStream(75000000).CopyToAsync(stream);
             }
 
-            // Traiter le téléchargement de la carte de visite
-            var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFile.Name);
+            // Récupération de l'extension du fichier pour la carte de visite
+            var carteVisiteExtension = Path.GetExtension(carteVisiteFile.Name);
+            var carteVisiteFileName = $"CarteAffaire_{NomEntreprise}{carteVisiteExtension}";
+            var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFileName);
             using (var stream = new FileStream(carteVisitePath, FileMode.Create))
             {
                 await carteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
             }
 
-            // Confirmation de l'upload
+            // Confirmation de l'upload avec les nouveaux noms de fichiers
             fileError = null;
-            uploadedFiles.Add(brochureFile); // Ajout des fichiers téléchargés à la liste
+            uploadedFiles.Add(brochureFile);
             uploadedFiles.Add(carteVisiteFile);
         }
         else
