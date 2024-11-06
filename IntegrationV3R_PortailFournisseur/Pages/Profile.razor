@@ -1,4 +1,5 @@
 ﻿@page "/profile"
+@using IntegrationV3R_PortailFournisseur.Shared.ComposantsProfile
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
 
@@ -9,53 +10,70 @@
 <PageTitle>Profile</PageTitle>
 
 <div class="container-fluid mt-4">
-    <div class="profile-container">
-        <!-- Identification Section -->
-        <h5>Identification</h5>
-        <div class="row mb-3">
-            <div class="col-md-2">@neq</div>
-            <div class="col-md-2">@nomEntreprise</div>
-            <div class="col-md-2">@courrielEntreprise</div>
-            <div class="col-md-auto">
-                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
-            </div>
-        </div>
 
-        <!-- Adresse Section -->
-        <h5>Adresse</h5>
-        <div class="row mb-3">
-            <div class="col-md-2">@numeroCiv</div>
-            <div class="col-md-2">@rue</div>
-            <div class="col-md-2">@ville</div>
-            <div class="col-md-2">@province</div>
-            <div class="col-md-2">@codePostal</div>
-            <div class="col-md-2">@regionAdministrative</div>
-            <div class="col-md-2">@numeroTelephone</div>
-            <div class="col-md-2">@siteWeb</div>
-            <div class="col-md-auto">
-                <a href="/test"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">...</svg></a>
-            </div>
-        </div>
-
-        <!-- Contacts Section -->
-        <h5>Contacts</h5>
-        @if (contacts != null && contacts.Any())
+    <!-- Button to Toggle Identification Section -->
+    <button class="btn btn-primary mb-3" @onclick="ToggleIdentificationVisibility">
+        @if (isIdentificationVisible)
         {
-            @foreach (var contact in contacts)
-            {
-                <div class="contact-entry mb-3 row">
-                    <div class="col-6 mb-3">
-                        <strong>Nom:</strong> @contact.NomContact<br>
-                        <strong>Téléphone:</strong> @contact.NumTelContact<br>
-                        <strong>Email:</strong> @contact.CourrielContact<br>
-                    </div>
-                </div>
-            }
+            <text>Hide Identification</text>
         }
         else
         {
-            <div>No contacts available.</div>
+            <text>Show Identification</text>
         }
+    </button>
+
+    <!-- Conditionally show the Identification component -->
+    @if (isIdentificationVisible)
+    {
+        <CompProfileIdentification neq="@neq"
+                               nomEntreprise="@nomEntreprise"
+                               courrielEntreprise="@courrielEntreprise" />
+    }
+
+    <!-- Button to Toggle Address Section -->
+    <button class="btn btn-primary mb-3" @onclick="ToggleAddressVisibility">
+        @if (isAddressVisible)
+        {
+            <text>Hide Address</text>
+        }
+        else
+        {
+            <text>Show Address</text>
+        }
+    </button>
+
+    <!-- Conditionally show the Address Section -->
+    @if (isAddressVisible)
+    {
+        <CompProfileAdresse NumeroCiv="@numeroCiv"
+                            Rue="@rue"
+                            Ville="@ville"
+                            Province="@province"
+                            CodePostal="@codePostal"
+                            RegionAdministrative="@regionAdministrative"
+                            NumeroTelephone="@numeroTelephone" />
+    }
+
+    <!-- Button to Toggle Contacts Section -->
+    <button class="btn btn-primary mb-3" @onclick="ToggleContactsVisibility">
+        @if (isContactsVisible)
+        {
+            <text>Hide Contacts</text>
+        }
+        else
+        {
+            <text>Show Contacts</text>
+        }
+    </button>
+
+    <!-- Conditionally show the Contacts Section -->
+    @if (isContactsVisible)
+    {
+        <CompProfileContact Contacts="@contacts" />
+    }
+
+    <div class="profile-container">
 
         <!-- Products/Services Section -->
         <h5>Products/Services</h5>
@@ -65,7 +83,7 @@
             {
                 <div class="product-entry mb-3 row">
                     <div class="col-6 mb-3">
-                        <strong>Comodite: </strong> @product.ComoditeId<br>
+                        <strong>Commodity: </strong> @product.ComoditeId<br>
                         <strong>Details:</strong> @product.Details<br>
                     </div>
                 </div>
@@ -84,8 +102,8 @@
             {
                 <div class="rbq-entry mb-3 row">
                     <div class="col-6 mb-3">
-                        <strong>Numéro RBQ:</strong> @rbq.NumLicence<br>
-                        <strong>Nom Sous-catégorie:</strong> @rbq.SousCategorie<br>
+                        <strong>RBQ Number:</strong> @rbq.NumLicence<br>
+                        <strong>Sub-category Name:</strong> @rbq.SousCategorie<br>
                     </div>
                 </div>
             }
@@ -95,19 +113,65 @@
             <div>No RBQ details available.</div>
         }
 
+        <!-- Finances Section -->
+        <h5>Finances</h5>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>TPS Number:</strong> @tps
+            </div>
+
+            <div class="col-md-6">
+                <strong>TVQ Number:</strong> @tvq
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Payment Terms:</strong> @conditionPaiement
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Currency</strong> @devise
+            </div>
+
+            <div class="col-md-6">
+                <strong>Communication Mode</strong> @modeCom
+            </div>
+        </div>
     </div>
 </div>
 
 @code {
+
     private bool isUserAuthenticated = false;
     private Fournisseur fournisseur;
-    public Adress Adresse { get; set; }
 
     [Parameter] public EventCallback<bool> BDFetched { get; set; }
 
     private string neq = "";
     private string nomEntreprise = "";
     private string courrielEntreprise = "";
+
+    private bool isIdentificationVisible = false; // Flag to toggle identification visibility
+    private bool isAddressVisible = false; // Flag to toggle address visibility
+    private bool isContactsVisible = false; // Flag to toggle contacts visibility
+
+    private void ToggleIdentificationVisibility()
+    {
+        isIdentificationVisible = !isIdentificationVisible; // Toggle visibility flag
+    }
+
+    private void ToggleAddressVisibility()
+    {
+        isAddressVisible = !isAddressVisible; // Toggle visibility flag for the address
+    }
+
+    private void ToggleContactsVisibility()
+    {
+        isContactsVisible = !isContactsVisible; // Toggle visibility flag for contacts
+    }
 
     private string numeroCiv = "";
     private string rue = "";
@@ -116,7 +180,12 @@
     private string codePostal = "";
     private string regionAdministrative = "";
     private string numeroTelephone = "";
-    private string siteWeb = "";
+
+    public string tvq = "";
+    public string tps = "";
+    public string conditionPaiement = "";
+    public string devise = "";
+    public string modeCom = "";
 
     private List<Contact> contacts = new List<Contact>();
     private List<Produitsservice> products = new List<Produitsservice>();
@@ -140,6 +209,8 @@
                     .ThenInclude(f => f.Adresses)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Contacts)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Finances)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
                 .Include(u => u.Fournisseur) // Include RBQ entities
@@ -167,6 +238,16 @@
                         codePostal = address.CodePostal;
                         regionAdministrative = GetRegionName(address.CodeRegionAdministrative); // Assuming RegionCode maps to your region list
                         numeroTelephone = address.NumTel;
+                    }
+
+                    var finance = fournisseur.Finances.FirstOrDefault(); // Assuming there is at least one address
+                    if (finance != null)
+                    {
+                        tvq = finance.Tvq;
+                        tps = finance.Tps;
+                        conditionPaiement = finance.ConditionPaiement;
+                        devise = finance.Devise;
+                        modeCom = finance.ModeCom;
                     }
 
                     // Fetch products/services

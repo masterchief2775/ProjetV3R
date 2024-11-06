@@ -1,5 +1,6 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
 using System;
+using System.Collections.Generic;
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
@@ -26,17 +27,16 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string NumeroTelephoneInput { get; set; } = string.Empty;
         public string SiteWebInput { get; set; } = string.Empty;
 
-        //Properties to hold data from contacts
+        // Properties to hold form data for contacts
         public List<Contact> ContactsInput = new List<Contact>();
 
-        
-        // Properties to holld data from produits/services 
+        // Properties to hold data from produits/services 
         public string DescriptionProduitsServicesInput { get; set; } = string.Empty;
 
         public List<UnspscComodite> ProduitsServicesSelectionnesInput = new List<UnspscComodite>();
 
-        //Properties to hold data from RBQ
-        public string RBQNumberInput {  get; set; } = string.Empty;
+        // Properties to hold data from RBQ
+        public string RBQNumberInput { get; set; } = string.Empty;
         public string SelectedStatus { get; set; } = string.Empty;
         public string SelectedLicenseType { get; set; } = string.Empty;
         public string SelectedCategory { get; set; } = string.Empty;
@@ -45,6 +45,19 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public List<Souscategorieafter2008> SelectedSubCategories = new List<Souscategorieafter2008>();
 
+        // Properties to hold financial information
+        public int FinanceId { get; set; }
+        public int FournisseurId { get; set; }
+        public string Tvq { get; set; } = string.Empty;
+        public string Tps { get; set; } = string.Empty;
+        public string ConditionPaiement { get; set; } = string.Empty;
+        public string Devise { get; set; } = string.Empty;
+        public string ModeCom { get; set; } = string.Empty;
+        public DateTime Timestamps { get; set; } = DateTime.Now;
+
+        // Navigation properties (optional, if you want to access related entities)
+        public Conditionspaiement ConditionPaiementNavigation { get; set; } = null!;
+        public Fournisseur Fournisseur { get; set; } = null!;
 
         private SingletonFormulaire() { }
 
@@ -69,6 +82,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public void LogDataToConsole()
         {
             Console.WriteLine("*****************************************************************************************");
+
             // Log identification data
             Console.WriteLine("\n***IDENTIFICATION***");
             Console.WriteLine($"Nom de l'entreprise: {NomEntrepriseInput}");
@@ -97,11 +111,12 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 Console.WriteLine($"\n\tNom complet: {contact.Prenom} {contact.Nom} \n\tFonction: {contact.Role} \n\tEmail: {contact.Email} \n\t" +
                     $"Telephone: {contact.NumeroTelephone} Poste {contact.Poste} - {contact.TypeTelephone}");
             }
+
             // Log Produits
             Console.WriteLine("\n***PRODUITS***");
             Console.WriteLine($"Description des produits et services offerts:\n\t {DescriptionProduitsServicesInput}");
             Console.WriteLine("Liste des produits et services selectionnees\n");
-            foreach (UnspscComodite produit in ProduitsServicesSelectionnesInput) 
+            foreach (UnspscComodite produit in ProduitsServicesSelectionnesInput)
             {
                 Console.WriteLine($"\t{produit.ComoditeNombre} - {produit.ComoditeTitreFr}");
             }
@@ -112,10 +127,21 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Statut Licence : {SelectedStatus}");
             Console.WriteLine($"Type Licence : {SelectedLicenseType}");
             Console.WriteLine($"Type Licence : {SelectedCategory}");
-            foreach(var sousCategorie in SelectedSubCategories)
+            foreach (var sousCategorie in SelectedSubCategories)
             {
                 Console.WriteLine($"\t{sousCategorie.NumeroSousCategorieAfter2008} - {sousCategorie.NomSousCategorieAfter2008}");
             }
+
+            // Log Finance Data
+            Console.WriteLine("\n***FINANCE***");
+            Console.WriteLine($"Finance ID: {FinanceId}");
+            Console.WriteLine($"Fournisseur ID: {FournisseurId}");
+            Console.WriteLine($"TVQ: {Tvq}");
+            Console.WriteLine($"TPS: {Tps}");
+            Console.WriteLine($"Condition de Paiement: {ConditionPaiement}");
+            Console.WriteLine($"Devise: {Devise}");
+            Console.WriteLine($"Mode de Communication: {ModeCom}");
+            Console.WriteLine($"Timestamp: {Timestamps}");
 
             Console.WriteLine("----------------------------------------------------------------------------------------------");
         }
