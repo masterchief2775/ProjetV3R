@@ -3,7 +3,6 @@
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 @using Microsoft.JSInterop
 
-
 @inject IJSRuntime JSRuntime
 
 <CompPreremplissage OnDataFetched="HandleSharedData" />
@@ -12,7 +11,7 @@
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
-		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"/>
+		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
 		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
@@ -30,6 +29,11 @@
 		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
+<div class="nav-item px-3">
+	<button class="btn btn-link nav-link" @onclick="LogFormData">
+		<div class="oi oi-bullhorn" aria-hidden="true"> Log Form Data</div>
+	</button>
+</div>
 
 
 @code {
@@ -40,8 +44,9 @@
 	private CompFormulaireProduit compProduit;
 	private CompFormulaireRBQ compRBQ;
 	private CompFormulaireBrochure compBrochure;
+	
 
-
+	[Inject] private SingletonFormulaire SingletonForm { get; set; }
 
 	private int selectedPageIndex = 0;
 
@@ -50,6 +55,11 @@
 	public bool _sharedData = false;
 
 	public int _FetchedComp = 1;
+
+	private void LogFormData()
+	{
+		SingletonForm.LogDataToConsole();
+	}
 
 	private void SetFormCheckpoint(int pageIndex)
 	{

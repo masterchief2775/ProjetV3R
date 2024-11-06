@@ -31,9 +31,7 @@
     </nav>
 </div>
 
-@code {
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
-
+@code {  
 
     private bool collapseNavMenu = true;
 
@@ -43,9 +41,9 @@
     {
         collapseNavMenu = !collapseNavMenu;
     }
-
+    
     private void LogFormData()
     {
-        SingletonForm.LogDataToConsole();
+        /*SingletonForm.LogDataToConsole();*/
     }
 }

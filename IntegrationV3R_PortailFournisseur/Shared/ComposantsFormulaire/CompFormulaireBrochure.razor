@@ -1,7 +1,13 @@
-﻿@using System.Text.RegularExpressions
+﻿﻿@using System.Text.RegularExpressions
 @using Microsoft.JSInterop
+@using System.IO
+@using IntegrationV3R_PortailFournisseur.Data.Models;
+
 
 @inject IJSRuntime JSRuntime
+@inject IWebHostEnvironment Environment
+@inject ApplicationDbContext DbContext
+
 
 <div class="container-fluid mt-4">
     <h3>Insérez vos fichiers</h3>
@@ -53,65 +59,20 @@
 </div>
 
 @code {
-    private List<UploadedFile> uploadedFiles = new();
+    [Parameter]
+    public string NomEntrepriseInput { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<int> OnPageSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<int> Checkpoint { get; set; }
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
+
+    private IBrowserFile brochureFile;
+    private IBrowserFile carteVisiteFile;
+    private List<IBrowserFile> uploadedFiles = new();
     private string fileError = string.Empty;
-    private bool brochureUploaded = false;  // Track if a brochure has been uploaded
-    private bool carteVisiteUploaded = false; // Track if a business card has been uploaded
-
-    private async Task HandleBrochureUpload(InputFileChangeEventArgs e)
-    {
-        await HandleFileUpload(e, "Brochure", true);
-    }
-
-    private async Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
-    {
-        await HandleFileUpload(e, "Carte de visite", false);
-    }
-
-    private async Task HandleFileUpload(InputFileChangeEventArgs e, string fileType, bool isBrochure)
-    {
-        foreach (var file in e.GetMultipleFiles())
-        {
-            // Validate file type
-            if (!IsValidFileType(file.ContentType))
-            {
-                fileError = $"Type de fichier non valide pour {fileType}. Veuillez sélectionner des fichiers doc, docx, pdf, jpg, jpeg, ou png.";
-                return;
-            }
-
-            // Validate file size
-            if (file.Size > 75 * 1024 * 1024)
-            {
-                fileError = $"{fileType} doit être inférieur à 75 Mo.";
-                return;
-            }
-
-            // Check if we need to update the existing file in the list
-            var existingFile = uploadedFiles.FirstOrDefault(f => (isBrochure && f.Type == "Brochure") || (!isBrochure && f.Type == "Carte de visite"));
-
-            if (existingFile != null)
-            {
-                // Update the existing file
-                existingFile.Name = file.Name;
-                existingFile.Size = file.Size;
-            }
-            else
-            {
-                // Add new file to the list
-                uploadedFiles.Add(new UploadedFile { Name = file.Name, Size = file.Size, Type = isBrochure ? "Brochure" : "Carte de visite" });
-            }
-
-            // Mark as uploaded
-            if (isBrochure)
-            {
-                brochureUploaded = true;
-            }
-            else
-            {
-                carteVisiteUploaded = true;
-            }
-        }
-    }
 
     private bool IsValidFileType(string contentType)
     {
@@ -126,27 +87,60 @@
         };
     }
 
-    private void HandleSubmit()
+    private Task HandleBrochureUpload(InputFileChangeEventArgs e)
     {
-        if (!uploadedFiles.Any())
+        brochureFile = e.File;
+        return Task.CompletedTask;
+    }
+
+    private Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
+    {
+        carteVisiteFile = e.File;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (brochureFile != null && carteVisiteFile != null)
         {
-            fileError = "Veuillez sélectionner au moins un fichier.";
-            return;
+
+            var uploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
+            if (!Directory.Exists(uploadDirectory))
+            {
+                Directory.CreateDirectory(uploadDirectory);
+            }
+
+            // Récupération de l'extension du fichier pour la brochure
+            var brochureExtension = Path.GetExtension(brochureFile.Name);
+            var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
+            var brochurePath = Path.Combine(uploadDirectory, brochureFileName);
+            using (var stream = new FileStream(brochurePath, FileMode.Create))
+            {
+                await brochureFile.OpenReadStream(75000000).CopyToAsync(stream);
+            }
+
+            // Récupération de l'extension du fichier pour la carte de visite
+            var carteVisiteExtension = Path.GetExtension(carteVisiteFile.Name);
+            var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
+            var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFileName);
+            using (var stream = new FileStream(carteVisitePath, FileMode.Create))
+            {
+                await carteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
+            }
+
+            // Confirmation de l'upload avec les nouveaux noms de fichiers
+            fileError = null;
+            uploadedFiles.Add(brochureFile);
+            uploadedFiles.Add(carteVisiteFile);
+
+            await SingletonForm.SaveDataAsync(DbContext);
+
         }
-
-        // You can add processing logic here after the files are validated.
+        else
+        {
+            fileError = "Veuillez sélectionner les deux fichiers avant de soumettre le formulaire.";
+        }
     }
 
-    private class UploadedFile
-    {
-        public string Name { get; set; }
-        public long Size { get; set; } // Size in bytes
-        public string Type { get; set; } // Type of file: Brochure or Carte de visite
-    }
 
-    [Parameter]
-    public EventCallback<int> OnPageSelected { get; set; }
-
-    [Parameter]
-    public EventCallback<int> Checkpoint { get; set; }
 }
