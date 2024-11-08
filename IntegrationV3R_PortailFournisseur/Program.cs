@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Blazored.SessionStorage;
+using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddHttpClient<DonneesQuebecService>(client =>
     client.BaseAddress = new Uri("https://www.donneesquebec.ca/");
 });
 
+builder.Services.AddScoped<SingletonFormulaire>();
 
 var app = builder.Build();
 

@@ -77,7 +77,7 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     //private string productDescription = string.Empty;
     private string productSearch = string.Empty;

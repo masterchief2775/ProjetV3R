@@ -129,7 +129,7 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     // Parameters and Variables
     [Parameter]
