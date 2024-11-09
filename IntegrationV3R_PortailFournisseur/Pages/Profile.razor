@@ -66,7 +66,7 @@
                 <div class="product-entry mb-3 row">
                     <div class="col-6 mb-3">
                         <strong>Comodite: </strong> @product.ComoditeId<br>
-                        <strong>Details:</strong> @product.Details<br>
+                        <!--<strong>Details:</strong> @product.Details<br>-->
                     </div>
                 </div>
             }
@@ -85,7 +85,7 @@
                 <div class="rbq-entry mb-3 row">
                     <div class="col-6 mb-3">
                         <strong>Numéro RBQ:</strong> @rbq.NumLicence<br>
-                        <strong>Nom Sous-catégorie:</strong> @rbq.SousCategorie<br>
+                        <strong>Nom Sous-catégorie:</strong> @rbq.SouscategorieLicencerbq<br>
                     </div>
                 </div>
             }
@@ -120,7 +120,7 @@
 
     private List<Contact> contacts = new List<Contact>();
     private List<Produitsservice> products = new List<Produitsservice>();
-    private List<Rbq> rbqDetails = new List<Rbq>(); // RBQ list for display
+    private List<Licencesrbq> rbqDetails = new List<Licencesrbq>(); // RBQ list for display
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,7 +143,7 @@
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
                 .Include(u => u.Fournisseur) // Include RBQ entities
-                    .ThenInclude(f => f.Rbqs) // Assuming this is the navigation property
+                    .ThenInclude(f => f.Licencesrbqs) // Assuming this is the navigation property
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
@@ -162,10 +162,10 @@
                     {
                         numeroCiv = address.NumeroCivique; // Ensure you have these properties in your address model
                         rue = address.Rue;
-                        ville = address.Ville;
-                        province = address.Province;
+                        ville = address.CodeMunicipalite /*DOOIT CHANG> POUR TROUVER LE NOM A CE CODE DE MUNICIPALITE*/;
+                        province = address.CodeProvince /*IDEM !!!!!!*/;
                         codePostal = address.CodePostal;
-                        regionAdministrative = GetRegionName(address.CodeRegionAdministrative); // Assuming RegionCode maps to your region list
+                        /*regionAdministrative = GetRegionName(address.CodeRegionAdministrative); DOIT PASSER PAR PROVINCE PUIS REGION*/
                         numeroTelephone = address.NumTel;
                     }
 
@@ -173,7 +173,7 @@
                     products = fournisseur.Produitsservices.ToList(); // Assuming this is correctly populated
 
                     // Fetch RBQ details
-                    rbqDetails = fournisseur.Rbqs.ToList(); // Adjust as per your model
+                    rbqDetails = fournisseur.Licencesrbqs.ToList(); // Adjust as per your model
 
                     // Fetch contacts
                     contacts = fournisseur.Contacts.ToList(); // Fetching contacts from fournisseur
@@ -183,6 +183,7 @@
     }
 
     private List<Regionadministrative> regions = new List<Regionadministrative>();
+    
 
     private string GetRegionName(string code)
     {

@@ -150,8 +150,8 @@
 
     // License types and categories
     private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };   
-    private List<Souscategorieafter2008> fetchedSousCategories = new List<Souscategorieafter2008>();
-    private List<Souscategorieafter2008> filteredSubCategories = new List<Souscategorieafter2008>(); // To hold search results
+    private List<Souscategoriesafter2008> fetchedSousCategories = new List<Souscategoriesafter2008>();
+    private List<Souscategoriesafter2008> filteredSubCategories = new List<Souscategoriesafter2008>(); // To hold search results
 
 
     public async Task FetchDataDB()
@@ -160,7 +160,7 @@
         try
         {
             // Appel à la base de données pour récupérer les régions
-            fetchedSousCategories = await dbContext.Souscategorieafter2008s.ToListAsync();
+            fetchedSousCategories = await dbContext.Souscategoriesafter2008s.ToListAsync();
         }
         catch (Exception ex)
         {
@@ -347,7 +347,7 @@
     }
 
     // Select a sub-category
-    private void SelectSubCategory(Souscategorieafter2008 subCategory)
+    private void SelectSubCategory(Souscategoriesafter2008 subCategory)
     {
         if (!SingletonForm.SelectedSubCategories.Contains(subCategory))
         {
@@ -358,7 +358,7 @@
     }
 
     // Remove a sub-category from the selection
-    private void RemoveSubCategory(Souscategorieafter2008 category)
+    private void RemoveSubCategory(Souscategoriesafter2008 category)
     {
         SingletonForm.SelectedSubCategories.Remove(category);
     }

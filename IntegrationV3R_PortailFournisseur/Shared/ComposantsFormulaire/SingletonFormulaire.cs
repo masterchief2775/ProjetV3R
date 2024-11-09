@@ -42,7 +42,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public DateTime StartDateInput { get; set; } = DateTime.Now;
         public DateTime EndDateInput { get; set; } = DateTime.Now;
 
-        public List<Souscategorieafter2008> SelectedSubCategories = new List<Souscategorieafter2008>();
+        public List<Souscategoriesafter2008> SelectedSubCategories = new List<Souscategoriesafter2008>();
 
         public SingletonFormulaire() { }
 
@@ -102,6 +102,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
+            /*
             // Création de l'entité Fournisseur
             var fournisseur = new Fournisseur
             {
@@ -166,7 +167,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             dbContext.Rbqs.Add(rbq);
 
             // Sauvegarder les modifications
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();*/
         }
     }
 

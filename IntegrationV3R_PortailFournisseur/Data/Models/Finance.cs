@@ -13,7 +13,7 @@ public partial class Finance
 
     public string Tps { get; set; } = null!;
 
-    public string ConditionPaiement { get; set; } = null!;
+    public string CodeConditionPaiement { get; set; } = null!;
 
     public string Devise { get; set; } = null!;
 
@@ -21,7 +21,7 @@ public partial class Finance
 
     public DateTime Timestamps { get; set; }
 
-    public virtual Conditionspaiement ConditionPaiementNavigation { get; set; } = null!;
+    public virtual Conditionspaiement CodeConditionPaiementNavigation { get; set; } = null!;
 
     public virtual Fournisseur Fournisseur { get; set; } = null!;
 }
