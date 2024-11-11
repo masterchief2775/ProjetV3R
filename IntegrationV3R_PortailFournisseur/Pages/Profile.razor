@@ -216,7 +216,7 @@
                 //.Include(u => u.Fournisseur)
                 //    .ThenInclude(f => f.)
                 .Include(u => u.Fournisseur) // Include RBQ entities
-                    .ThenInclude(f => f.Rbqs) // Assuming this is the navigation property
+                    .ThenInclude(f => f.Licencesrbqs) // Assuming this is the navigation property
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
@@ -231,7 +231,6 @@
 
                     // Set address fields
                     var address = fournisseur.Adresses.FirstOrDefault(); // Assuming there is at least one address
-                    var region = fournisseur.region
                     if (address != null)
                     {
                         numeroCiv = address.NumeroCivique; // Ensure you have these properties in your address model
@@ -239,7 +238,7 @@
                         ville = address.CodeMunicipalite /*DOOIT CHANG> POUR TROUVER LE NOM A CE CODE DE MUNICIPALITE*/;
                         province = address.CodeProvince /*IDEM !!!!!!*/;
                         codePostal = address.CodePostal;
-                        regionAdministrative = GetRegionName(address.CodeRegionAdministrative); /*DOIT PASSER PAR PROVINCE PUIS REGION*/
+                        /* regionAdministrative = GetRegionName(address.CodeRegionAdministrative); DOIT PASSER PAR PROVINCE PUIS REGION*/
                         numeroTelephone = address.NumTel;
                     }
 

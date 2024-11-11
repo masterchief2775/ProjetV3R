@@ -11,5 +11,5 @@ public partial class Regionadministrative
 
     public string NomRegionAmdin { get; set; } = null!;
 
-    public virtual ICollection<Adress> Adresses { get; } = new List<Adress>();
+    public virtual ICollection<Territoire> Territoires { get; } = new List<Territoire>();
 }
