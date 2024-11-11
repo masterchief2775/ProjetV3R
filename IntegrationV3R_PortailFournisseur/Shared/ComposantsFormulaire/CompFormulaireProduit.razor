@@ -189,14 +189,28 @@
     {
         filteredProducts.Clear();
 
+
         foreach (var produit in fetchedProducts)
         {
-            if (produit.ComoditeTitreFr.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeNombre.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeTitreEn.Contains(productSearch, StringComparison.OrdinalIgnoreCase))
+            if(produit.ComoditeTitreEn != null)
             {
-                if (!SingletonForm.ProduitsServicesSelectionnesInput.Contains(produit))
+                if (produit.ComoditeTitreFr.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeNombre.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeTitreEn.Contains(productSearch, StringComparison.OrdinalIgnoreCase))
                 {
-                    filteredProducts.Add(produit);
-                }                
+                    if (!SingletonForm.ProduitsServicesSelectionnesInput.Contains(produit))
+                    {
+                        filteredProducts.Add(produit);
+                    }
+                }
+            }
+            else
+            {
+                if (produit.ComoditeTitreFr.Contains(productSearch, StringComparison.OrdinalIgnoreCase) || produit.ComoditeNombre.Contains(productSearch, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!SingletonForm.ProduitsServicesSelectionnesInput.Contains(produit))
+                    {
+                        filteredProducts.Add(produit);
+                    }
+                }
             }
         }
     }

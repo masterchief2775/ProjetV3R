@@ -11,6 +11,23 @@
     <form class="form" @onsubmit="HandleSubmit">
         <h5>Adresse de l'entreprise</h5>
         <div class="row mb-3">
+
+            <div class="mb-3 col-6">
+                <label for="provinceInput" class="form-label">Province*</label>                  
+                <select class="form-select" id="provinceInput" @bind="SingletonForm.ProvinceInput" @onclick="OnProvinceChange">
+                    <option value="">Sélectionner votre province</option>
+                    @foreach (var province in provinces)
+                    {
+                        <option value="@province.CodeProvince" >@province.NomProvince</option>
+                    }
+                </select>
+                @if (!string.IsNullOrEmpty(regionError))
+                {
+                    <div class="text-danger">@provinceError</div>
+                }
+                 
+            </div>
+
             <div class="mb-3 col-6">
                 <label for="numCiviqueInput" class="form-label">Numéro Civique*</label>
                 <input type="text" class="form-control" id="numCiviqueInput" @bind="SingletonForm.NumCiviqueInput">
@@ -38,21 +55,43 @@
                 }
             </div>
 
-            <div class="mb-3 col-6">
-                <label for="villeInput" class="form-label">Nom Ville*</label>
-                <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.VilleInput">
+            <div class="mb-3">
+                <label for="villeInput" class="form-label">Nom de Ville*</label>
+                @if (SingletonForm.ProvinceInput == "4")
+                {
+                    @if (municipaliteChoisie == null)
+                    {
+                        <input type="text" class="form-control" id="municipaliteSearchInput" @bind="municipaliteSearch" @oninput="OnMunicipaliteSearchInput" placeholder="Recherchez votre ville" />
+                        <!-- Add a div wrapper with a fixed height and overflow-y to enable scrolling -->
+                        <div class="overflow-auto" style="max-height: 200px;">
+                            <ul class="list-group" id="productResults">
+                                @foreach (var municipalite in filteredMunicipalites)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectMunicipalite(municipalite)">
+                                        @municipalite.NomMunicipalite
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="form-control" id="municipaliteInput" @onclick="ChangeMunicipalite">@municipaliteChoisie.NomMunicipalite</p>
+                    }
+                }
+                else
+                {
+                    <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.MunicipaliteInput">
+                    @if (!string.IsNullOrEmpty(villeError))
+                    {
+                        <div class="text-danger">@villeError</div>
+                    }
+                }
+
+
                 @if (!string.IsNullOrEmpty(villeError))
                 {
                     <div class="text-danger">@villeError</div>
-                }
-            </div>
-
-            <div class="mb-3 col-6">
-                <label for="provinceInput" class="form-label">Province*</label>
-                <input type="text" class="form-control" id="provinceInput" @bind="SingletonForm.ProvinceInput">
-                @if (!string.IsNullOrEmpty(provinceError))
-                {
-                    <div class="text-danger">@provinceError</div>
                 }
             </div>
 
@@ -66,22 +105,7 @@
             </div>
         </div>
 
-        <br />
-        <h5>Informations supplémentaires</h5>
-        <div class="mb-3">
-            <label for="regionInput" class="form-label">Région administrative*</label>
-            <select class="form-select" id="regionInput" @bind="SingletonForm.RegionInput">
-                <option value="">Sélectionner une région</option>
-                @foreach (var region in regions)
-                {
-                    <option value="@region.CodeRegionAdministrative">@region.NomRegionAmdin</option>
-                }
-            </select>
-            @if (!string.IsNullOrEmpty(regionError))
-            {
-                <div class="text-danger">@regionError</div>
-            }
-        </div>
+        
 
         <div class="mb-3">
             <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone de l'entreprise*</label>
@@ -120,7 +144,7 @@
 
     private bool[] _selectionRegionAdministrative = new bool[17];
 
-    
+
     private string numCiviqueError = string.Empty;
     private string rueError = string.Empty;
     private string bureauError = string.Empty;
@@ -131,18 +155,24 @@
     private string siteWebError = string.Empty;
     private string regionError = string.Empty;
 
-    private List<Regionadministrative> regions = new List<Regionadministrative>();
+    private List<Province> provinces = new List<Province>();
+
+    private string municipaliteSearch = string.Empty;
+    private Municipalite? municipaliteChoisie = new Municipalite();
+    private List<Municipalite> fetchedMunicipalites = new List<Municipalite>();
+    private List<Municipalite> filteredMunicipalites = new List<Municipalite>();
 
     public async Task FetchDataDB()
     {
         try
         {
             // Appel à la base de données pour récupérer les régions
-            regions = await dbContext.Regionadministratives.ToListAsync();
+            provinces = await dbContext.Provinces.ToListAsync();
+            fetchedMunicipalites = await dbContext.Municipalites.ToListAsync();
         }
         catch (Exception ex)
         {
-            regionError = "Erreur lors de la récupération des régions.";
+            regionError = "Erreur lors de la récupération à la BD";
             Console.WriteLine(ex.Message);
         }        
         BDFetched.InvokeAsync(true);
@@ -150,6 +180,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        municipaliteChoisie = null;
         FetchDataDB();
     }
 
@@ -157,15 +188,79 @@
     {       
         SingletonForm.NumCiviqueInput = SharedData.NumCivique;
         SingletonForm.RueInput = SharedData.NomRue;
-        SingletonForm.VilleInput = SharedData.NomVille;
-        SingletonForm.ProvinceInput = SharedData.Province;
+        SingletonForm.MunicipaliteInput = SharedData.NomVille;
         SingletonForm.CodePostalInput = SharedData.CodePostal;
         SingletonForm.NumeroTelephoneInput = SharedData.NumTelephone;
         SingletonForm.RegionInput = SharedData.CodeRegionAdministrative;
 
+        SingletonForm.ProvinceInput = "4";
+
         FormatTelephoneNumber(SingletonForm.NumeroTelephoneInput);
+        CheckMunicipaliteCorrespondance();
         StateHasChanged();        
         //BDFetched.InvokeAsync();
+    }
+
+    private void CheckMunicipaliteCorrespondance()
+    {
+        foreach(var municipalite in fetchedMunicipalites)
+        {
+            if(municipalite.NomMunicipalite.ToUpper() == SingletonForm.MunicipaliteInput)
+            {
+                SingletonForm.MunicipaliteInput = municipalite.CodeMunicipalite;
+                municipaliteChoisie = municipalite;
+            }
+        }
+    }
+
+    private void OnMunicipaliteSearchInput(ChangeEventArgs e)
+    {
+        municipaliteSearch = e.Value?.ToString() ?? string.Empty;
+
+        // Only perform search if there are at least 3 characters
+        if (municipaliteSearch.Length >= 1)
+        {
+            SearchMunicipalites();
+        }
+        else
+        {
+            filteredMunicipalites.Clear();
+        }
+    }
+
+    private void OnProvinceChange()
+    {
+        SingletonForm.MunicipaliteInput = string.Empty;
+        municipaliteChoisie = null;
+    }
+
+    private void SearchMunicipalites()
+    {
+        filteredMunicipalites.Clear();
+
+
+        foreach (var municipalite in fetchedMunicipalites)
+        {
+            if(municipalite.NomMunicipalite.Contains(municipaliteSearch, StringComparison.OrdinalIgnoreCase))
+            {                
+                filteredMunicipalites.Add(municipalite);
+            }
+        }
+    }
+
+    private void SelectMunicipalite(Municipalite municipalite)
+    {
+        municipaliteChoisie = municipalite;
+        SingletonForm.MunicipaliteInput = municipalite.CodeMunicipalite;
+
+        municipaliteSearch = string.Empty;
+        filteredMunicipalites.Clear();
+    }
+
+    private void ChangeMunicipalite()
+    {      
+        municipaliteChoisie = null;
+        SingletonForm.MunicipaliteInput = string.Empty;
     }
 
     private void HandleSubmit()
@@ -178,8 +273,7 @@
 
         // If valid, log the data and navigate
         if (isValid)
-        {
-            LogToConsole();
+        {            
             Checkpoint.InvokeAsync(2);
             OnPageSelected.InvokeAsync(2);
         }
@@ -195,8 +289,7 @@
 
         // If valid, export and log data to console
         if (isValid)
-        {            
-            LogToConsole();
+        {    
             OnPageSelected.InvokeAsync(pageID);
         }
     }
@@ -235,7 +328,7 @@
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(SingletonForm.VilleInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.MunicipaliteInput))
         {
             villeError = "Le nom de la ville est requis";
             isValid = false;
@@ -272,19 +365,6 @@
         }
 
         return isValid;
-    }
-
-    private void LogToConsole()
-    {
-        Console.WriteLine($"Numéro Civique: {SingletonForm.NumCiviqueInput}");
-        Console.WriteLine($"Bureau: {SingletonForm.BureauInput}");
-        Console.WriteLine($"Rue: {SingletonForm.RueInput}");
-        Console.WriteLine($"Ville: {SingletonForm.VilleInput}");
-        Console.WriteLine($"Province: {SingletonForm.ProvinceInput}");
-        Console.WriteLine($"Code Postal: {SingletonForm.CodePostalInput}");
-        Console.WriteLine($"Région: {SingletonForm.RegionInput}");
-        Console.WriteLine($"Numéro de téléphone: {SingletonForm.NumeroTelephoneInput}");
-        Console.WriteLine($"Site Web: {SingletonForm.SiteWebInput}");
     }
 
     private void FormatTelephoneNumber(ChangeEventArgs e)

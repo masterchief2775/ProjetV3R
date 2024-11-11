@@ -1,4 +1,6 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,7 +22,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string NumCiviqueInput { get; set; } = string.Empty;
         public string BureauInput { get; set; } = string.Empty;
         public string RueInput { get; set; } = string.Empty;
-        public string VilleInput { get; set; } = string.Empty;
+        public string MunicipaliteInput { get; set; } = string.Empty;
         public string ProvinceInput { get; set; } = string.Empty;
         public string CodePostalInput { get; set; } = string.Empty;
         public string RegionInput { get; set; } = string.Empty;
@@ -62,7 +64,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Numéro Civique: {NumCiviqueInput}");
             Console.WriteLine($"Bureau: {BureauInput}");
             Console.WriteLine($"Rue: {RueInput}");
-            Console.WriteLine($"Ville: {VilleInput}");
+            Console.WriteLine($"Ville: {MunicipaliteInput}");
             Console.WriteLine($"Province: {ProvinceInput}");
             Console.WriteLine($"Code Postal: {CodePostalInput}");
             Console.WriteLine($"Région: {RegionInput}");
@@ -102,33 +104,46 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
-            /*
+
             // Création de l'entité Fournisseur
             var fournisseur = new Fournisseur
             {
                 NomEntreprise = this.NomEntrepriseInput,
                 Neq = this.NeqInput,
                 CourrielEntreprise = this.EmailInput,
+                DetailsEntreprise = this.DescriptionProduitsServicesInput,
                 EtatDemande = "En attente",
-                DateInscription = DateTime.Now
+                EtatCompte = true,
+                SiteWeb= this.SiteWebInput,
             };
-            dbContext.Fournisseurs.Add(fournisseur);
-            await dbContext.SaveChangesAsync();
+            var result = await dbContext.Database.ExecuteSqlRawAsync("CALL insertFournisseur(@nom, @neq, @courriel, @details, @etatDemande, @etatCompte, @siteWeb)",
+                new MySqlParameter("@nom", fournisseur.NomEntreprise),
+                new MySqlParameter("@neq", fournisseur.Neq),
+                new MySqlParameter("@courriel", fournisseur.CourrielEntreprise),
+                new MySqlParameter("@details", fournisseur.DetailsEntreprise),
+                new MySqlParameter("@etatDemande", fournisseur.EtatDemande),
+                new MySqlParameter("@etatCompte", fournisseur.EtatCompte),
+                new MySqlParameter("@siteWeb", fournisseur.SiteWeb));
 
+            
             // Création de l'adresse
             var adresse = new Adress
             {
                 NumeroCivique = this.NumCiviqueInput,
                 Bureau = this.BureauInput,
                 Rue = this.RueInput,
-                Ville = this.VilleInput,
-                Province = this.ProvinceInput,
+                CodeMunicipalite = this.MunicipaliteInput,
+                CodeProvince = this.ProvinceInput,
                 CodePostal = this.CodePostalInput,
+                NumTel = this.NumeroTelephoneInput,                
                 FournisseurId = fournisseur.FournisseurId
             };
+
+
             dbContext.Adresses.Add(adresse);
 
-
+            await dbContext.SaveChangesAsync();
+            /*
             // Ajouter les contacts
             foreach (var contactInput in this.ContactsInput)
             {
