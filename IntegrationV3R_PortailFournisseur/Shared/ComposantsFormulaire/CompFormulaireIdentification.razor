@@ -67,14 +67,17 @@
 </div>
 
 @code {
-    [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Inject] private SharedDataService SharedData { get; set; }  
+    
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     [Parameter]
     public EventCallback<int> OnPageSelected { get; set; }
 
     [Parameter]
-    public EventCallback<int> Checkpoint { get; set; }   
+    public EventCallback<int> Checkpoint { get; set; }
+
+    
 
     private string neqInput = string.Empty;
     private string nomEntrepriseInput = string.Empty;

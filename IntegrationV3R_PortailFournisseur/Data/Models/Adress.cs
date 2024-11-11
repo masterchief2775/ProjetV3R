@@ -15,15 +15,11 @@ public partial class Adress
 
     public string? Bureau { get; set; }
 
-    public string Ville { get; set; } = null!;
+    public string CodeMunicipalite { get; set; } = null!;
 
-    public string Province { get; set; } = null!;
+    public string CodeProvince { get; set; } = null!;
 
     public string CodePostal { get; set; } = null!;
-
-    public string CodeRegionAdministrative { get; set; } = null!;
-
-    public string Pays { get; set; } = null!;
 
     public string NumTel { get; set; } = null!;
 
@@ -31,7 +27,9 @@ public partial class Adress
 
     public DateTime Timestamps { get; set; }
 
-    public virtual Regionadministrative CodeRegionAdministrativeNavigation { get; set; } = null!;
+    public virtual Municipalite CodeMunicipaliteNavigation { get; set; } = null!;
+
+    public virtual Province CodeProvinceNavigation { get; set; } = null!;
 
     public virtual Fournisseur Fournisseur { get; set; } = null!;
 }

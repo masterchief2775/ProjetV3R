@@ -13,7 +13,7 @@
 
         @for (int i = 0; i < SingletonForm.ContactsInput.Count; i++)
         {
-            Contact contact = SingletonForm.ContactsInput[i];
+            ContactInput contact = SingletonForm.ContactsInput[i];
             <div class="contact-entry mb-3 row">
                 <div class="col-6 mb-3">
                     <label for="prenomInput" class="form-label">Prénom</label>
@@ -106,7 +106,7 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     //private List<Contact> contacts = new List<Contact>();
     private string errorMessage = string.Empty;
@@ -114,16 +114,16 @@
     protected override void OnInitialized()
     {
         // Initialize with one contact
-        SingletonForm.ContactsInput.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new ContactInput());
     }
 
     private void AddContact()
     {
-        SingletonForm.ContactsInput.Add(new Contact());
+        SingletonForm.ContactsInput.Add(new ContactInput());
         errorMessage = string.Empty; // Clear error message when a contact is added
     }
 
-    private void RemoveContact(Contact contact)
+    private void RemoveContact(ContactInput contact)
     {
         // Only allow removal if more than one contact exists
         if (SingletonForm.ContactsInput.Count > 1)
@@ -155,10 +155,7 @@
                                       string.IsNullOrEmpty(c.PosteError));
 
         if (isValid)
-        {
-            // Log contact data
-            var contactData = ExportFormData();
-            LogToConsole(contactData);
+        {            
 
             // If all checks pass, navigate to the next page
             Checkpoint.InvokeAsync(3);
@@ -189,15 +186,12 @@
 
         if (isValid)
         {
-            // Log contact data
-            var contactData = ExportFormData();
-            LogToConsole(contactData);
 
             OnPageSelected.InvokeAsync(pageID);
         }
     }
     
-    private void FormatTelephoneNumber(ChangeEventArgs e, Contact contact)
+    private void FormatTelephoneNumber(ChangeEventArgs e, ContactInput contact)
     {
         var input = e.Value?.ToString() ?? string.Empty;
 
@@ -225,7 +219,7 @@
     }
 
 
-    private void ValidateInputs(Contact contact)
+    private void ValidateInputs(ContactInput contact)
     {
         contact.PrenomError = string.IsNullOrWhiteSpace(contact.Prenom) ? "Le prénom est requis." : string.Empty;
         contact.NomError = string.IsNullOrWhiteSpace(contact.Nom) ? "Le nom est requis." : string.Empty;
@@ -266,28 +260,7 @@
             contact.PosteError = string.Empty;
         }
     }
-
-    private string[][] ExportFormData()
-    {
-        return SingletonForm.ContactsInput.Select(c => new string[]
-        {
-            c.Prenom,
-            c.Nom,
-            c.Role,
-            c.Email,
-            c.NumeroTelephone,
-            c.TypeTelephone,
-            c.Poste
-        }).ToArray();
-    }
-
-    private void LogToConsole(string[][] contactData)
-    {
-        foreach (var contact in contactData)
-        {
-            Console.WriteLine($"Prénom: {contact[0]}, Nom: {contact[1]}, Fonction: {contact[2]}, Email: {contact[3]}, Numéro de téléphone: {contact[4]}, Type de téléphone: {contact[5]}, Poste: {contact[6]}");
-        }
-    }
+    
 
     /*
     public class Contact

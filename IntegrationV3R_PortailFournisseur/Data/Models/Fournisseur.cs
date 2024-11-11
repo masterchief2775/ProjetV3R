@@ -21,6 +21,10 @@ public partial class Fournisseur
 
     public DateTime DateInscription { get; set; }
 
+    public string? SiteWeb { get; set; }
+
+    public string? RaisonRefus { get; set; }
+
     public virtual ICollection<Adress> Adresses { get; } = new List<Adress>();
 
     public virtual ICollection<Brochure> Brochures { get; } = new List<Brochure>();
@@ -29,9 +33,9 @@ public partial class Fournisseur
 
     public virtual ICollection<Finance> Finances { get; } = new List<Finance>();
 
-    public virtual ICollection<Produitsservice> Produitsservices { get; } = new List<Produitsservice>();
+    public virtual ICollection<Licencesrbq> Licencesrbqs { get; } = new List<Licencesrbq>();
 
-    public virtual ICollection<Rbq> Rbqs { get; } = new List<Rbq>();
+    public virtual ICollection<Produitsservice> Produitsservices { get; } = new List<Produitsservice>();
 
     public virtual ICollection<User> Users { get; } = new List<User>();
 }

@@ -1,12 +1,12 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
     public class SingletonFormulaire
     {
-        private static SingletonFormulaire _instance;
         private static readonly object _lock = new object();
 
         // Properties to hold form data for identification
@@ -27,12 +27,11 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string NumeroTelephoneInput { get; set; } = string.Empty;
         public string SiteWebInput { get; set; } = string.Empty;
 
-        // Properties to hold form data for contacts
-        public List<Contact> ContactsInput = new List<Contact>();
+        // Properties to hold data from contacts
+        public List<ContactInput> ContactsInput = new List<ContactInput>();
 
         // Properties to hold data from produits/services 
         public string DescriptionProduitsServicesInput { get; set; } = string.Empty;
-
         public List<UnspscComodite> ProduitsServicesSelectionnesInput = new List<UnspscComodite>();
 
         // Properties to hold data from RBQ
@@ -43,41 +42,9 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public DateTime StartDateInput { get; set; } = DateTime.Now;
         public DateTime EndDateInput { get; set; } = DateTime.Now;
 
-        public List<Souscategorieafter2008> SelectedSubCategories = new List<Souscategorieafter2008>();
+        public List<Souscategoriesafter2008> SelectedSubCategories = new List<Souscategoriesafter2008>();
 
-        // Properties to hold financial information
-        public int FinanceId { get; set; }
-        public int FournisseurId { get; set; }
-        public string Tvq { get; set; } = string.Empty;
-        public string Tps { get; set; } = string.Empty;
-        public string ConditionPaiement { get; set; } = string.Empty;
-        public string Devise { get; set; } = string.Empty;
-        public string ModeCom { get; set; } = string.Empty;
-        public DateTime Timestamps { get; set; } = DateTime.Now;
-
-        // Navigation properties (optional, if you want to access related entities)
-        public Conditionspaiement ConditionPaiementNavigation { get; set; } = null!;
-        public Fournisseur Fournisseur { get; set; } = null!;
-
-        private SingletonFormulaire() { }
-
-        public static SingletonFormulaire Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new SingletonFormulaire();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
+        public SingletonFormulaire() { }
 
         public void LogDataToConsole()
         {
@@ -88,7 +55,6 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Nom de l'entreprise: {NomEntrepriseInput}");
             Console.WriteLine($"NEQ: {NeqInput}");
             Console.WriteLine($"Email: {EmailInput}");
-            // Be cautious with logging sensitive data like passwords
             Console.WriteLine($"Mot de passe: {PasswordInput}");
             Console.WriteLine($"Répéter le mot de passe: {RepeatPasswordInput}");
 
@@ -106,10 +72,10 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             // Log Contacts
             Console.WriteLine("\n***LISTE DES CONTACTS***");
-            foreach (Contact contact in ContactsInput)
+            foreach (ContactInput contact in ContactsInput)
             {
                 Console.WriteLine($"\n\tNom complet: {contact.Prenom} {contact.Nom} \n\tFonction: {contact.Role} \n\tEmail: {contact.Email} \n\t" +
-                    $"Telephone: {contact.NumeroTelephone} Poste {contact.Poste} - {contact.TypeTelephone}");
+                                  $"Telephone: {contact.NumeroTelephone} Poste {contact.Poste} - {contact.TypeTelephone}");
             }
 
             // Log Produits
@@ -126,7 +92,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Code RBQ : {RBQNumberInput}");
             Console.WriteLine($"Statut Licence : {SelectedStatus}");
             Console.WriteLine($"Type Licence : {SelectedLicenseType}");
-            Console.WriteLine($"Type Licence : {SelectedCategory}");
+            Console.WriteLine($"Categorie : {SelectedCategory}");
             foreach (var sousCategorie in SelectedSubCategories)
             {
                 Console.WriteLine($"\t{sousCategorie.NumeroSousCategorieAfter2008} - {sousCategorie.NomSousCategorieAfter2008}");
@@ -145,9 +111,79 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             Console.WriteLine("----------------------------------------------------------------------------------------------");
         }
+
+        public async Task SaveDataAsync(ApplicationDbContext dbContext)
+        {
+            /*
+            // Création de l'entité Fournisseur
+            var fournisseur = new Fournisseur
+            {
+                NomEntreprise = this.NomEntrepriseInput,
+                Neq = this.NeqInput,
+                CourrielEntreprise = this.EmailInput,
+                EtatDemande = "En attente",
+                DateInscription = DateTime.Now
+            };
+            dbContext.Fournisseurs.Add(fournisseur);
+            await dbContext.SaveChangesAsync();
+
+            // Création de l'adresse
+            var adresse = new Adress
+            {
+                NumeroCivique = this.NumCiviqueInput,
+                Bureau = this.BureauInput,
+                Rue = this.RueInput,
+                Ville = this.VilleInput,
+                Province = this.ProvinceInput,
+                CodePostal = this.CodePostalInput,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Adresses.Add(adresse);
+
+
+            // Ajouter les contacts
+            foreach (var contactInput in this.ContactsInput)
+            {
+                var contact = new Contact
+                {
+                    PrenomContact = contactInput.Prenom,
+                    NomContact = contactInput.Nom,
+                    FonctionContact = contactInput.Role,
+                    CourrielContact = contactInput.Email,
+                    NumTelContact = contactInput.NumeroTelephone,
+                    TypeTel = contactInput.TypeTelephone,
+                    PosteTelContact = contactInput.Poste,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Contacts.Add(contact);
+            }
+
+            // Ajouter les produits/services
+            foreach (var produit in this.ProduitsServicesSelectionnesInput)
+            {
+                var produitService = new Produitsservice
+                {
+                    Details = this.DescriptionProduitsServicesInput,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Produitsservices.Add(produitService);
+            }
+
+            // Ajouter les informations RBQ
+            var rbq = new Rbq
+            {
+                NumLicence = this.RBQNumberInput,
+                StatutLicence = this.SelectedStatus,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Rbqs.Add(rbq);
+
+            // Sauvegarder les modifications
+            await dbContext.SaveChangesAsync();*/
+        }
     }
 
-    public class Contact
+    public class ContactInput
     {
         public string Prenom { get; set; } = string.Empty;
         public string Nom { get; set; } = string.Empty;

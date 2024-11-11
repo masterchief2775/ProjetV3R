@@ -11,8 +11,6 @@ public partial class Produitsservice
 
     public int ComoditeId { get; set; }
 
-    public string Details { get; set; } = null!;
-
     public DateTime Timestamps { get; set; }
 
     public virtual UnspscComodite Comodite { get; set; } = null!;

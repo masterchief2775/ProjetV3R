@@ -17,6 +17,9 @@
                 {
                     <div class="text-danger">@rbqNumberError</div>
                 }
+                <div id="neqHelp" class="form-text">
+                    <a href="https://www.rbq.gouv.qc.ca/licence/" target="_blank">En savoir plus sur la licence RBQ</a>
+                </div>
             </div>            
             
         </div>
@@ -80,8 +83,7 @@
                         @foreach (var subCategory in filteredSubCategories)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center" @onclick="() => SelectSubCategory(subCategory)">
-                                @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008
-                                <button type="button" class="btn-close btn-close-sm" aria-label="Close" @onclick="() => RemoveSubCategory(subCategory)"></button>
+                                @subCategory.NumeroSousCategorieAfter2008 - @subCategory.NomSousCategorieAfter2008                                
                             </li>
                         }
                     </ul>
@@ -127,7 +129,7 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     // Parameters and Variables
     [Parameter]
@@ -148,8 +150,8 @@
 
     // License types and categories
     private List<string> licenseTypes = new List<string> { "Entrepreneur", "Constructeur-Propriétaire" };   
-    private List<Souscategorieafter2008> fetchedSousCategories = new List<Souscategorieafter2008>();
-    private List<Souscategorieafter2008> filteredSubCategories = new List<Souscategorieafter2008>(); // To hold search results
+    private List<Souscategoriesafter2008> fetchedSousCategories = new List<Souscategoriesafter2008>();
+    private List<Souscategoriesafter2008> filteredSubCategories = new List<Souscategoriesafter2008>(); // To hold search results
 
 
     public async Task FetchDataDB()
@@ -158,7 +160,7 @@
         try
         {
             // Appel à la base de données pour récupérer les régions
-            fetchedSousCategories = await dbContext.Souscategorieafter2008s.ToListAsync();
+            fetchedSousCategories = await dbContext.Souscategoriesafter2008s.ToListAsync();
         }
         catch (Exception ex)
         {
@@ -196,7 +198,7 @@
         if (isValid)
         {
             CheckForEmptyRBQ();
-            
+
             // Proceed with further logic, e.g., saving the data or navigating to another page
             await Checkpoint.InvokeAsync(5);
             await OnPageSelected.InvokeAsync(5); // Adjust the argument as necessary
@@ -336,13 +338,16 @@
         {
             if (categorie.NomSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase) || categorie.NumeroSousCategorieAfter2008.Contains(subCategorySearch, StringComparison.OrdinalIgnoreCase))
             {
-                filteredSubCategories.Add(categorie);
+                if (!SingletonForm.SelectedSubCategories.Contains(categorie))
+                {
+                    filteredSubCategories.Add(categorie);
+                }                
             }
         }
     }
 
     // Select a sub-category
-    private void SelectSubCategory(Souscategorieafter2008 subCategory)
+    private void SelectSubCategory(Souscategoriesafter2008 subCategory)
     {
         if (!SingletonForm.SelectedSubCategories.Contains(subCategory))
         {
@@ -353,7 +358,7 @@
     }
 
     // Remove a sub-category from the selection
-    private void RemoveSubCategory(Souscategorieafter2008 category)
+    private void RemoveSubCategory(Souscategoriesafter2008 category)
     {
         SingletonForm.SelectedSubCategories.Remove(category);
     }
