@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace IntegrationV3R_PortailFournisseur.Data.Models;
 
 public partial class ApplicationDbContext : DbContext
 {
+
     public ApplicationDbContext()
     {
     }
@@ -29,15 +31,11 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Fournisseur> Fournisseurs { get; set; }
 
-    public virtual DbSet<Licencesrbq> Licencesrbqs { get; set; }
-
     public virtual DbSet<Motsdepass> Motsdepasses { get; set; }
-
-    public virtual DbSet<Municipalite> Municipalites { get; set; }
 
     public virtual DbSet<Produitsservice> Produitsservices { get; set; }
 
-    public virtual DbSet<Province> Provinces { get; set; }
+    public virtual DbSet<Rbq> Rbqs { get; set; }
 
     public virtual DbSet<Regionadministrative> Regionadministratives { get; set; }
 
@@ -45,13 +43,9 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<SeaoUnspscNature> SeaoUnspscNatures { get; set; }
 
-    public virtual DbSet<SouscategorieLicencerbq> SouscategorieLicencerbqs { get; set; }
+    public virtual DbSet<Souscategorieafter2008> Souscategorieafter2008s { get; set; }
 
-    public virtual DbSet<Souscategoriesafter2008> Souscategoriesafter2008s { get; set; }
-
-    public virtual DbSet<Souscategoriesbefore2008> Souscategoriesbefore2008s { get; set; }
-
-    public virtual DbSet<Territoire> Territoires { get; set; }
+    public virtual DbSet<Souscategoriebefore2008> Souscategoriebefore2008s { get; set; }
 
     public virtual DbSet<UnspscClass> UnspscClasses { get; set; }
 
@@ -79,9 +73,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("adresses");
 
-            entity.HasIndex(e => e.CodeMunicipalite, "codeMunicipalite");
-
-            entity.HasIndex(e => e.CodeProvince, "codeProvince");
+            entity.HasIndex(e => e.CodeRegionAdministrative, "codeRegionAdministrative");
 
             entity.HasIndex(e => e.FournisseurId, "fournisseurId");
 
@@ -91,15 +83,12 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Bureau)
                 .HasMaxLength(2)
                 .HasColumnName("bureau");
-            entity.Property(e => e.CodeMunicipalite)
-                .HasMaxLength(5)
-                .HasColumnName("codeMunicipalite");
             entity.Property(e => e.CodePostal)
                 .HasMaxLength(6)
                 .HasColumnName("codePostal");
-            entity.Property(e => e.CodeProvince)
+            entity.Property(e => e.CodeRegionAdministrative)
                 .HasMaxLength(2)
-                .HasColumnName("codeProvince");
+                .HasColumnName("codeRegionAdministrative");
             entity.Property(e => e.FournisseurId)
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurId");
@@ -109,28 +98,29 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.NumeroCivique)
                 .HasMaxLength(5)
                 .HasColumnName("numeroCivique");
+            entity.Property(e => e.Pays)
+                .HasMaxLength(32)
+                .HasColumnName("pays");
             entity.Property(e => e.Poste)
                 .HasMaxLength(5)
                 .HasColumnName("poste");
-            entity.Property(e => e.Rue)
-                .HasMaxLength(64)
-                .HasColumnName("rue");
+            entity.Property(e => e.Province)
+                .HasMaxLength(32)
+                .HasColumnName("province");
+            entity.Property(e => e.Rue).HasMaxLength(64);
             entity.Property(e => e.Timestamps)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime")
                 .HasColumnName("timestamps");
+            entity.Property(e => e.Ville)
+                .HasMaxLength(64)
+                .HasColumnName("ville");
 
-            entity.HasOne(d => d.CodeMunicipaliteNavigation).WithMany(p => p.Adresses)
-                .HasPrincipalKey(p => p.CodeMunicipalite)
-                .HasForeignKey(d => d.CodeMunicipalite)
+            entity.HasOne(d => d.CodeRegionAdministrativeNavigation).WithMany(p => p.Adresses)
+                .HasPrincipalKey(p => p.CodeRegionAdministrative)
+                .HasForeignKey(d => d.CodeRegionAdministrative)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("adresses_ibfk_2");
-
-            entity.HasOne(d => d.CodeProvinceNavigation).WithMany(p => p.Adresses)
-                .HasPrincipalKey(p => p.CodeProvince)
-                .HasForeignKey(d => d.CodeProvince)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("adresses_ibfk_3");
 
             entity.HasOne(d => d.Fournisseur).WithMany(p => p.Adresses)
                 .HasForeignKey(d => d.FournisseurId)
@@ -142,7 +132,7 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.BrochureId).HasName("PRIMARY");
 
-            entity.ToTable("brochures");
+            entity.ToTable("brochure");
 
             entity.HasIndex(e => e.FournisseurId, "fournisseurId");
 
@@ -160,9 +150,9 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(128)
                 .HasColumnName("lienDocument");
             entity.Property(e => e.NoFichier).HasMaxLength(32);
-            entity.Property(e => e.NomFichier)
+            entity.Property(e => e.Nom)
                 .HasMaxLength(32)
-                .HasColumnName("nomFichier");
+                .HasColumnName("nom");
             entity.Property(e => e.Taille)
                 .HasMaxLength(8)
                 .HasColumnName("taille");
@@ -173,7 +163,7 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(d => d.Fournisseur).WithMany(p => p.Brochures)
                 .HasForeignKey(d => d.FournisseurId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("brochures_ibfk_1");
+                .HasConstraintName("brochure_ibfk_1");
         });
 
         modelBuilder.Entity<Conditionspaiement>(entity =>
@@ -277,7 +267,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("finances");
 
-            entity.HasIndex(e => e.CodeConditionPaiement, "codeConditionPaiement");
+            entity.HasIndex(e => e.ConditionPaiement, "conditionPaiement");
 
             entity.HasIndex(e => e.FournisseurId, "fournisseurId");
 
@@ -288,9 +278,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FinanceId)
                 .HasColumnType("int(11)")
                 .HasColumnName("financeId");
-            entity.Property(e => e.CodeConditionPaiement)
-                .HasMaxLength(4)
-                .HasColumnName("codeConditionPaiement");
+            entity.Property(e => e.ConditionPaiement)
+                .HasMaxLength(8)
+                .HasColumnName("conditionPaiement");
             entity.Property(e => e.Devise)
                 .HasMaxLength(4)
                 .HasColumnName("devise");
@@ -311,9 +301,9 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(16)
                 .HasColumnName("tvq");
 
-            entity.HasOne(d => d.CodeConditionPaiementNavigation).WithMany(p => p.Finances)
+            entity.HasOne(d => d.ConditionPaiementNavigation).WithMany(p => p.Finances)
                 .HasPrincipalKey(p => p.CodeConditionsPaiements)
-                .HasForeignKey(d => d.CodeConditionPaiement)
+                .HasForeignKey(d => d.ConditionPaiement)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("finances_ibfk_2");
 
@@ -346,7 +336,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("dateInscription");
             entity.Property(e => e.DetailsEntreprise)
-                .HasMaxLength(500)
+                .HasMaxLength(512)
                 .HasColumnName("detailsEntreprise");
             entity.Property(e => e.EtatCompte)
                 .IsRequired()
@@ -361,44 +351,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.NomEntreprise)
                 .HasMaxLength(64)
                 .HasColumnName("nomEntreprise");
-            entity.Property(e => e.RaisonRefus)
-                .HasMaxLength(500)
-                .HasColumnName("raisonRefus");
-            entity.Property(e => e.SiteWeb)
-                .HasMaxLength(64)
-                .HasColumnName("siteWeb");
-        });
-
-        modelBuilder.Entity<Licencesrbq>(entity =>
-        {
-            entity.HasKey(e => e.RbqId).HasName("PRIMARY");
-
-            entity.ToTable("licencesrbq");
-
-            entity.HasIndex(e => e.FournisseurId, "fournisseurId");
-
-            entity.HasIndex(e => e.NumLicence, "numLicence").IsUnique();
-
-            entity.Property(e => e.RbqId)
-                .HasColumnType("int(11)")
-                .HasColumnName("rbqId");
-            entity.Property(e => e.Categorie)
-                .HasMaxLength(32)
-                .HasColumnName("categorie");
-            entity.Property(e => e.FournisseurId)
-                .HasColumnType("int(11)")
-                .HasColumnName("fournisseurId");
-            entity.Property(e => e.NumLicence)
-                .HasMaxLength(10)
-                .HasColumnName("numLicence");
-            entity.Property(e => e.StatutLicence)
-                .HasMaxLength(10)
-                .HasColumnName("statutLicence");
-
-            entity.HasOne(d => d.Fournisseur).WithMany(p => p.Licencesrbqs)
-                .HasForeignKey(d => d.FournisseurId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("licencesrbq_ibfk_1");
         });
 
         modelBuilder.Entity<Motsdepass>(entity =>
@@ -432,38 +384,6 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("motsdepasses_ibfk_1");
         });
 
-        modelBuilder.Entity<Municipalite>(entity =>
-        {
-            entity.HasKey(e => e.MunicipaliteId).HasName("PRIMARY");
-
-            entity.ToTable("municipalites");
-
-            entity.HasIndex(e => e.CodeMunicipalite, "codeMunicipalite").IsUnique();
-
-            entity.HasIndex(e => e.CodeTerritoire, "codeTerritoire");
-
-            entity.HasIndex(e => e.NomMunicipalite, "nomMunicipalite").IsUnique();
-
-            entity.Property(e => e.MunicipaliteId)
-                .HasColumnType("int(11)")
-                .HasColumnName("municipaliteId");
-            entity.Property(e => e.CodeMunicipalite)
-                .HasMaxLength(5)
-                .HasColumnName("codeMunicipalite");
-            entity.Property(e => e.CodeTerritoire)
-                .HasMaxLength(5)
-                .HasColumnName("codeTerritoire");
-            entity.Property(e => e.NomMunicipalite)
-                .HasMaxLength(64)
-                .HasColumnName("nomMunicipalite");
-
-            entity.HasOne(d => d.CodeTerritoireNavigation).WithMany(p => p.Municipalites)
-                .HasPrincipalKey(p => p.CodeTerritoire)
-                .HasForeignKey(d => d.CodeTerritoire)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("municipalites_ibfk_1");
-        });
-
         modelBuilder.Entity<Produitsservice>(entity =>
         {
             entity.HasKey(e => e.ProduitId).HasName("PRIMARY");
@@ -480,6 +400,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ComoditeId)
                 .HasColumnType("int(11)")
                 .HasColumnName("comoditeId");
+            entity.Property(e => e.Details)
+                .HasMaxLength(64)
+                .HasColumnName("details");
             entity.Property(e => e.FournisseurId)
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurId");
@@ -499,32 +422,46 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("produitsservices_ibfk_1");
         });
 
-        modelBuilder.Entity<Province>(entity =>
+        modelBuilder.Entity<Rbq>(entity =>
         {
-            entity.HasKey(e => e.ProvinceId).HasName("PRIMARY");
+            entity.HasKey(e => e.RbqId).HasName("PRIMARY");
 
-            entity.ToTable("provinces");
+            entity.ToTable("rbq");
 
-            entity.HasIndex(e => e.CodeProvince, "codeProvince").IsUnique();
+            entity.HasIndex(e => e.FournisseurId, "fournisseurId");
 
-            entity.HasIndex(e => e.NomProvince, "nomProvince").IsUnique();
-
-            entity.Property(e => e.ProvinceId)
+            entity.Property(e => e.RbqId)
                 .HasColumnType("int(11)")
-                .HasColumnName("provinceId");
-            entity.Property(e => e.CodeProvince)
-                .HasMaxLength(2)
-                .HasColumnName("codeProvince");
-            entity.Property(e => e.NomProvince)
-                .HasMaxLength(30)
-                .HasColumnName("nomProvince");
+                .HasColumnName("rbqId");
+            entity.Property(e => e.Categorie)
+                .HasMaxLength(32)
+                .HasColumnName("categorie");
+            entity.Property(e => e.DateEmission).HasColumnName("dateEmission");
+            entity.Property(e => e.DateRenouvellememt).HasColumnName("dateRenouvellememt");
+            entity.Property(e => e.FournisseurId)
+                .HasColumnType("int(11)")
+                .HasColumnName("fournisseurId");
+            entity.Property(e => e.NumLicence)
+                .HasMaxLength(10)
+                .HasColumnName("numLicence");
+            entity.Property(e => e.SousCategorie)
+                .HasMaxLength(32)
+                .HasColumnName("sousCategorie");
+            entity.Property(e => e.StatutLicence)
+                .HasMaxLength(10)
+                .HasColumnName("statutLicence");
+
+            entity.HasOne(d => d.Fournisseur).WithMany(p => p.Rbqs)
+                .HasForeignKey(d => d.FournisseurId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("rbq_ibfk_1");
         });
 
         modelBuilder.Entity<Regionadministrative>(entity =>
         {
             entity.HasKey(e => e.RegionAdminId).HasName("PRIMARY");
 
-            entity.ToTable("regionadministratives");
+            entity.ToTable("regionadministrative");
 
             entity.HasIndex(e => e.CodeRegionAdministrative, "codeRegionAdministrative").IsUnique();
 
@@ -547,8 +484,6 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("seao_unspsc_categories");
 
-            entity.HasIndex(e => e.CategorieCode, "categorieCode").IsUnique();
-
             entity.HasIndex(e => e.CategorieNom, "categorieNom").IsUnique();
 
             entity.HasIndex(e => e.NatureCode, "natureCode");
@@ -561,7 +496,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("categorieCode");
             entity.Property(e => e.CategorieNom).HasColumnName("categorieNom");
             entity.Property(e => e.NatureCode)
-                .HasMaxLength(3)
+                .HasMaxLength(1)
                 .HasColumnName("natureCode");
 
             entity.HasOne(d => d.NatureCodeNavigation).WithMany(p => p.SeaoUnspscCategories)
@@ -584,51 +519,18 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("int(11)")
                 .HasColumnName("natureId");
             entity.Property(e => e.NatureCode)
-                .HasMaxLength(3)
+                .HasMaxLength(1)
                 .HasColumnName("natureCode");
             entity.Property(e => e.NatureNom)
                 .HasMaxLength(30)
                 .HasColumnName("natureNom");
         });
 
-        modelBuilder.Entity<SouscategorieLicencerbq>(entity =>
-        {
-            entity.HasKey(e => e.SousCategrorieRbqId).HasName("PRIMARY");
-
-            entity.ToTable("souscategorie_licencerbq");
-
-            entity.HasIndex(e => e.NumLicence, "numLicence").IsUnique();
-
-            entity.HasIndex(e => e.NumeroSousCategorie, "numeroSousCategorie").IsUnique();
-
-            entity.Property(e => e.SousCategrorieRbqId)
-                .HasColumnType("int(11)")
-                .HasColumnName("sousCategrorie_rbqId");
-            entity.Property(e => e.NumLicence)
-                .HasMaxLength(10)
-                .HasColumnName("numLicence");
-            entity.Property(e => e.NumeroSousCategorie)
-                .HasMaxLength(8)
-                .HasColumnName("numeroSousCategorie");
-
-            entity.HasOne(d => d.NumLicenceNavigation).WithOne(p => p.SouscategorieLicencerbq)
-                .HasPrincipalKey<Licencesrbq>(p => p.NumLicence)
-                .HasForeignKey<SouscategorieLicencerbq>(d => d.NumLicence)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("souscategorie_licencerbq_ibfk_1");
-
-            entity.HasOne(d => d.NumeroSousCategorieNavigation).WithOne(p => p.SouscategorieLicencerbq)
-                .HasPrincipalKey<Souscategoriesafter2008>(p => p.NumeroSousCategorieAfter2008)
-                .HasForeignKey<SouscategorieLicencerbq>(d => d.NumeroSousCategorie)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("souscategorie_licencerbq_ibfk_2");
-        });
-
-        modelBuilder.Entity<Souscategoriesafter2008>(entity =>
+        modelBuilder.Entity<Souscategorieafter2008>(entity =>
         {
             entity.HasKey(e => e.SousCategorieAfter2008Id).HasName("PRIMARY");
 
-            entity.ToTable("souscategoriesafter2008");
+            entity.ToTable("souscategorieafter2008");
 
             entity.HasIndex(e => e.NomSousCategorieAfter2008, "nomSousCategorieAfter2008").IsUnique();
 
@@ -643,15 +545,13 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("numeroSousCategorieAfter2008");
         });
 
-        modelBuilder.Entity<Souscategoriesbefore2008>(entity =>
+        modelBuilder.Entity<Souscategoriebefore2008>(entity =>
         {
             entity.HasKey(e => e.SousCategorieBefore2008Id).HasName("PRIMARY");
 
-            entity.ToTable("souscategoriesbefore2008");
+            entity.ToTable("souscategoriebefore2008");
 
             entity.HasIndex(e => e.NomSousCategorieBefore2008, "nomSousCategorieBefore2008").IsUnique();
-
-            entity.HasIndex(e => e.NumeroSousCategorieBefore2008, "numeroSousCategorieBefore2008").IsUnique();
 
             entity.Property(e => e.SousCategorieBefore2008Id).HasColumnType("int(11)");
             entity.Property(e => e.NomSousCategorieBefore2008)
@@ -660,38 +560,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.NumeroSousCategorieBefore2008)
                 .HasMaxLength(8)
                 .HasColumnName("numeroSousCategorieBefore2008");
-        });
-
-        modelBuilder.Entity<Territoire>(entity =>
-        {
-            entity.HasKey(e => e.TerritoireId).HasName("PRIMARY");
-
-            entity.ToTable("territoires");
-
-            entity.HasIndex(e => e.CodeRegionAdministrative, "codeRegionAdministrative");
-
-            entity.HasIndex(e => e.CodeTerritoire, "codeTerritoire").IsUnique();
-
-            entity.HasIndex(e => e.NomTerritoire, "nomTerritoire").IsUnique();
-
-            entity.Property(e => e.TerritoireId)
-                .HasColumnType("int(11)")
-                .HasColumnName("territoireId");
-            entity.Property(e => e.CodeRegionAdministrative)
-                .HasMaxLength(2)
-                .HasColumnName("codeRegionAdministrative");
-            entity.Property(e => e.CodeTerritoire)
-                .HasMaxLength(5)
-                .HasColumnName("codeTerritoire");
-            entity.Property(e => e.NomTerritoire)
-                .HasMaxLength(64)
-                .HasColumnName("nomTerritoire");
-
-            entity.HasOne(d => d.CodeRegionAdministrativeNavigation).WithMany(p => p.Territoires)
-                .HasPrincipalKey(p => p.CodeRegionAdministrative)
-                .HasForeignKey(d => d.CodeRegionAdministrative)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("territoires_ibfk_1");
         });
 
         modelBuilder.Entity<UnspscClass>(entity =>
@@ -733,8 +601,6 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("unspsc_comodites");
 
-            entity.HasIndex(e => e.CategorieSeao, "categorieSEAO");
-
             entity.HasIndex(e => e.ClasseNombre, "classeNombre");
 
             entity.HasIndex(e => e.ComoditeNombre, "comoditeNombre").IsUnique();
@@ -742,9 +608,6 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ComoditeId)
                 .HasColumnType("int(11)")
                 .HasColumnName("comoditeId");
-            entity.Property(e => e.CategorieSeao)
-                .HasMaxLength(3)
-                .HasColumnName("categorieSEAO");
             entity.Property(e => e.ClasseNombre)
                 .HasMaxLength(8)
                 .HasColumnName("classeNombre");
@@ -758,14 +621,10 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(64)
                 .HasColumnName("comoditeTitreFr");
 
-            entity.HasOne(d => d.CategorieSeaoNavigation).WithMany(p => p.UnspscComodites)
-                .HasPrincipalKey(p => p.CategorieCode)
-                .HasForeignKey(d => d.CategorieSeao)
-                .HasConstraintName("unspsc_comodites_ibfk_2");
-
             entity.HasOne(d => d.ClasseNombreNavigation).WithMany(p => p.UnspscComodites)
                 .HasPrincipalKey(p => p.ClasseNombre)
                 .HasForeignKey(d => d.ClasseNombre)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("unspsc_comodites_ibfk_1");
         });
 

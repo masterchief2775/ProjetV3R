@@ -11,7 +11,7 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="tpsInput" class="form-label">Numéro de TPS</label>
-                <input type="text" class="form-control" id="tpsInput" @bind="SingletonForm.Tps">
+                <input type="text" class="form-control" id="tpsInput" @bind="SingletonForm.TpsInput">
                 @if (!string.IsNullOrEmpty(tpsError))
                 {
                     <div class="text-danger">@tpsError</div>
@@ -20,7 +20,7 @@
 
             <div class="col-md-6">
                 <label for="tvqInput" class="form-label">Numéro de TVQ</label>
-                <input type="text" class="form-control" id="tvqInput" @bind="SingletonForm.Tvq">
+                <input type="text" class="form-control" id="tvqInput" @bind="SingletonForm.TvqInput">
                 @if (!string.IsNullOrEmpty(tvqError))
                 {
                     <div class="text-danger">@tvqError</div>
@@ -44,11 +44,11 @@
                 <fieldset>
                     <legend>Devise</legend>
                     <div class="form-check">
-                        <input type="radio" class="form-check-input" id="cad" name="currency"  @bind="SingletonForm.Devise">
+                        <input type="radio" class="form-check-input" id="cad" name="currency" @bind="SingletonForm.Devise">
                         <label class="form-check-label" for="cad">CAD – Dollar canadien</label>
                     </div>
                     <div class="form-check">
-                        <input type="radio" class="form-check-input" id="usd" name="currency"  @bind="SingletonForm.Devise">
+                        <input type="radio" class="form-check-input" id="usd" name="currency" @bind="SingletonForm.Devise">
                         <label class="form-check-label" for="usd">USD – Dollar des États-Unis</label>
                     </div>
                 </fieldset>
@@ -58,7 +58,7 @@
                 <fieldset>
                     <legend>Mode de communication</legend>
                     <div class="form-check">
-                        <input type="radio" class="form-check-input" id="email" name="communicationMode"  @bind="SingletonForm.ModeCom">
+                        <input type="radio" class="form-check-input" id="email" name="communicationMode" @bind="SingletonForm.ModeCom">
                         <label class="form-check-label" for="email">Courriel</label>
                     </div>
                     <div class="form-check">
@@ -75,7 +75,8 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }
-    private SingletonFormulaire SingletonForm => SingletonFormulaire.Instance;
+
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     private string tpsError = string.Empty;
     private string tvqError = string.Empty;
@@ -101,16 +102,30 @@
         var isValid = true;
 
         // Validation for TPS (if any required format, e.g., numeric)
-        if (!string.IsNullOrWhiteSpace(SingletonForm.Tps) && !IsNumeric(SingletonForm.Tps))
+        if (!string.IsNullOrWhiteSpace(SingletonForm.TpsInput) && !IsNumeric(SingletonForm.TpsInput))
         {
             tpsError = "Le numéro de TPS doit être numérique.";
             isValid = false;
         }
 
         // Validation for TVQ (if any required format, e.g., numeric)
-        if (!string.IsNullOrWhiteSpace(SingletonForm.Tvq) && !IsNumeric(SingletonForm.Tvq))
+        if (!string.IsNullOrWhiteSpace(SingletonForm.TvqInput) && !IsNumeric(SingletonForm.TvqInput))
         {
             tvqError = "Le numéro de TVQ doit être numérique.";
+            isValid = false;
+        }
+
+        // Ensure that one of the currency options is selected
+        if (string.IsNullOrEmpty(SingletonForm.Devise))
+        {
+            tpsError = "Veuillez sélectionner une devise.";
+            isValid = false;
+        }
+
+        // Ensure that one of the communication mode options is selected
+        if (string.IsNullOrEmpty(SingletonForm.ModeCom))
+        {
+            tvqError = "Veuillez sélectionner un mode de communication.";
             isValid = false;
         }
 
@@ -119,8 +134,8 @@
 
     private void LogToConsole()
     {
-        Console.WriteLine($"Numéro de TPS: {SingletonForm.Tps}");
-        Console.WriteLine($"Numéro de TVQ: {SingletonForm.Tvq}");
+        Console.WriteLine($"Numéro de TPS: {SingletonForm.TpsInput}");
+        Console.WriteLine($"Numéro de TVQ: {SingletonForm.TvqInput}");
         Console.WriteLine($"Conditions de paiement: {SingletonForm.ConditionPaiement}");
         Console.WriteLine($"Devise: {SingletonForm.Devise}");
         Console.WriteLine($"Mode de communication: {SingletonForm.ModeCom}");

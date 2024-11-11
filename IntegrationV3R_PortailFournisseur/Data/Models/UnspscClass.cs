@@ -11,7 +11,7 @@ public partial class UnspscClass
 
     public string ClasseNombre { get; set; } = null!;
 
-    public string? ClasseTitreEn { get; set; }
+    public string ClasseTitreEn { get; set; } = null!;
 
     public string ClasseTitreFr { get; set; } = null!;
 

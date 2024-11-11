@@ -1,7 +1,6 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
@@ -44,12 +43,18 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public List<Souscategoriesafter2008> SelectedSubCategories = new List<Souscategoriesafter2008>();
 
+        // New properties for Finances
+        public string TpsInput { get; set; } = string.Empty;  // Numéro de TPS
+        public string TvqInput { get; set; } = string.Empty;  // Numéro de TVQ
+        public string ConditionPaiement { get; set; } = "Dans les 30 jours sans déduction"; // Default option for conditions
+        public string Devise { get; set; } = "CAD"; // Default to CAD
+        public string ModeCom { get; set; } = "email"; // Default to email for communication mode
+
         public SingletonFormulaire() { }
 
         public void LogDataToConsole()
         {
             Console.WriteLine("*****************************************************************************************");
-
             // Log identification data
             Console.WriteLine("\n***IDENTIFICATION***");
             Console.WriteLine($"Nom de l'entreprise: {NomEntrepriseInput}");
@@ -98,16 +103,13 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 Console.WriteLine($"\t{sousCategorie.NumeroSousCategorieAfter2008} - {sousCategorie.NomSousCategorieAfter2008}");
             }
 
-            // Log Finance Data
-            Console.WriteLine("\n***FINANCE***");
-            Console.WriteLine($"Finance ID: {FinanceId}");
-            Console.WriteLine($"Fournisseur ID: {FournisseurId}");
-            Console.WriteLine($"TVQ: {Tvq}");
-            Console.WriteLine($"TPS: {Tps}");
-            Console.WriteLine($"Condition de Paiement: {ConditionPaiement}");
+            // Log Finances data
+            Console.WriteLine("\n***FINANCES***");
+            Console.WriteLine($"Numéro de TPS: {TpsInput}");
+            Console.WriteLine($"Numéro de TVQ: {TvqInput}");
+            Console.WriteLine($"Conditions de paiement: {ConditionPaiement}");
             Console.WriteLine($"Devise: {Devise}");
-            Console.WriteLine($"Mode de Communication: {ModeCom}");
-            Console.WriteLine($"Timestamp: {Timestamps}");
+            Console.WriteLine($"Mode de communication: {ModeCom}");
 
             Console.WriteLine("----------------------------------------------------------------------------------------------");
         }
@@ -115,71 +117,23 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
             /*
-            // Création de l'entité Fournisseur
+            // Example code to save financial data along with other fields
             var fournisseur = new Fournisseur
             {
                 NomEntreprise = this.NomEntrepriseInput,
                 Neq = this.NeqInput,
                 CourrielEntreprise = this.EmailInput,
                 EtatDemande = "En attente",
-                DateInscription = DateTime.Now
+                DateInscription = DateTime.Now,
+                Tps = this.TpsInput,
+                Tvq = this.TvqInput,
+                ConditionPaiement = this.ConditionPaiement,
+                Devise = this.Devise,
+                ModeCom = this.ModeCom
             };
             dbContext.Fournisseurs.Add(fournisseur);
             await dbContext.SaveChangesAsync();
-
-            // Création de l'adresse
-            var adresse = new Adress
-            {
-                NumeroCivique = this.NumCiviqueInput,
-                Bureau = this.BureauInput,
-                Rue = this.RueInput,
-                Ville = this.VilleInput,
-                Province = this.ProvinceInput,
-                CodePostal = this.CodePostalInput,
-                FournisseurId = fournisseur.FournisseurId
-            };
-            dbContext.Adresses.Add(adresse);
-
-
-            // Ajouter les contacts
-            foreach (var contactInput in this.ContactsInput)
-            {
-                var contact = new Contact
-                {
-                    PrenomContact = contactInput.Prenom,
-                    NomContact = contactInput.Nom,
-                    FonctionContact = contactInput.Role,
-                    CourrielContact = contactInput.Email,
-                    NumTelContact = contactInput.NumeroTelephone,
-                    TypeTel = contactInput.TypeTelephone,
-                    PosteTelContact = contactInput.Poste,
-                    FournisseurId = fournisseur.FournisseurId
-                };
-                dbContext.Contacts.Add(contact);
-            }
-
-            // Ajouter les produits/services
-            foreach (var produit in this.ProduitsServicesSelectionnesInput)
-            {
-                var produitService = new Produitsservice
-                {
-                    Details = this.DescriptionProduitsServicesInput,
-                    FournisseurId = fournisseur.FournisseurId
-                };
-                dbContext.Produitsservices.Add(produitService);
-            }
-
-            // Ajouter les informations RBQ
-            var rbq = new Rbq
-            {
-                NumLicence = this.RBQNumberInput,
-                StatutLicence = this.SelectedStatus,
-                FournisseurId = fournisseur.FournisseurId
-            };
-            dbContext.Rbqs.Add(rbq);
-
-            // Sauvegarder les modifications
-            await dbContext.SaveChangesAsync();*/
+            */
         }
     }
 

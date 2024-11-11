@@ -7,13 +7,11 @@ public partial class SeaoUnspscCategory
 {
     public int CategorieId { get; set; }
 
-    public string CategorieCode { get; set; } = null!;
+    public string? NatureCode { get; set; }
+
+    public string? CategorieCode { get; set; }
 
     public string? CategorieNom { get; set; }
 
-    public string? NatureCode { get; set; }
-
     public virtual SeaoUnspscNature? NatureCodeNavigation { get; set; }
-
-    public virtual ICollection<UnspscComodite> UnspscComodites { get; } = new List<UnspscComodite>();
 }
