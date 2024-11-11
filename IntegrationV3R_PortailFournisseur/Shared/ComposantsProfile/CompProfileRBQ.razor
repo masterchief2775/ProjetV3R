@@ -1,0 +1,29 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+<h5>Licences RBQ</h5>
+
+@if (Licences != null && Licences.Any())
+{
+        <div class="rbq-list">
+        @foreach (var rbq in Licences)
+        {
+                    <div class="rbq-entry mb-3 row">
+                        <div class="col-md-6">
+                            <strong>Numéro RBQ:</strong> @rbq.NumLicence
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Nom Sous-catégorie:</strong> @rbq.SouscategorieLicencerbq
+                        </div>
+                    </div>
+        }
+        </div>
+}
+else
+{
+        <p>No RBQ licenses found.</p>
+}
+
+@code {
+    [Parameter]
+    public List<Licencesrbq> Licences { get; set; }
+}

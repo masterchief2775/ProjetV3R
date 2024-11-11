@@ -7,144 +7,130 @@
 @inject NavigationManager Navigation
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-<PageTitle>Profile</PageTitle>
+<PageTitle>Profil</PageTitle>
 
 <div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar with buttons on the left -->
+        <div class="col-md-3">
+            <div class="btn-group-vertical w-100">
+                <button class="btn btn-primary mb-3" @onclick="ShowIdentification">
+                    @if (isIdentificationVisible)
+                    {
+                        <text>--Identification--</text>
+                    }
+                    else
+                    {
+                        <text>Identification</text>
+                    }
+                </button>
 
-    <!-- Button to Toggle Identification Section -->
-    <button class="btn btn-primary mb-3" @onclick="ToggleIdentificationVisibility">
-        @if (isIdentificationVisible)
-        {
-            <text>Hide Identification</text>
-        }
-        else
-        {
-            <text>Show Identification</text>
-        }
-    </button>
+                <button class="btn btn-primary mb-3" @onclick="ShowAddress">
+                    @if (isAddressVisible)
+                    {
+                        <text>--Adresse--</text>
+                    }
+                    else
+                    {
+                        <text>Adresse</text>
+                    }
+                </button>
 
-    <!-- Conditionally show the Identification component -->
-    @if (isIdentificationVisible)
-    {
-        <CompProfileIdentification neq="@neq"
-                               nomEntreprise="@nomEntreprise"
-                               courrielEntreprise="@courrielEntreprise" />
-    }
+                <button class="btn btn-primary mb-3" @onclick="ShowRBQLicences">
+                    @if (isRBQLicencesVisible)
+                    {
+                        <text>--Lisence RBQ--</text>
+                    }
+                    else
+                    {
+                        <text>Lisence RBQ</text>
+                    }
+                </button>
 
-    <!-- Button to Toggle Address Section -->
-    <button class="btn btn-primary mb-3" @onclick="ToggleAddressVisibility">
-        @if (isAddressVisible)
-        {
-            <text>Hide Address</text>
-        }
-        else
-        {
-            <text>Show Address</text>
-        }
-    </button>
+                <button class="btn btn-primary mb-3" @onclick="ShowFinances">
+                    @if (isFinancesVisible)
+                    {
+                        <text>--Finances--</text>
+                    }
+                    else
+                    {
+                        <text>Finances</text>
+                    }
+                </button>
 
-    <!-- Conditionally show the Address Section -->
-    @if (isAddressVisible)
-    {
-        <CompProfileAdresse NumeroCiv="@numeroCiv"
-                            Rue="@rue"
-                            Ville="@ville"
-                            Province="@province"
-                            CodePostal="@codePostal"
-                            RegionAdministrative="@regionAdministrative"
-                            NumeroTelephone="@numeroTelephone" />
-    }
+                <button class="btn btn-primary mb-3" @onclick="ShowContacts">
+                    @if (isContactsVisible)
+                    {
+                        <text>--Contacts--</text>
+                    }
+                    else
+                    {
+                        <text>Contacts</text>
+                    }
+                </button>
 
-    <!-- Button to Toggle Contacts Section -->
-    <button class="btn btn-primary mb-3" @onclick="ToggleContactsVisibility">
-        @if (isContactsVisible)
-        {
-            <text>Hide Contacts</text>
-        }
-        else
-        {
-            <text>Show Contacts</text>
-        }
-    </button>
+                <button class="btn btn-primary mb-3" @onclick="ShowProducts">
+                    @if (isProductsVisible)
+                    {
+                        <text>--Produits--</text>
+                    }
+                    else
+                    {
+                        <text>Produits</text>
+                    }
+                </button>
+            </div> <!-- btn-group-vertical -->
+        </div> <!-- col-md-3 -->
+        <!-- Right column to display components -->
+        <div class="col-md-9">
+            <div class="content-panel">
+                @if (isIdentificationVisible)
+                {
+                    <CompProfileIdentification neq="@neq"
+                                           nomEntreprise="@nomEntreprise"
+                                           courrielEntreprise="@courrielEntreprise" />
+                }
 
-    <!-- Conditionally show the Contacts Section -->
-    @if (isContactsVisible)
-    {
-        <CompProfileContact Contacts="@contacts" />
-    }
+                @if (isAddressVisible)
+                {
+                    <CompProfileAdresse NumeroCiv="@numeroCiv"
+                                    Rue="@rue"
+                                    Ville="@ville"
+                                    Province="@province"
+                                    CodePostal="@codePostal"
+                                    RegionAdministrative="@regionAdministrative"
+                                    NumeroTelephone="@numeroTelephone" />
 
-    <div class="profile-container">
+                }
 
-        <!-- Products/Services Section -->
-        <h5>Products/Services</h5>
-        @if (products != null && products.Any())
-        {
-            @foreach (var product in products)
-            {
-                <div class="product-entry mb-3 row">
-                    <div class="col-6 mb-3">
-                        <strong>Comodite: </strong> @product.ComoditeId<br>
-                        <!--<strong>Details:</strong> @product.Details<br>-->
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div>No products/services available.</div>
-        }
+                @if (isRBQLicencesVisible)
+                {
+                    <CompProfileRBQ Licences="@rbqDetails" />
+                }
 
-        <!-- RBQ Section -->
-        <h5>RBQ Details</h5>
-        @if (rbqDetails != null && rbqDetails.Any())
-        {
-            @foreach (var rbq in rbqDetails)
-            {
-                <div class="rbq-entry mb-3 row">
-                    <div class="col-6 mb-3">
-                        <strong>Numéro RBQ:</strong> @rbq.NumLicence<br>
-                        <strong>Nom Sous-catégorie:</strong> @rbq.SouscategorieLicencerbq<br>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div>No RBQ details available.</div>
-        }
+                @if (isFinancesVisible)
+                {
+                    <CompProfileFinances Tps="@tps"
+                                     Tvq="@tvq"
+                                     CodeConditionPaiement="@conditionPaiement"
+                                     Devise="@devise"
+                                     ModeCom="@modeCom" />
+                }
 
-        <!-- Finances Section -->
-        <h5>Finances</h5>
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <strong>TPS Number:</strong> @tps
-            </div>
+                @if (isContactsVisible)
+                {
+                    <CompProfileContact Contacts="@contacts" />
+                }
 
-            <div class="col-md-6">
-                <strong>TVQ Number:</strong> @tvq
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <strong>Payment Terms:</strong> @conditionPaiement
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <strong>Currency</strong> @devise
-            </div>
-
-            <div class="col-md-6">
-                <strong>Communication Mode</strong> @modeCom
-            </div>
-        </div>
-    </div>
-</div>
-
+                @if (isProductsVisible)
+                {
+                    <CompProfileProduit Products="@products" />
+                }
+            </div> <!-- content-panel -->
+        </div> <!-- col-md-9 -->
+    </div> <!-- row -->
+</div> <!-- container-fluid -->
 @code {
-
     private bool isUserAuthenticated = false;
     private Fournisseur fournisseur;
 
@@ -154,24 +140,12 @@
     private string nomEntreprise = "";
     private string courrielEntreprise = "";
 
-    private bool isIdentificationVisible = false; // Flag to toggle identification visibility
-    private bool isAddressVisible = false; // Flag to toggle address visibility
-    private bool isContactsVisible = false; // Flag to toggle contacts visibility
-
-    private void ToggleIdentificationVisibility()
-    {
-        isIdentificationVisible = !isIdentificationVisible; // Toggle visibility flag
-    }
-
-    private void ToggleAddressVisibility()
-    {
-        isAddressVisible = !isAddressVisible; // Toggle visibility flag for the address
-    }
-
-    private void ToggleContactsVisibility()
-    {
-        isContactsVisible = !isContactsVisible; // Toggle visibility flag for contacts
-    }
+    private bool isIdentificationVisible = true; // Identification is visible by default
+    private bool isAddressVisible = false;
+    private bool isContactsVisible = false;
+    private bool isProductsVisible = false;
+    private bool isRBQLicencesVisible = false;
+    private bool isFinancesVisible = false;
 
     private string numeroCiv = "";
     private string rue = "";
@@ -189,11 +163,85 @@
 
     private List<Contact> contacts = new List<Contact>();
     private List<Produitsservice> products = new List<Produitsservice>();
-    private List<Licencesrbq> rbqDetails = new List<Licencesrbq>(); // RBQ list for display
+    private List<Licencesrbq> rbqDetails = new List<Licencesrbq>();
+    private List<Municipalite> municipalites = new List<Municipalite>();
+    private List<Province> provinces = new List<Province>();
+
+    private void ShowIdentification()
+    {
+        // Show only identification and hide others
+        isIdentificationVisible = true;
+        isAddressVisible = false;
+        isContactsVisible = false;
+        isProductsVisible = false;
+        isRBQLicencesVisible = false;
+        isFinancesVisible = false;
+    }
+
+    private void ShowAddress()
+    {
+        // Show only address and hide others
+        isIdentificationVisible = false;
+        isAddressVisible = true;
+        isContactsVisible = false;
+        isProductsVisible = false;
+        isRBQLicencesVisible = false;
+        isFinancesVisible = false;
+    }
+
+    private void ShowContacts()
+    {
+        // Show only contacts and hide others
+        isIdentificationVisible = false;
+        isAddressVisible = false;
+        isContactsVisible = true;
+        isProductsVisible = false;
+        isRBQLicencesVisible = false;
+        isFinancesVisible = false;
+    }
+
+    private void ShowProducts()
+    {
+        // Show only products and hide others
+        isIdentificationVisible = false;
+        isAddressVisible = false;
+        isContactsVisible = false;
+        isProductsVisible = true;
+        isRBQLicencesVisible = false;
+        isFinancesVisible = false;
+    }
+
+    private void ShowRBQLicences()
+    {
+        // Show only RBQ Licenses and hide others
+        isIdentificationVisible = false;
+        isAddressVisible = false;
+        isContactsVisible = false;
+        isProductsVisible = false;
+        isRBQLicencesVisible = true;
+        isFinancesVisible = false;
+    }
+
+    private void ShowFinances()
+    {
+        // Show only finances and hide others
+        isIdentificationVisible = false;
+        isAddressVisible = false;
+        isContactsVisible = false;
+        isProductsVisible = false;
+        isRBQLicencesVisible = false;
+        isFinancesVisible = true;
+    }
 
     protected override async Task OnInitializedAsync()
     {
-        await FetchDataDB();
+        // Fetch the municipalites data from the database
+        municipalites = await dbContext.Municipalites
+            .Include(m => m.CodeTerritoireNavigation)  // Make sure you include the related 'Territoire'
+            .ToListAsync();
+
+        // Fetch the provinces data from the database
+        provinces = await dbContext.Provinces.ToListAsync();
 
         var userId = await sessionStorage.GetItemAsync<int?>("UserId");
 
@@ -213,10 +261,9 @@
                     .ThenInclude(f => f.Finances)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
-                //.Include(u => u.Fournisseur)
-                //    .ThenInclude(f => f.)
                 .Include(u => u.Fournisseur) // Include RBQ entities
                     .ThenInclude(f => f.Licencesrbqs) // Assuming this is the navigation property
+                .Include(u => u.Fournisseur)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
@@ -225,24 +272,40 @@
                 if (fournisseur != null)
                 {
                     // Set identification fields
-                    neq = fournisseur.Neq; // Assuming Fournisseur has a property for NEQ
-                    nomEntreprise = fournisseur.NomEntreprise; // Assuming Fournisseur has a property for the company name
-                    courrielEntreprise = fournisseur.CourrielEntreprise; // Assuming Fournisseur has a property for the email
+                    neq = fournisseur.Neq;
+                    nomEntreprise = fournisseur.NomEntreprise;
+                    courrielEntreprise = fournisseur.CourrielEntreprise;
 
                     // Set address fields
-                    var address = fournisseur.Adresses.FirstOrDefault(); // Assuming there is at least one address
+                    var address = fournisseur.Adresses.FirstOrDefault();
                     if (address != null)
                     {
-                        numeroCiv = address.NumeroCivique; // Ensure you have these properties in your address model
+                        numeroCiv = address.NumeroCivique;
                         rue = address.Rue;
-                        ville = address.CodeMunicipalite /*DOOIT CHANG> POUR TROUVER LE NOM A CE CODE DE MUNICIPALITE*/;
-                        province = address.CodeProvince /*IDEM !!!!!!*/;
+
+                        var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
+                        ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
+
+                        var provinceObj = provinces.FirstOrDefault(p => p.CodeProvince == address.CodeProvince);
+                        province = provinceObj?.NomProvince ?? "Province Inconnue";
+
                         codePostal = address.CodePostal;
-                        /* regionAdministrative = GetRegionName(address.CodeRegionAdministrative); DOIT PASSER PAR PROVINCE PUIS REGION*/
                         numeroTelephone = address.NumTel;
+
+                        // Now, set RegionAdministrative
+                        if (municipality?.CodeTerritoireNavigation != null)
+                        {
+                            // Get the RegionAdministrative name from the Territoire
+                            regionAdministrative = municipality.CodeTerritoireNavigation.CodeRegionAdministrative ?? "Région administrative Inconnue";
+                        }
+                        else
+                        {
+                            regionAdministrative = "Territoire ou Région inconnus";
+                        }
                     }
 
-                    var finance = fournisseur.Finances.FirstOrDefault(); // Assuming there is at least one address
+                    // Set finances fields
+                    var finance = fournisseur.Finances.FirstOrDefault();
                     if (finance != null)
                     {
                         tvq = finance.Tvq;
@@ -253,38 +316,16 @@
                     }
 
                     // Fetch products/services
-                    products = fournisseur.Produitsservices.ToList(); // Assuming this is correctly populated
+                    products = fournisseur.Produitsservices.ToList();
 
                     // Fetch RBQ details
-                    rbqDetails = fournisseur.Licencesrbqs.ToList(); // Adjust as per your model
+                    rbqDetails = fournisseur.Licencesrbqs.ToList();
 
                     // Fetch contacts
-                    contacts = fournisseur.Contacts.ToList(); // Fetching contacts from fournisseur
+                    contacts = fournisseur.Contacts.ToList();
                 }
             }
         }
     }
 
-    private List<Regionadministrative> regions = new List<Regionadministrative>();
-    
-
-    private string GetRegionName(string code)
-    {
-        var region = regions.FirstOrDefault(r => r.CodeRegionAdministrative == code);
-        return region != null ? region.NomRegionAmdin : "Région non disponible";
-    }
-
-    public async Task FetchDataDB()
-    {
-        try
-        {
-            regions = await dbContext.Regionadministratives.ToListAsync();
-        }
-        catch (Exception ex)
-        {
-            regionAdministrative = "Erreur lors de la récupération des régions.";
-            Console.WriteLine(ex.Message);
-        }
-        BDFetched.InvokeAsync(true);
-    }
 }
