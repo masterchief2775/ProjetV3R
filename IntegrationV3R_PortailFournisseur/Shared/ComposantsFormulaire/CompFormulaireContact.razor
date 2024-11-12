@@ -232,18 +232,16 @@
         contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
 
         // Validate Poste
-        if (string.IsNullOrWhiteSpace(contact.Poste))
+        if (!string.IsNullOrWhiteSpace(contact.Poste))
         {
-            contact.PosteError = "Le poste est requis.";
+            bool isNumeric = int.TryParse(contact.NumeroTelephone, out int n);
+            if (!isNumeric || contact.NumeroTelephone.Length > 5)
+            {
+                contact.PosteError = "Le numero de poste doit être numérique et au plus de 5 chiffres.";
+            }
         }
-        else if (!Regex.IsMatch(contact.Poste, @"^\d{1,6}$"))
-        {
-            contact.PosteError = "Le poste doit être numérique et contenir au maximum 6 chiffres.";
-        }
-        else
-        {
-            contact.PosteError = string.Empty; // Clear error if valid
-        }
+        
+        
     }
 
 

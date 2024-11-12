@@ -116,6 +116,15 @@
             }
         </div>
 
+        <div class="mb-3 col-6">
+            <label for="numeroPosteInput" class="form-label">Numero de poste</label>
+            <input type="text" class="form-control" id="numeroPosteInput" @bind="SingletonForm.NumeroPosteInput">
+            @if (!string.IsNullOrEmpty(@numeroPosteError))
+            {
+                <div class="text-danger">@numeroPosteError</div>
+            }
+        </div>
+
         <div class="mb-3">
             <label for="siteWebInput" class="form-label">Site web de l'entreprise</label>
             <input type="url" class="form-control" id="siteWebInput" @bind="SingletonForm.SiteWebInput">
@@ -152,6 +161,7 @@
     private string villeError = string.Empty;
     private string codePostalError = string.Empty;
     private string numeroTelephoneError = string.Empty;
+    private string numeroPosteError = string.Empty;
     private string siteWebError = string.Empty;
     private string regionError = string.Empty;
 
@@ -313,7 +323,7 @@
 
         if (string.IsNullOrWhiteSpace(SingletonForm.NumCiviqueInput))
         {
-            numCiviqueError = "Le numéro civique est requis";
+            numCiviqueError = "Le numéro civique est requis.";
             isValid = false;
         }
         else if (!SingletonForm.NumCiviqueInput.All(char.IsDigit))
@@ -324,19 +334,19 @@
 
         if (string.IsNullOrWhiteSpace(SingletonForm.RueInput))
         {
-            rueError = "Le nom de rue est requis";
+            rueError = "Le nom de rue est requis.";
             isValid = false;
         }
 
         if (string.IsNullOrWhiteSpace(SingletonForm.MunicipaliteInput))
         {
-            villeError = "Le nom de la ville est requis";
+            villeError = "Le nom de la ville est requis.";
             isValid = false;
         }
 
         if (string.IsNullOrWhiteSpace(SingletonForm.ProvinceInput))
         {
-            provinceError = "Le nom de la province est requis";
+            provinceError = "Le nom de la province est requis.";
             isValid = false;
         }
 
@@ -344,6 +354,10 @@
         {
             codePostalError = "Le code postal est requis.";
             isValid = false;
+        }
+        else if (!Regex.IsMatch(SingletonForm.CodePostalInput, @"^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$") && !Regex.IsMatch(SingletonForm.CodePostalInput, @"^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$"))
+        {
+            codePostalError = "Le code postal doit être au formet A0A 0A0";
         }
 
         // Validate phone number format
@@ -357,6 +371,17 @@
             numeroTelephoneError = "Le numéro de téléphone doit être au format XXX-XXX-XXXX.";
             isValid = false;
         }
+
+        if (!string.IsNullOrWhiteSpace(SingletonForm.NumeroPosteInput))
+        {
+            bool isNumeric = int.TryParse(SingletonForm.NumeroPosteInput, out int n);
+            if (!isNumeric || SingletonForm.NumeroPosteInput.Length > 5)
+            {
+                numeroPosteError = "Le numero de poste doit être numérique et au plus de 5 chiffres.";
+                isValid = false;
+            }
+        }
+        
 
         if (string.IsNullOrWhiteSpace(SingletonForm.RegionInput))
         {

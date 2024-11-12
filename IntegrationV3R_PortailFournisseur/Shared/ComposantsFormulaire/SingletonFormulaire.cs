@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
@@ -27,6 +28,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string CodePostalInput { get; set; } = string.Empty;
         public string RegionInput { get; set; } = string.Empty;
         public string NumeroTelephoneInput { get; set; } = string.Empty;
+        public string NumeroPosteInput { get; set; } = string.Empty;
         public string SiteWebInput { get; set; } = string.Empty;
 
         // Properties to hold data from contacts
@@ -104,6 +106,16 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
+            /*EXEMPLE D'UTILISATION DE METHODES STOCKES
+            var result = await dbContext.Database.ExecuteSqlRawAsync("CALL insertFournisseur(@nom, @neq, @courriel, @details, @etatDemande, @etatCompte, @siteWeb)",
+                new MySqlParameter("@nom", fournisseur.NomEntreprise),
+                new MySqlParameter("@neq", fournisseur.Neq),
+                new MySqlParameter("@courriel", fournisseur.CourrielEntreprise),
+                new MySqlParameter("@details", fournisseur.DetailsEntreprise),
+                new MySqlParameter("@etatDemande", fournisseur.EtatDemande),
+                new MySqlParameter("@etatCompte", fournisseur.EtatCompte),
+                new MySqlParameter("@siteWeb", fournisseur.SiteWeb));*/
+
 
             // Création de l'entité Fournisseur
             var fournisseur = new Fournisseur
@@ -116,17 +128,18 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 EtatCompte = true,
                 SiteWeb= this.SiteWebInput,
             };
-            var result = await dbContext.Database.ExecuteSqlRawAsync("CALL insertFournisseur(@nom, @neq, @courriel, @details, @etatDemande, @etatCompte, @siteWeb)",
-                new MySqlParameter("@nom", fournisseur.NomEntreprise),
-                new MySqlParameter("@neq", fournisseur.Neq),
-                new MySqlParameter("@courriel", fournisseur.CourrielEntreprise),
-                new MySqlParameter("@details", fournisseur.DetailsEntreprise),
-                new MySqlParameter("@etatDemande", fournisseur.EtatDemande),
-                new MySqlParameter("@etatCompte", fournisseur.EtatCompte),
-                new MySqlParameter("@siteWeb", fournisseur.SiteWeb));
-
             
+
+            dbContext.Fournisseurs.Add( fournisseur );
+
+            await dbContext.SaveChangesAsync();
+
+
             // Création de l'adresse
+            string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
+            string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
+            
+            Console.WriteLine(cleanedNumeroTelephone);
             var adresse = new Adress
             {
                 NumeroCivique = this.NumCiviqueInput,
@@ -134,33 +147,34 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 Rue = this.RueInput,
                 CodeMunicipalite = this.MunicipaliteInput,
                 CodeProvince = this.ProvinceInput,
-                CodePostal = this.CodePostalInput,
-                NumTel = this.NumeroTelephoneInput,                
+                CodePostal = cleanedCodePostal,
+                NumTel = cleanedNumeroTelephone,
+                Poste = this.NumeroPosteInput,
                 FournisseurId = fournisseur.FournisseurId
-            };
-
-
+            }; 
             dbContext.Adresses.Add(adresse);
-
             await dbContext.SaveChangesAsync();
-            /*
+            
             // Ajouter les contacts
             foreach (var contactInput in this.ContactsInput)
             {
+                string cleanedTelephone = Regex.Replace(contactInput.NumeroTelephone, @"-", "");
                 var contact = new Contact
                 {
                     PrenomContact = contactInput.Prenom,
                     NomContact = contactInput.Nom,
                     FonctionContact = contactInput.Role,
                     CourrielContact = contactInput.Email,
-                    NumTelContact = contactInput.NumeroTelephone,
+                    NumTelContact = cleanedTelephone,
                     TypeTel = contactInput.TypeTelephone,
                     PosteTelContact = contactInput.Poste,
                     FournisseurId = fournisseur.FournisseurId
                 };
                 dbContext.Contacts.Add(contact);
             }
+            await dbContext.SaveChangesAsync();
 
+            /*
             // Ajouter les produits/services
             foreach (var produit in this.ProduitsServicesSelectionnesInput)
             {
