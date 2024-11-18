@@ -23,11 +23,6 @@
                 <div class="oi oi-list" aria-hidden="true"> FormulaireDemande</div>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <button class="btn btn-link nav-link" @onclick="LogFormData">
-                <div class="oi oi-bullhorn" aria-hidden="true"> Log Form Data</div>
-            </button>
-        </div>
     </nav>
 </div>
 
@@ -40,10 +35,5 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
-    }
-    
-    private void LogFormData()
-    {
-        /*SingletonForm.LogDataToConsole();*/
     }
 }

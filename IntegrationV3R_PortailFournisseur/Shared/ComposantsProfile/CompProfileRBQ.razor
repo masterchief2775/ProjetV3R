@@ -4,23 +4,36 @@
 
 @if (Licences != null && Licences.Any())
 {
-        <div class="rbq-list">
+    <div class="rbq-list">
         @foreach (var rbq in Licences)
         {
-                    <div class="rbq-entry mb-3 row">
-                        <div class="col-md-6">
-                            <strong>Numéro RBQ:</strong> @rbq.NumLicence
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Nom Sous-catégorie:</strong> @rbq.SouscategorieLicencerbq
-                        </div>
+            <div class="rbq-entry mb-3 row">
+                <div class="col-md-6">
+                    <strong>Numéro RBQ:</strong> @rbq.NumLicence
+                </div>
+                <div class="col-md-6">
+                    <strong>Nom Licence:</strong> @rbq.StatutLicence
+                </div>
+
+                @if (rbq.SouscategorieLicencerbq != null)
+                {
+                    <div class="col-md-12">
+                        <strong>Sous-catégorie:</strong> @rbq.SouscategorieLicencerbq.NumeroSousCategorie
                     </div>
+                }
+                else
+                {
+                    <div class="col-md-12">
+                        <p>No subcategory available.</p>
+                    </div>
+                }
+            </div>
         }
-        </div>
+    </div>
 }
 else
 {
-        <p>No RBQ licenses found.</p>
+    <p>No RBQ licenses found.</p>
 }
 
 @code {

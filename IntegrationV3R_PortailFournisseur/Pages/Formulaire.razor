@@ -7,7 +7,7 @@
 
 <CompPreremplissage OnDataFetched="HandleSharedData" />
 
-<div class="container-fluid  formulaire-container">
+<div class="container-fluid formulaire-container">
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
