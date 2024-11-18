@@ -115,8 +115,6 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 new MySqlParameter("@etatDemande", fournisseur.EtatDemande),
                 new MySqlParameter("@etatCompte", fournisseur.EtatCompte),
                 new MySqlParameter("@siteWeb", fournisseur.SiteWeb));*/
-
-
             // Création de l'entité Fournisseur
             var fournisseur = new Fournisseur
             {
@@ -126,19 +124,18 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 DetailsEntreprise = this.DescriptionProduitsServicesInput,
                 EtatDemande = "En attente",
                 EtatCompte = true,
-                SiteWeb= this.SiteWebInput,
+                SiteWeb = this.SiteWebInput,
             };
-            
 
-            dbContext.Fournisseurs.Add( fournisseur );
-
+            dbContext.Fournisseurs.Add(fournisseur);
             await dbContext.SaveChangesAsync();
+
 
 
             // Création de l'adresse
             string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
             string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
-            
+
             Console.WriteLine(cleanedNumeroTelephone);
             var adresse = new Adress
             {
@@ -151,10 +148,10 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 NumTel = cleanedNumeroTelephone,
                 Poste = this.NumeroPosteInput,
                 FournisseurId = fournisseur.FournisseurId
-            }; 
+            };
             dbContext.Adresses.Add(adresse);
             await dbContext.SaveChangesAsync();
-            
+
             // Ajouter les contacts
             foreach (var contactInput in this.ContactsInput)
             {
@@ -174,29 +171,57 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             }
             await dbContext.SaveChangesAsync();
 
-            /*
             // Ajouter les produits/services
             foreach (var produit in this.ProduitsServicesSelectionnesInput)
             {
                 var produitService = new Produitsservice
                 {
-                    Details = this.DescriptionProduitsServicesInput,
-                    FournisseurId = fournisseur.FournisseurId
+                    FournisseurId = fournisseur.FournisseurId,
+                    ComoditeId = produit.ComoditeId
                 };
                 dbContext.Produitsservices.Add(produitService);
             }
+            await dbContext.SaveChangesAsync();
 
             // Ajouter les informations RBQ
-            var rbq = new Rbq
+            string cleanedLicence = Regex.Replace(RBQNumberInput, @"-", "");
+            
+            var rbq = new Licencesrbq
             {
-                NumLicence = this.RBQNumberInput,
+                NumLicence = cleanedLicence,
                 StatutLicence = this.SelectedStatus,
+                Categorie = this.SelectedCategory,
                 FournisseurId = fournisseur.FournisseurId
             };
-            dbContext.Rbqs.Add(rbq);
+            dbContext.Licencesrbqs.Add(rbq);
 
-            // Sauvegarder les modifications
-            await dbContext.SaveChangesAsync();*/
+            await dbContext.SaveChangesAsync();
+
+            Console.WriteLine(SelectedSubCategories.Count);
+            foreach (Souscategoriesafter2008 item in SelectedSubCategories)
+            {
+                Console.WriteLine(SelectedSubCategories.ToString());
+                var liaison = new SouscategorieLicencerbq
+                {
+                    NumLicence = rbq.NumLicence,                    
+                    NumeroSousCategorie = item.NumeroSousCategorieAfter2008                    
+                };
+                Console.WriteLine(liaison.NumLicence + liaison.NumeroSousCategorie);
+                dbContext.SouscategorieLicencerbqs.Add(liaison);
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            try
+            {
+                
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            
+            
         }
     }
 

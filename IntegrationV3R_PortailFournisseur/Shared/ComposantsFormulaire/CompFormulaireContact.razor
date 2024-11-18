@@ -234,8 +234,8 @@
         // Validate Poste
         if (!string.IsNullOrWhiteSpace(contact.Poste))
         {
-            bool isNumeric = int.TryParse(contact.NumeroTelephone, out int n);
-            if (!isNumeric || contact.NumeroTelephone.Length > 5)
+            bool isNumeric = int.TryParse(contact.Poste, out int n);
+            if (!isNumeric || contact.Poste.Length > 5)
             {
                 contact.PosteError = "Le numero de poste doit être numérique et au plus de 5 chiffres.";
             }
