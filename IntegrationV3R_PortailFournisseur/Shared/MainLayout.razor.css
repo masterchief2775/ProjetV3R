@@ -7,7 +7,6 @@
 main {
     flex: 1;
     padding-top: 3.5rem; /* Adjust to match the height of the top-row */
-    padding-right: 15rem;
 }
 
 .sidebar {

@@ -175,7 +175,9 @@
         provinces = await dbContext.Provinces.ToListAsync();
         var regionAdministrativeList = await dbContext.Regionadministratives.ToListAsync();
         var conditionPaiementList = await dbContext.Conditionspaiements.ToListAsync();
-        var sousCategories = await dbContext.SouscategorieLicencerbqs.ToListAsync();
+        var sousCategories = await dbContext.SouscategorieLicencerbqs
+                            .Include(s => s.IdSousCategorieNavigation)  // Ensure we include the navigation property to the subcategory
+                            .ToListAsync();  // Fetching all subcategories
 
         var userId = await sessionStorage.GetItemAsync<int?>("UserId");
 
@@ -192,8 +194,10 @@
                     .ThenInclude(f => f.Finances)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
+                        .ThenInclude(p => p.Comodite) // Including Comodite
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Licencesrbqs)
+                        .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
@@ -239,7 +243,7 @@
                     }
 
                     rbqDetails = fournisseur.Licencesrbqs.ToList();
-                    products = fournisseur.Produitsservices.ToList();
+                    products = fournisseur.Produitsservices.ToList(); // This already includes Comodite
                     contacts = fournisseur.Contacts.ToList();
                 }
             }
@@ -247,4 +251,6 @@
 
         isLoading = false;
     }
+
+
 }

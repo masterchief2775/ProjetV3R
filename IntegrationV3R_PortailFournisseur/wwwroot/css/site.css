@@ -2,7 +2,6 @@
 /*CSS DE BASE*/
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    overflow: hidden
 }
 .container {
     height: 100%;
@@ -370,6 +369,88 @@ a, .btn-link {
             font-size: 14px; /* Smaller font size for mobile inputs and button */
         }
 }
+
+/* CSS GLOBAL POUR ETAT DEMANDE */
+
+/* État Demande Section */
+.etat-demande-container {
+    margin-bottom: 20px;
+    padding: 15px; /* Added padding for better spacing */
+    background-color: #f9f9f9; /* Light background to match other sections */
+    border-radius: 8px; /* Rounded corners for consistency */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow to stand out */
+}
+
+    /* Label for Etat Demande */
+    .etat-demande-container label {
+        font-size: 15px; /* Slightly larger font for better readability */
+        font-weight: 500; /* Consistent weight with other text */
+        color: #444; /* Slightly darker text for contrast */
+        margin-bottom: 8px; /* Uniform spacing for labels */
+        display: block;
+    }
+
+    /* Input and Select for Etat Demande */
+    .etat-demande-container input,
+    .etat-demande-container select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd; /* Lighter gray border for a softer look */
+        margin-bottom: 15px;
+        font-size: 16px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        /* Focused input/select for Etat Demande */
+        .etat-demande-container input:focus,
+        .etat-demande-container select:focus {
+            outline: none;
+            border-color: #0056b3; /* Darker blue for focus */
+            box-shadow: 0 0 8px rgba(0, 86, 179, 0.3); /* Soft blue glow on focus */
+        }
+
+        /* Status dropdown for Etat Demande */
+        .etat-demande-container select.status {
+            background-color: #fff;
+        }
+
+        /* Option style for Etat Demande */
+        .etat-demande-container select option {
+            padding: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+    /* Button for Etat Demande */
+    .etat-demande-container .btn-submit {
+        background-color: #007bff; /* Consistent blue button */
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        display: block;
+        width: 100%;
+        border: none;
+        margin-top: 15px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        /* Button hover for Etat Demande */
+        .etat-demande-container .btn-submit:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slight scale effect for interaction */
+        }
+
+        /* Button focus for Etat Demande */
+        .etat-demande-container .btn-submit:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #007bff;
+        }
+
+
 
 /* ICONS */
 .icon {
