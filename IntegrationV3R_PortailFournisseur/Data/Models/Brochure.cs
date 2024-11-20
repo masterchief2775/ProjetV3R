@@ -15,7 +15,7 @@ public partial class Brochure
 
     public string NoFichier { get; set; } = null!;
 
-    public string Taille { get; set; } = null!;
+    public int? Taille { get; set; }
 
     public string LienDocument { get; set; } = null!;
 

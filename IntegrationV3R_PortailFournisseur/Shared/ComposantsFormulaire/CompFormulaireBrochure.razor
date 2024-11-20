@@ -39,7 +39,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var file in uploadedFiles)
+                    @if (uploadedFiles.Count == 0)
+                    {
+                        <tr>
+                            <td>Aucun fichiers séléctionnés</td>                            
+                        </tr>
+                    }
+                    else
+                    foreach (var file in uploadedFiles)
                     {
                         <tr>
                             <td>@file.Name</td>
@@ -55,7 +62,7 @@
         }
 
         <button type="button" class="btn btn-primary" @onclick="HandleSubmit">Soumettre</button>
-    </form>
+    </form>    
 </div>
 
 @code {
@@ -69,8 +76,7 @@
     public EventCallback<int> Checkpoint { get; set; }
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
-    private IBrowserFile brochureFile;
-    private IBrowserFile carteVisiteFile;
+
     private List<IBrowserFile> uploadedFiles = new();
     private string fileError = string.Empty;
 
@@ -87,60 +93,84 @@
         };
     }
 
+    private long currentUploadSize = 0;
+    private long uploadLimit = 75000000;
+
     private Task HandleBrochureUpload(InputFileChangeEventArgs e)
-    {
-        brochureFile = e.File;
+    {       
+        currentUploadSize += e.File.Size;
+
+        if(currentUploadSize < uploadLimit)
+        {
+            SingletonForm.BrochureFile = e.File;
+
+            // Récupération de l'extension du fichier pour la brochure
+            var brochureExtension = Path.GetExtension(SingletonForm.BrochureFile.Name);
+            var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
+            var brochurePath = Path.Combine(SingletonForm.UploadDirectory, brochureFileName);
+
+            Brochure _brochure = new Brochure();
+            _brochure.NomFichier = brochureFileName;
+            _brochure.TypeFichier = brochureExtension;
+            _brochure.NoFichier = "Brochure";
+            _brochure.Taille = (int)SingletonForm.BrochureFile.Size;
+            _brochure.LienDocument = brochurePath;
+            SingletonForm.SelectedBrochure = _brochure;
+
+            // Confirmation de l'upload avec les nouveaux noms de fichiers
+
+            uploadedFiles.Add(SingletonForm.BrochureFile);
+        }
+        else
+        {
+            fileError = "Les deux fichiers ne doivent pas dépasser 75mo combinés";
+            currentUploadSize -= e.File.Size;
+        }
+
         return Task.CompletedTask;
     }
 
     private Task HandleCarteVisiteUpload(InputFileChangeEventArgs e)
     {
-        carteVisiteFile = e.File;
+        currentUploadSize += e.File.Size;
+
+        if(currentUploadSize < uploadLimit)
+        {
+            SingletonForm.CarteVisiteFile = e.File;
+
+            // Récupération de l'extension du fichier pour la carte de visite
+            var carteVisiteExtension = Path.GetExtension(SingletonForm.CarteVisiteFile.Name);
+            var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
+            var carteVisitePath = Path.Combine(SingletonForm.UploadDirectory, carteVisiteFileName);
+
+            Brochure _carteVisite = new Brochure();
+            _carteVisite.NomFichier = carteVisiteFileName;
+            _carteVisite.TypeFichier = carteVisiteExtension;
+            _carteVisite.NoFichier = "Carte Affaire";
+            _carteVisite.Taille = (int)SingletonForm.CarteVisiteFile.Size;
+            _carteVisite.LienDocument = carteVisitePath;
+            SingletonForm.SelectedCarteAffaire = _carteVisite; 
+
+            uploadedFiles.Add(SingletonForm.CarteVisiteFile);
+        }
+        else
+        {
+            fileError = "Les deux fichiers ne doivent pas dépasser 75mo combinés";
+            currentUploadSize -= e.File.Size;
+        }
+
         return Task.CompletedTask;
     }
 
     private async Task HandleSubmit()
     {
-        if (brochureFile != null && carteVisiteFile != null)
+        SingletonForm.UploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
+        if (!Directory.Exists(SingletonForm.UploadDirectory))
         {
-
-            var uploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadDirectory))
-            {
-                Directory.CreateDirectory(uploadDirectory);
-            }
-
-            // Récupération de l'extension du fichier pour la brochure
-            var brochureExtension = Path.GetExtension(brochureFile.Name);
-            var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
-            var brochurePath = Path.Combine(uploadDirectory, brochureFileName);
-            using (var stream = new FileStream(brochurePath, FileMode.Create))
-            {
-                await brochureFile.OpenReadStream(75000000).CopyToAsync(stream);
-            }
-
-            // Récupération de l'extension du fichier pour la carte de visite
-            var carteVisiteExtension = Path.GetExtension(carteVisiteFile.Name);
-            var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
-            var carteVisitePath = Path.Combine(uploadDirectory, carteVisiteFileName);
-            using (var stream = new FileStream(carteVisitePath, FileMode.Create))
-            {
-                await carteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
-            }
-
-            // Confirmation de l'upload avec les nouveaux noms de fichiers
-            fileError = null;
-            uploadedFiles.Add(brochureFile);
-            uploadedFiles.Add(carteVisiteFile);
-
-            await SingletonForm.SaveDataAsync(DbContext);
-
+            Directory.CreateDirectory(SingletonForm.UploadDirectory);
         }
-        else
-        {
-            fileError = "Veuillez sélectionner les deux fichiers avant de soumettre le formulaire.";
-        }
+        await SingletonForm.SaveDataAsync(DbContext);
     }
-
+    
 
 }

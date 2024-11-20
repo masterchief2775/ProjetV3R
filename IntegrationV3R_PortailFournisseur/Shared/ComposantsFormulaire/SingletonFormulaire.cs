@@ -1,10 +1,12 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
@@ -48,7 +50,14 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public List<Souscategoriesafter2008> SelectedSubCategories = new List<Souscategoriesafter2008>();
 
-        public SingletonFormulaire() { }
+        // Section pour Brochures 
+        public string UploadDirectory { get; set; } = string.Empty;
+        public Brochure SelectedBrochure = new Brochure();
+        public Brochure SelectedCarteAffaire = new Brochure();
+        public IBrowserFile BrochureFile { get; set; } = null;
+        public IBrowserFile CarteVisiteFile { get; set; } = null;
+
+        public SingletonFormulaire() { }        
 
         public void LogDataToConsole()
         {
@@ -201,9 +210,37 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             }
 
             await dbContext.SaveChangesAsync();
-                        
+
             
-            
+
+            //Ajoute les brochures 
+            if (BrochureFile != null)
+            {
+                var brochureExtension = Path.GetExtension(BrochureFile.Name);
+                var brochureFileName = $"Brochure_{NomEntrepriseInput}{brochureExtension}";
+                var brochurePath = Path.Combine(UploadDirectory, brochureFileName);
+                using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
+                {
+                    await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
+                }
+                /********************************************************************************************************************************************************************************************/
+                SelectedCarteAffaire.FournisseurId = fournisseur.FournisseurId;
+                dbContext.Brochures.Add(SelectedBrochure);
+            }
+            await dbContext.SaveChangesAsync();
+
+            if(CarteVisiteFile!= null)
+            {
+                var brochureExtension = Path.GetExtension(CarteVisiteFile.Name);
+                var brochureFileName = $"Brochure_{NomEntrepriseInput}{brochureExtension}";
+                var brochurePath = Path.Combine(UploadDirectory, brochureFileName);
+                using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
+                {
+                    await CarteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
+                }
+                SelectedBrochure.FournisseurId = fournisseur.FournisseurId;
+                dbContext.Brochures.Add(SelectedCarteAffaire);
+            }
         }
     }
 

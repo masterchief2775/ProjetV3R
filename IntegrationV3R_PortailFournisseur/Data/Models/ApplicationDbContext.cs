@@ -164,7 +164,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(32)
                 .HasColumnName("nomFichier");
             entity.Property(e => e.Taille)
-                .HasMaxLength(8)
+                .HasColumnType("int(11)")
                 .HasColumnName("taille");
             entity.Property(e => e.TypeFichier)
                 .HasMaxLength(4)
