@@ -1,6 +1,10 @@
 ﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
@@ -19,11 +23,12 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string NumCiviqueInput { get; set; } = string.Empty;
         public string BureauInput { get; set; } = string.Empty;
         public string RueInput { get; set; } = string.Empty;
-        public string VilleInput { get; set; } = string.Empty;
+        public string MunicipaliteInput { get; set; } = string.Empty;
         public string ProvinceInput { get; set; } = string.Empty;
         public string CodePostalInput { get; set; } = string.Empty;
         public string RegionInput { get; set; } = string.Empty;
         public string NumeroTelephoneInput { get; set; } = string.Empty;
+        public string NumeroPosteInput { get; set; } = string.Empty;
         public string SiteWebInput { get; set; } = string.Empty;
 
         // Properties to hold data from contacts
@@ -68,7 +73,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             Console.WriteLine($"Numéro Civique: {NumCiviqueInput}");
             Console.WriteLine($"Bureau: {BureauInput}");
             Console.WriteLine($"Rue: {RueInput}");
-            Console.WriteLine($"Ville: {VilleInput}");
+            Console.WriteLine($"Ville: {MunicipaliteInput}");
             Console.WriteLine($"Province: {ProvinceInput}");
             Console.WriteLine($"Code Postal: {CodePostalInput}");
             Console.WriteLine($"Région: {RegionInput}");
@@ -116,24 +121,104 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
-            /*
-            // Example code to save financial data along with other fields
+            
             var fournisseur = new Fournisseur
             {
                 NomEntreprise = this.NomEntrepriseInput,
                 Neq = this.NeqInput,
                 CourrielEntreprise = this.EmailInput,
+                DetailsEntreprise = this.DescriptionProduitsServicesInput,
                 EtatDemande = "En attente",
-                DateInscription = DateTime.Now,
-                Tps = this.TpsInput,
-                Tvq = this.TvqInput,
-                ConditionPaiement = this.ConditionPaiement,
-                Devise = this.Devise,
-                ModeCom = this.ModeCom
+                EtatCompte = true,
+                SiteWeb = this.SiteWebInput,
             };
+
             dbContext.Fournisseurs.Add(fournisseur);
             await dbContext.SaveChangesAsync();
-            */
+
+
+
+            // Création de l'adresse
+            string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
+            string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
+
+            Console.WriteLine(cleanedNumeroTelephone);
+            var adresse = new Adress
+            {
+                NumeroCivique = this.NumCiviqueInput,
+                Bureau = this.BureauInput,
+                Rue = this.RueInput,
+                CodeMunicipalite = this.MunicipaliteInput,
+                CodeProvince = this.ProvinceInput,
+                CodePostal = cleanedCodePostal,
+                NumTel = cleanedNumeroTelephone,
+                Poste = this.NumeroPosteInput,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Adresses.Add(adresse);
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les contacts
+            foreach (var contactInput in this.ContactsInput)
+            {
+                string cleanedTelephone = Regex.Replace(contactInput.NumeroTelephone, @"-", "");
+                var contact = new Contact
+                {
+                    PrenomContact = contactInput.Prenom,
+                    NomContact = contactInput.Nom,
+                    FonctionContact = contactInput.Role,
+                    CourrielContact = contactInput.Email,
+                    NumTelContact = cleanedTelephone,
+                    TypeTel = contactInput.TypeTelephone,
+                    PosteTelContact = contactInput.Poste,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Contacts.Add(contact);
+            }
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les produits/services
+            foreach (var produit in this.ProduitsServicesSelectionnesInput)
+            {
+                var produitService = new Produitsservice
+                {
+                    FournisseurId = fournisseur.FournisseurId,
+                    ComoditeId = produit.ComoditeId
+                };
+                dbContext.Produitsservices.Add(produitService);
+            }
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les informations RBQ
+            string cleanedLicence = Regex.Replace(RBQNumberInput, @"-", "");
+            
+            var rbq = new Licencesrbq
+            {
+                NumLicence = cleanedLicence,
+                StatutLicence = this.SelectedStatus,
+                Categorie = this.SelectedCategory,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Licencesrbqs.Add(rbq);
+
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les sous categories RBQ choisies 
+            foreach (Souscategoriesafter2008 item in SelectedSubCategories)
+            {
+                Console.WriteLine(SelectedSubCategories.ToString());
+                var liaison = new SouscategorieLicencerbq
+                {
+                    IdLicence = rbq.RbqId,                    
+                    IdSousCategorie = item.SousCategorieAfter2008Id                    
+                };                
+                dbContext.SouscategorieLicencerbqs.Add(liaison);
+            }
+
+            await dbContext.SaveChangesAsync();
+                        
+            
+            
         }
     }
 

@@ -17,7 +17,7 @@ public partial class Contact
 
     public string CourrielContact { get; set; } = null!;
 
-    public string TypeTel { get; set; } = null!;
+    public string? TypeTel { get; set; }
 
     public string NumTelContact { get; set; } = null!;
 

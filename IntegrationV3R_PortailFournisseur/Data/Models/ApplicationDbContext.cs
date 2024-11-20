@@ -262,7 +262,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("timestamps");
             entity.Property(e => e.TypeTel)
-                .HasMaxLength(8)
+                .HasMaxLength(12)
                 .HasColumnName("typeTel");
 
             entity.HasOne(d => d.Fournisseur).WithMany(p => p.Contacts)
@@ -597,29 +597,27 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("souscategorie_licencerbq");
 
-            entity.HasIndex(e => e.NumLicence, "numLicence").IsUnique();
+            entity.HasIndex(e => e.IdLicence, "idLicence");
 
-            entity.HasIndex(e => e.NumeroSousCategorie, "numeroSousCategorie").IsUnique();
+            entity.HasIndex(e => e.IdSousCategorie, "idSousCategorie");
 
             entity.Property(e => e.SousCategrorieRbqId)
                 .HasColumnType("int(11)")
                 .HasColumnName("sousCategrorie_rbqId");
-            entity.Property(e => e.NumLicence)
-                .HasMaxLength(10)
-                .HasColumnName("numLicence");
-            entity.Property(e => e.NumeroSousCategorie)
-                .HasMaxLength(8)
-                .HasColumnName("numeroSousCategorie");
+            entity.Property(e => e.IdLicence)
+                .HasColumnType("int(11)")
+                .HasColumnName("idLicence");
+            entity.Property(e => e.IdSousCategorie)
+                .HasColumnType("int(11)")
+                .HasColumnName("idSousCategorie");
 
-            entity.HasOne(d => d.NumLicenceNavigation).WithOne(p => p.SouscategorieLicencerbq)
-                .HasPrincipalKey<Licencesrbq>(p => p.NumLicence)
-                .HasForeignKey<SouscategorieLicencerbq>(d => d.NumLicence)
+            entity.HasOne(d => d.IdLicenceNavigation).WithMany(p => p.SouscategorieLicencerbqs)
+                .HasForeignKey(d => d.IdLicence)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("souscategorie_licencerbq_ibfk_1");
 
-            entity.HasOne(d => d.NumeroSousCategorieNavigation).WithOne(p => p.SouscategorieLicencerbq)
-                .HasPrincipalKey<Souscategoriesafter2008>(p => p.NumeroSousCategorieAfter2008)
-                .HasForeignKey<SouscategorieLicencerbq>(d => d.NumeroSousCategorie)
+            entity.HasOne(d => d.IdSousCategorieNavigation).WithMany(p => p.SouscategorieLicencerbqs)
+                .HasForeignKey(d => d.IdSousCategorie)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("souscategorie_licencerbq_ibfk_2");
         });

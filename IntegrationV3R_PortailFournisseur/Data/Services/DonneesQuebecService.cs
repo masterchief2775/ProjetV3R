@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services
         public string Adresse { get; set; }
 
         [JsonPropertyName("Numero de telephone")]
-        public string NumTelephone { get; set; }
+        public string NumTelephone { get; set; }        
 
         [JsonPropertyName("Region administrative")]
         public string RegionAdministrative { get; set; }

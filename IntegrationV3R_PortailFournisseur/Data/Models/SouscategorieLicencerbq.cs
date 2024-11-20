@@ -7,11 +7,11 @@ public partial class SouscategorieLicencerbq
 {
     public int SousCategrorieRbqId { get; set; }
 
-    public string NumLicence { get; set; } = null!;
+    public int IdLicence { get; set; }
 
-    public string NumeroSousCategorie { get; set; } = null!;
+    public int IdSousCategorie { get; set; }
 
-    public virtual Licencesrbq NumLicenceNavigation { get; set; } = null!;
+    public virtual Licencesrbq IdLicenceNavigation { get; set; } = null!;
 
-    public virtual Souscategoriesafter2008 NumeroSousCategorieNavigation { get; set; } = null!;
+    public virtual Souscategoriesafter2008 IdSousCategorieNavigation { get; set; } = null!;
 }

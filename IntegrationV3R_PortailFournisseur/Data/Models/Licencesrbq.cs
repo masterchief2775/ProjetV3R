@@ -17,5 +17,5 @@ public partial class Licencesrbq
 
     public virtual Fournisseur Fournisseur { get; set; } = null!;
 
-    public virtual SouscategorieLicencerbq? SouscategorieLicencerbq { get; set; }
+    public virtual ICollection<SouscategorieLicencerbq> SouscategorieLicencerbqs { get; } = new List<SouscategorieLicencerbq>();
 }
