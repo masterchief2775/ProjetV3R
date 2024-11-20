@@ -106,16 +106,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
-            /*EXEMPLE D'UTILISATION DE METHODES STOCKES
-            var result = await dbContext.Database.ExecuteSqlRawAsync("CALL insertFournisseur(@nom, @neq, @courriel, @details, @etatDemande, @etatCompte, @siteWeb)",
-                new MySqlParameter("@nom", fournisseur.NomEntreprise),
-                new MySqlParameter("@neq", fournisseur.Neq),
-                new MySqlParameter("@courriel", fournisseur.CourrielEntreprise),
-                new MySqlParameter("@details", fournisseur.DetailsEntreprise),
-                new MySqlParameter("@etatDemande", fournisseur.EtatDemande),
-                new MySqlParameter("@etatCompte", fournisseur.EtatCompte),
-                new MySqlParameter("@siteWeb", fournisseur.SiteWeb));*/
-            // Création de l'entité Fournisseur
+            
             var fournisseur = new Fournisseur
             {
                 NomEntreprise = this.NomEntrepriseInput,
@@ -197,29 +188,20 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             await dbContext.SaveChangesAsync();
 
-            Console.WriteLine(SelectedSubCategories.Count);
+            // Ajouter les sous categories RBQ choisies 
             foreach (Souscategoriesafter2008 item in SelectedSubCategories)
             {
                 Console.WriteLine(SelectedSubCategories.ToString());
                 var liaison = new SouscategorieLicencerbq
                 {
-                    NumLicence = rbq.NumLicence,                    
-                    NumeroSousCategorie = item.NumeroSousCategorieAfter2008                    
-                };
-                Console.WriteLine(liaison.NumLicence + liaison.NumeroSousCategorie);
+                    IdLicence = rbq.RbqId,                    
+                    IdSousCategorie = item.SousCategorieAfter2008Id                    
+                };                
                 dbContext.SouscategorieLicencerbqs.Add(liaison);
             }
 
             await dbContext.SaveChangesAsync();
-
-            try
-            {
-                
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+                        
             
             
         }

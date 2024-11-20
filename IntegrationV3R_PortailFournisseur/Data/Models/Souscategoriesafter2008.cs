@@ -11,5 +11,5 @@ public partial class Souscategoriesafter2008
 
     public string NomSousCategorieAfter2008 { get; set; } = null!;
 
-    public virtual SouscategorieLicencerbq? SouscategorieLicencerbq { get; set; }
+    public virtual ICollection<SouscategorieLicencerbq> SouscategorieLicencerbqs { get; } = new List<SouscategorieLicencerbq>();
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Build.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace IntegrationV3R_PortailFournisseur.Data.Models;
@@ -7,12 +6,12 @@ namespace IntegrationV3R_PortailFournisseur.Data.Models;
 public partial class SouscategorieLicencerbq
 {
     public int SousCategrorieRbqId { get; set; }
-    
-    public string NumLicence { get; set; }
 
-    public string NumeroSousCategorie { get; set; }
+    public int IdLicence { get; set; }
 
-    public virtual Licencesrbq NumLicenceNavigation { get; set; } = null!;
+    public int IdSousCategorie { get; set; }
 
-    public virtual Souscategoriesafter2008 NumeroSousCategorieNavigation { get; set; } = null!;
+    public virtual Licencesrbq IdLicenceNavigation { get; set; } = null!;
+
+    public virtual Souscategoriesafter2008 IdSousCategorieNavigation { get; set; } = null!;
 }
