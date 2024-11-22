@@ -14,7 +14,7 @@
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
 		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -25,15 +25,20 @@
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
 		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
-	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">		
+	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
 		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
+	<!-- Conditionally display based on session value -->
+<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
+    <CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+</div>
 </div>
 <div class="nav-item px-3">
 	<button class="btn btn-link nav-link" @onclick="LogFormData">
 		<div class="oi oi-bullhorn" aria-hidden="true"> Log Form Data</div>
 	</button>
 </div>
+
 
 
 @code {
@@ -44,7 +49,7 @@
 	private CompFormulaireProduit compProduit;
 	private CompFormulaireRBQ compRBQ;
 	private CompFormulaireBrochure compBrochure;
-	
+	private CompFormulaireFinances compFinance;
 
 	[Inject] private SingletonFormulaire SingletonForm { get; set; }
 
@@ -56,6 +61,8 @@
 
 	public int _FetchedComp = 1;
 
+	
+
 	private void LogFormData()
 	{
 		SingletonForm.LogDataToConsole();
@@ -63,7 +70,7 @@
 
 	private void SetFormCheckpoint(int pageIndex)
 	{
-		if(pageIndex > _checkpoint)
+		if (pageIndex > _checkpoint)
 		{
 			_checkpoint = pageIndex;
 			compNavbar.Checkpoint = pageIndex;
@@ -71,16 +78,17 @@
 	}
 
 	private void HandlePageSelected(int pageIndex)
-	{	
+	{
 		if (pageIndex <= _checkpoint)
-		{		
+		{
 			selectedPageIndex = pageIndex;
 		}
+
 	}
 
 	private void HandlePageSelectedNavbar(int pageIndex)
 	{
-		if(pageIndex < selectedPageIndex && selectedPageIndex == _checkpoint)
+		if (pageIndex < selectedPageIndex && selectedPageIndex == _checkpoint)
 		{
 			selectedPageIndex = pageIndex;
 		}
@@ -92,21 +100,22 @@
 					compIdentification.HandleSubmitReturn(pageIndex);
 					break;
 				case 1:
-					compAdresse.HandleSubmitReturn(pageIndex);					
+					compAdresse.HandleSubmitReturn(pageIndex);
 					break;
 				case 2:
-					compContact.HandleSubmitReturn(pageIndex);					
+					compContact.HandleSubmitReturn(pageIndex);
 					break;
 				case 3:
-					compProduit.HandleSubmitReturn(pageIndex);					
+					compProduit.HandleSubmitReturn(pageIndex);
 					break;
 				case 4:
-					compRBQ.HandleSubmitReturn(pageIndex);					
+					compRBQ.HandleSubmitReturn(pageIndex);
+					break;
+				case 5:
+					compFinance.HandleSubmitReturn(pageIndex);
 					break;
 			}
 		}
-		
-		
 	}
 
 	private void HandleSharedData(bool value)
@@ -123,7 +132,7 @@
 
 		switch (_FetchedComp)
 		{
-			case 2 :
+			case 2:
 				compProduit.FetchDataDB();
 				break;
 			case 3:
@@ -133,4 +142,5 @@
 
 		Console.WriteLine("In FORMULAIRE");
 	}
+
 }

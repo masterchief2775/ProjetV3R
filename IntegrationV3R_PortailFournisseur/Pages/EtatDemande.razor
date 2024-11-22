@@ -6,6 +6,7 @@
 @using IntegrationV3R_PortailFournisseur.Data.Models
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject ApplicationDbContext _context
+@inject StateContainer stateContainer
 
 <PageTitle>État de la demande</PageTitle>
 
@@ -174,5 +175,12 @@
     private void NavigateToFormulaireDemande()
     {
         Navigation.NavigateTo("/formulaire");
+        UpdateFinancePageState(false);
+    }
+
+    private void UpdateFinancePageState(bool value)
+    {
+        stateContainer.ShouldDisplayFinancePage = value;
+        stateContainer.NotifyStateChanged();
     }
 }

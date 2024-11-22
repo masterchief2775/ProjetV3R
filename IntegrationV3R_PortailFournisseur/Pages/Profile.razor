@@ -6,6 +6,8 @@
 @inject ApplicationDbContext dbContext
 @inject NavigationManager Navigation
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject IJSRuntime JSRuntime
+@inject StateContainer stateContainer
 
 <PageTitle>Profil</PageTitle>
 
@@ -109,6 +111,13 @@
                     </div>
                 </div>
             }
+
+            <!-- Button to navigate to the formulaire page -->
+            <div class="text-end">
+                <button class="btn btn-primary" @onclick="GoToFormulaire">
+                    Modifier ses informations
+                </button>
+            </div>
         </div> <!-- col-md-9 -->
     </div> <!-- row -->
 </div> <!-- container-fluid -->
@@ -165,6 +174,18 @@
         isProductsVisible = section == "Products";
         isRBQLicencesVisible = section == "RBQLicences";
         isFinancesVisible = section == "Finances";
+    }
+
+    private void GoToFormulaire()
+    {
+        Navigation.NavigateTo("/formulaire");
+        UpdateFinancePageState(true);
+    }
+
+    private void UpdateFinancePageState(bool value)
+    {
+        stateContainer.ShouldDisplayFinancePage = value;
+        stateContainer.NotifyStateChanged();
     }
 
     protected override async Task OnInitializedAsync()
