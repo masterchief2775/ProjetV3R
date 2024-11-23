@@ -186,7 +186,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             //Ajoute les brochures 
             if (BrochureFile != null)
             {
-                using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
+                var path = Path.Combine(Directory.GetCurrentDirectory(), SelectedBrochure.LienDocument);
+                using (var stream = new FileStream(path, FileMode.Create))
                 {
                     await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
                 }
@@ -198,7 +199,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             if (CarteVisiteFile != null)
             {
-                using (var stream = new FileStream(SelectedCarteAffaire.LienDocument, FileMode.Create))
+                var path = Path.Combine(Directory.GetCurrentDirectory(), SelectedBrochure.LienDocument);
+                using (var stream = new FileStream(path, FileMode.Create))
                 {
                     await CarteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
                 }
@@ -251,8 +253,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 IsBodyHtml = true // Set to true if you want to send HTML content
             };
 
-            //mailMessage.To.Add(EmailInput); MIT EN COMMENTAIRES POUR TOUT DE SUITE AU CAS QUE MAILTRAP FAIL 
-            mailMessage.To.Add("gporlier97@gmail.com");
+            mailMessage.To.Add(EmailInput); 
+            //mailMessage.To.Add("gporlier97@gmail.com");
 
             // Send the email asynchronously
             try

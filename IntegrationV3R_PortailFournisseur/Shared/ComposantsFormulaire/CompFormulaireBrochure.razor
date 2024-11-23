@@ -108,7 +108,7 @@
             // Récupération de l'extension du fichier pour la brochure
             var brochureExtension = Path.GetExtension(SingletonForm.BrochureFile.Name);
             var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
-            var brochurePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", brochureFileName);
+            var brochurePath = Path.Combine("wwwroot/uploads", brochureFileName);
 
             Brochure _brochure = new Brochure();
             _brochure.NomFichier = brochureFileName;
@@ -142,7 +142,7 @@
             // Récupération de l'extension du fichier pour la carte de visite
             var carteVisiteExtension = Path.GetExtension(SingletonForm.CarteVisiteFile.Name);
             var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
-            var carteVisitePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", carteVisiteFileName);
+            var carteVisitePath = Path.Combine("wwwroot/uploads", carteVisiteFileName);
 
             Brochure _carteVisite = new Brochure();
             _carteVisite.NomFichier = carteVisiteFileName;
