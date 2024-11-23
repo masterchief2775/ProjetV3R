@@ -79,143 +79,144 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             bool _isUploadSuccessful = true; 
             try
             {
-                var fournisseur = new Fournisseur
-                {
-                    NomEntreprise = this.NomEntrepriseInput,
-                    Neq = this.NeqInput,
-                    CourrielEntreprise = this.EmailInput,
-                    DetailsEntreprise = this.DescriptionProduitsServicesInput,
-                    EtatDemande = "En attente",
-                    EtatCompte = true,
-                    SiteWeb = this.SiteWebInput,
-                };
-
-                dbContext.Fournisseurs.Add(fournisseur);
-                await dbContext.SaveChangesAsync();
-
-
-
-                // Création de l'adresse
-                string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
-                string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
-
-                Console.WriteLine(cleanedNumeroTelephone);
-                var adresse = new Adress
-                {
-                    NumeroCivique = this.NumCiviqueInput,
-                    Bureau = this.BureauInput,
-                    Rue = this.RueInput,
-                    CodeMunicipalite = this.MunicipaliteInput,
-                    CodeProvince = this.ProvinceInput,
-                    CodePostal = cleanedCodePostal,
-                    NumTel = cleanedNumeroTelephone,
-                    Poste = this.NumeroPosteInput,
-                    FournisseurId = fournisseur.FournisseurId
-                };
-                dbContext.Adresses.Add(adresse);
-                await dbContext.SaveChangesAsync();
-
-                // Ajouter les contacts
-                foreach (var contactInput in this.ContactsInput)
-                {
-                    string cleanedTelephone = Regex.Replace(contactInput.NumeroTelephone, @"-", "");
-                    var contact = new Contact
-                    {
-                        PrenomContact = contactInput.Prenom,
-                        NomContact = contactInput.Nom,
-                        FonctionContact = contactInput.Role,
-                        CourrielContact = contactInput.Email,
-                        NumTelContact = cleanedTelephone,
-                        TypeTel = contactInput.TypeTelephone,
-                        PosteTelContact = contactInput.Poste,
-                        FournisseurId = fournisseur.FournisseurId
-                    };
-                    dbContext.Contacts.Add(contact);
-                }
-                await dbContext.SaveChangesAsync();
-
-                // Ajouter les produits/services
-                foreach (var produit in this.ProduitsServicesSelectionnesInput)
-                {
-                    var produitService = new Produitsservice
-                    {
-                        FournisseurId = fournisseur.FournisseurId,
-                        ComoditeId = produit.ComoditeId
-                    };
-                    dbContext.Produitsservices.Add(produitService);
-                }
-                await dbContext.SaveChangesAsync();
-
-                // Ajouter les informations RBQ
-                string cleanedLicence = Regex.Replace(RBQNumberInput, @"-", "");
-
-                var rbq = new Licencesrbq
-                {
-                    NumLicence = cleanedLicence,
-                    StatutLicence = this.SelectedStatus,
-                    Categorie = this.SelectedCategory,
-                    FournisseurId = fournisseur.FournisseurId
-                };
-                dbContext.Licencesrbqs.Add(rbq);
-
-                await dbContext.SaveChangesAsync();
-
-                // Ajouter les sous categories RBQ choisies 
-                foreach (Souscategoriesafter2008 item in SelectedSubCategories)
-                {
-                    Console.WriteLine(SelectedSubCategories.ToString());
-                    var liaison = new SouscategorieLicencerbq
-                    {
-                        IdLicence = rbq.RbqId,
-                        IdSousCategorie = item.SousCategorieAfter2008Id
-                    };
-                    dbContext.SouscategorieLicencerbqs.Add(liaison);
-                }
-
-                await dbContext.SaveChangesAsync();
-
-
-
-                //Ajoute les brochures 
-                if (BrochureFile != null)
-                {
-                    var brochureExtension = Path.GetExtension(BrochureFile.Name);
-                    var brochureFileName = $"Brochure_{NomEntrepriseInput}{brochureExtension}";
-                    var brochurePath = Path.Combine(Directory.GetCurrentDirectory(), brochureFileName);
-                    using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
-                    {
-                        await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
-                    }
-                    /********************************************************************************************************************************************************************************************/
-                    SelectedBrochure.FournisseurId = fournisseur.FournisseurId;
-                    dbContext.Brochures.Add(SelectedBrochure);
-                }
-                await dbContext.SaveChangesAsync();
-
-                if (CarteVisiteFile != null)
-                {
-                    var brochureExtension = Path.GetExtension(CarteVisiteFile.Name);
-                    var brochureFileName = $"Brochure_{NomEntrepriseInput}{brochureExtension}";
-                    var brochurePath = Path.Combine(UploadDirectory, brochureFileName);
-                    using (var stream = new FileStream(SelectedCarteAffaire.LienDocument, FileMode.Create))
-                    {
-                        await CarteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
-                    }
-                    SelectedCarteAffaire.FournisseurId = fournisseur.FournisseurId;
-                    dbContext.Brochures.Add(SelectedCarteAffaire);
-                }
-                await dbContext.SaveChangesAsync();
+               
             }
             catch (Exception ex)
             {
                 _isUploadSuccessful = false;
             }
+
+            var fournisseur = new Fournisseur
+            {
+                NomEntreprise = this.NomEntrepriseInput,
+                Neq = this.NeqInput,
+                CourrielEntreprise = this.EmailInput,
+                DetailsEntreprise = this.DescriptionProduitsServicesInput,
+                EtatDemande = "En attente",
+                EtatCompte = true,
+                SiteWeb = this.SiteWebInput,
+            };
+
+            dbContext.Fournisseurs.Add(fournisseur);
+            await dbContext.SaveChangesAsync();
+
+
+
+            // Création de l'adresse
+            string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
+            string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
+
+            Console.WriteLine(cleanedNumeroTelephone);
+            var adresse = new Adress
+            {
+                NumeroCivique = this.NumCiviqueInput,
+                Bureau = this.BureauInput,
+                Rue = this.RueInput,
+                CodeMunicipalite = this.MunicipaliteInput,
+                CodeProvince = this.ProvinceInput,
+                CodePostal = cleanedCodePostal,
+                NumTel = cleanedNumeroTelephone,
+                Poste = this.NumeroPosteInput,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Adresses.Add(adresse);
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les contacts
+            foreach (var contactInput in this.ContactsInput)
+            {
+                string cleanedTelephone = Regex.Replace(contactInput.NumeroTelephone, @"-", "");
+                var contact = new Contact
+                {
+                    PrenomContact = contactInput.Prenom,
+                    NomContact = contactInput.Nom,
+                    FonctionContact = contactInput.Role,
+                    CourrielContact = contactInput.Email,
+                    NumTelContact = cleanedTelephone,
+                    TypeTel = contactInput.TypeTelephone,
+                    PosteTelContact = contactInput.Poste,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Contacts.Add(contact);
+            }
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les produits/services
+            foreach (var produit in this.ProduitsServicesSelectionnesInput)
+            {
+                var produitService = new Produitsservice
+                {
+                    FournisseurId = fournisseur.FournisseurId,
+                    ComoditeId = produit.ComoditeId
+                };
+                dbContext.Produitsservices.Add(produitService);
+            }
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les informations RBQ
+            string cleanedLicence = Regex.Replace(RBQNumberInput, @"-", "");
+
+            var rbq = new Licencesrbq
+            {
+                NumLicence = cleanedLicence,
+                StatutLicence = this.SelectedStatus,
+                Categorie = this.SelectedCategory,
+                FournisseurId = fournisseur.FournisseurId
+            };
+            dbContext.Licencesrbqs.Add(rbq);
+
+            await dbContext.SaveChangesAsync();
+
+            // Ajouter les sous categories RBQ choisies 
+            foreach (Souscategoriesafter2008 item in SelectedSubCategories)
+            {
+                Console.WriteLine(SelectedSubCategories.ToString());
+                var liaison = new SouscategorieLicencerbq
+                {
+                    IdLicence = rbq.RbqId,
+                    IdSousCategorie = item.SousCategorieAfter2008Id
+                };
+                dbContext.SouscategorieLicencerbqs.Add(liaison);
+            }
+
+            await dbContext.SaveChangesAsync();
+
+
+
+            //Ajoute les brochures 
+            if (BrochureFile != null)
+            {
+                using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
+                {
+                    await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
+                }
+                /********************************************************************************************************************************************************************************************/
+                SelectedBrochure.FournisseurId = fournisseur.FournisseurId;
+                dbContext.Brochures.Add(SelectedBrochure);
+            }
+            await dbContext.SaveChangesAsync();
+
+            if (CarteVisiteFile != null)
+            {
+                using (var stream = new FileStream(SelectedCarteAffaire.LienDocument, FileMode.Create))
+                {
+                    await CarteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
+                }
+                SelectedCarteAffaire.FournisseurId = fournisseur.FournisseurId;
+                dbContext.Brochures.Add(SelectedCarteAffaire);
+            }
+            await dbContext.SaveChangesAsync();
+
+            var check = dbContext.Fournisseurs.Where(f => f.FournisseurId == fournisseur.FournisseurId);  
             
-            //
-            if(_isUploadSuccessful)
+            if (check != null)
             {
                 await SendMail();
                 await UploadSuccessful.InvokeAsync(true);
+            }
+            else
+            {
+                //FAIRE UN MODAL QUI DIT A L'UTILISATER QU'IL Y A UNE ERREUR
             }
         }
         private async Task SendMail()

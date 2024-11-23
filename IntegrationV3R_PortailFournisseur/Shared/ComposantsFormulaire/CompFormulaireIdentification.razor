@@ -206,6 +206,17 @@
             nomEntrepriseError = "Le nom de l'entreprise doit faire moins de 64 caractères.";
             isValid = false;
         }
+        else
+        {
+            foreach (Fournisseur fournisseur in currentFournisseurs)
+            {
+                if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput)
+                {
+                    nomEntrepriseError = "Ce nom est déjà inscrit dans la liste de fournisseurs. Veulliez confirmer qu'il est bien inscrit";
+                    isValid = false;
+                }
+            }
+        }
        
 
         // Validation for Email

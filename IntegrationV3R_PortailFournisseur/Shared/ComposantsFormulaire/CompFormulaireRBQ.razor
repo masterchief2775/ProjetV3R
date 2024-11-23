@@ -1,6 +1,7 @@
 ﻿﻿@using IntegrationV3R_PortailFournisseur.Data.Services;﻿
 @using IntegrationV3R_PortailFournisseur.Data.Models;﻿
 @using Microsoft.EntityFrameworkCore;
+@using System.Text.RegularExpressions;
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 
 
@@ -172,7 +173,7 @@
         }
         await BDFetched.InvokeAsync();
     }
-    
+
 
     public void LoadSharedData()
     {
@@ -230,7 +231,18 @@
             {
                 rbqNumberError = "Le numéro RBQ doit être au format ####-####-##.";
                 isValid = false;
+            }   
+
+            string cleanRBQ = Regex.Replace(SingletonForm.RBQNumberInput, @"-", "");
+            foreach(Licencesrbq licence in currentLicences)
+            {
+                if(licence.NumLicence == SingletonForm.RBQNumberInput)
+                {
+                    rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
+                    isValid = false;
+                }
             }
+
         }
 
 
@@ -249,6 +261,12 @@
             categoryError = "La catégorie est requise.";
             isValid = false;
         }
+        else if (SingletonForm.SelectedCategory != "General" && SingletonForm.SelectedCategory != "Specialisee")
+        {
+            categoryError = "Catégorie " + SingletonForm.SelectedCategory + " invalide. Veuillez choisir parmis les choix";
+            isValid = false;
+        }
+
         if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && !SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
         {
             subCategoryError = "Au moins une sous-catégorie doit être sélectionnée.";
