@@ -5,13 +5,13 @@
 
 @inject IJSRuntime JSRuntime
 
-<CompPreremplissage OnDataFetched="HandleSharedData" />
+<CompPreremplissage @ref="compPreremplissage" OnDataFetched="HandleSharedData" BDFetched="NextBDFetch"/>
 
 <div class="container-fluid  formulaire-container">
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
-		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
 		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
@@ -33,6 +33,7 @@
 
 @code {
 	private NavbarFormulaire compNavbar;
+	private CompPreremplissage compPreremplissage;
 	private CompFormulaireIdentification compIdentification;
 	private CompFormulaireAdresse compAdresse;
 	private CompFormulaireContact compContact;
@@ -115,9 +116,15 @@
 		switch (_FetchedComp)
 		{
 			case 2 :
-				compProduit.FetchDataDB();
+				compIdentification.FetchDataDB();
 				break;
 			case 3:
+				compAdresse.FetchDataDB();
+				break;
+			case 4:
+				compProduit.FetchDataDB();
+				break;
+			case 5:
 				compRBQ.FetchDataDB();
 				break;
 		}

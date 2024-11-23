@@ -1,5 +1,10 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data.Services;
+@using System.Text.RegularExpressions;
 @inject DonneesQuebecService DonnéesQuébecService
+
+@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using Microsoft.EntityFrameworkCore
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 
 <div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
     <div class="modal-boxSize" >
@@ -61,6 +66,9 @@
 
     [Parameter]
     public EventCallback<bool> OnDataFetched { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> BDFetched { get; set; }
     //[Parameter] public RenderFragment? ChildContent { get; set; }
 
     private bool IsVisible { get; set; } = true;
@@ -68,6 +76,29 @@
     public string codeRBQ = string.Empty;
 
     public string codeRBQError = string.Empty;
+
+    public List<Licencesrbq> currentLicences = new List<Licencesrbq>();
+
+    public async Task FetchDataDB()
+    {
+        try
+        {
+            // Appel à la base de données pour récupérer les régions
+            currentLicences = await dbContext.Licencesrbqs.ToListAsync();
+
+        }
+        catch (Exception ex)
+        {
+            codeRBQError = "Erreur lors de la récupération à la BD, veuillez réessayer";
+            Console.WriteLine(ex.Message);
+        }
+        await BDFetched.InvokeAsync(true);        
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchDataDB();
+    }
 
     public void ShowModal()
     {
@@ -87,11 +118,31 @@
 
         var isValid = true;
 
+        string cleanRBQ = Regex.Replace(codeRBQ, @"-", "");
+        bool hasNonDigit = Regex.IsMatch(cleanRBQ, @"\D");
+
         if (string.IsNullOrWhiteSpace(codeRBQ) || codeRBQ.Length != 12)
         {
             codeRBQError = "Veuillez entrer un code RBQ valide";
             isValid = false;
-        }        
+        }
+        else if(hasNonDigit)
+        {
+            codeRBQError = "Un code RBQ ne peux que contenir des chiffres";
+            isValid = false;
+        }
+        else
+        {
+            foreach (Licencesrbq licence in currentLicences)
+            {
+
+                if (licence.NumLicence == cleanRBQ)
+                {
+                    codeRBQError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
+                    isValid = false;
+                }
+            }
+        }
 
         if (isValid)
         {
@@ -138,7 +189,7 @@
         }
 
         // Set the formatted value back
-        codeRBQ = input;
+        codeRBQ = input;        
     }
     //Traite l'information de l'adresse
     public Fiche? record;
@@ -154,54 +205,53 @@
 
     protected async Task FetchRecord()
     {
+
         record = await DonnéesQuébecService.GetRecordByLicenceAsync(codeRBQ);
-        try
-        {
-            string test = record.NumeroDeLicence;
-        }
-        catch
+        if(record == null)
         {
             FetchError();
-            return;
         }
-        //Identification
-        SharedData.NEQ = record.NEQ;
-        SharedData.NomEntreprise = record.NomEntreprise;
-        SharedData.Courriel = record.Courriel;
-
-        //Adresse  
-        string[] parts = record.Adresse.Split(' ');
-
-        int numParts = parts.Length;
-
-        SharedData.NumCivique = parts[0];
-        SharedData.CodePostal = parts[parts.Length - 2] + ' ' + parts[parts.Length - 1];
-        SharedData.Province = parts[parts.Length - 4];
-        SharedData.NomVille = parts[parts.Length - 5];
-        numParts -= 5;
-
-        for (int i = 1; i < numParts; i++)
+        else
         {
-            nomRue += parts[i];
-            if (i != numParts)
-                nomRue += ' ';
-        }
-        SharedData.NomRue = nomRue;
-        SharedData.NumTelephone = record.NumTelephone;
-        SharedData.RegionAdministrative = record.RegionAdministrative;
-        SharedData.CodeRegionAdministrative = record. CodeRegionAdministrative;
+            //Identification
+            SharedData.NEQ = record.NEQ;
+            SharedData.NomEntreprise = record.NomEntreprise;
+            SharedData.Courriel = record.Courriel;
 
-        //RBQ
-        SharedData.NumLicence = record.NumeroDeLicence;
-        SharedData.StatutLicence = record.StatutLicence;
-        SharedData.TypeLicence = record.TypeLicence;
-        SharedData.CategorieLicence = record.CategorieLicence;
+            //Adresse
+            string[] parts = record.Adresse.Split(' ');
 
-        
-        
-        await OnDataFetched.InvokeAsync(true);
+            int numParts = parts.Length;
 
-        CloseModal();
+            SharedData.NumCivique = parts[0];
+            SharedData.CodePostal = parts[parts.Length - 2] + ' ' + parts[parts.Length - 1];
+            SharedData.Province = parts[parts.Length - 4];
+            SharedData.NomVille = parts[parts.Length - 5];
+            numParts -= 5;
+
+            for (int i = 1; i < numParts; i++)
+            {
+                nomRue += parts[i];
+                if (i != numParts)
+                    nomRue += ' ';
+            }
+            SharedData.NomRue = nomRue;
+            SharedData.NumTelephone = record.NumTelephone;
+            SharedData.RegionAdministrative = record.RegionAdministrative;
+            SharedData.CodeRegionAdministrative = record.CodeRegionAdministrative;
+
+            //RBQ
+            SharedData.NumLicence = record.NumeroDeLicence;
+            SharedData.StatutLicence = record.StatutLicence;
+            SharedData.TypeLicence = record.TypeLicence;
+            SharedData.CategorieLicence = record.CategorieLicence;
+
+
+
+            await OnDataFetched.InvokeAsync(true);
+
+            CloseModal();            
+        }        
     }    
 
     private void FetchError()

@@ -1,6 +1,11 @@
 ﻿@using System.Text.RegularExpressions
 @using IntegrationV3R_PortailFournisseur.Data.Services;
+@using IntegrationV3R_PortailFournisseur.Data.Models;
 @using Microsoft.JSInterop
+@using System.Net
+@using Microsoft.EntityFrameworkCore
+
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 
 <div class="container-fluid mt-4">
 
@@ -68,7 +73,7 @@
 
 @code {
     [Inject] private SharedDataService SharedData { get; set; }  
-    
+
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     [Parameter]
@@ -77,7 +82,8 @@
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
 
-    
+    [Parameter]
+    public EventCallback<bool> BDFetched { get; set; }
 
     private string neqInput = string.Empty;
     private string nomEntrepriseInput = string.Empty;
@@ -91,6 +97,8 @@
     private string passwordError = string.Empty;
     private string repeatPasswordError = string.Empty;
 
+    private List<Fournisseur> currentFournisseurs = new List<Fournisseur>();
+
 
     public void LoadSharedData()
     {
@@ -100,6 +108,23 @@
 
         StateHasChanged();
     }
+
+    public async Task FetchDataDB()
+    {
+        try
+        {
+            // Appel à la base de données pour récupérer les régions
+            currentFournisseurs = await dbContext.Fournisseurs.ToListAsync();
+
+        }
+        catch (Exception ex)
+        {
+            emailError = "Erreur lors de la récupération à la BD, veuillez réessayer";
+            Console.WriteLine(ex.Message);
+        }
+        await BDFetched.InvokeAsync(true);       
+    }
+        
 
     private void HandleSubmit()
     {
@@ -157,6 +182,17 @@
                 neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88.";
                 isValid = false;
             }
+            else
+            {
+                foreach(Fournisseur fournisseur in currentFournisseurs)
+                {
+                    if(fournisseur.Neq == SingletonForm.NeqInput)
+                    {
+                        neqError = "Ce NEQ est déjà inscrit dans la liste de fournisseurs pour" + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien inscrit";
+                        isValid = false;
+                    }
+                }
+            }
         }        
 
         // Validation for Nom de l'entreprise
@@ -170,17 +206,35 @@
             nomEntrepriseError = "Le nom de l'entreprise doit faire moins de 64 caractères.";
             isValid = false;
         }
+       
 
         // Validation for Email
         if (string.IsNullOrWhiteSpace(SingletonForm.EmailInput))
         {
-            emailError = "Une adresse courriel valide de l'entreprise est requise.";
+            emailError = "Une adresse courriel est requise.";
             isValid = false;
         }
         else if (SingletonForm.EmailInput.Length > 64 || !IsValidEmail(SingletonForm.EmailInput))
         {
             emailError = "L'adresse courriel doit être valide et faire moins de 64 caractères.";
             isValid = false;
+        }
+        /*
+        else if (!isValidDNS(SingletonForm.EmailInput))
+        {
+            emailError = "Le domaine du courriel entrer n'est pas valide.";
+            isValid = false;
+        }*/
+        else
+        {
+            foreach (Fournisseur fournisseur in currentFournisseurs)
+            {
+                if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput)
+                {
+                    emailError = "Ce courriel est déjà inscrit dans la liste de fournisseurs pour " + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien inscrit";
+                    isValid = false;
+                }
+            }
         }
 
         // Validation for Password
@@ -221,6 +275,7 @@
 
         if (trimmedMail.Contains("@") && trimmedMail.Contains(".") && !trimmedMail.Contains(" ") && !trimmedMail.EndsWith("."))
         {
+            //CONFIRME QUE LA SYNTAXE DU COURRIEL EST VALIDE
             try
             {
                 var testAddress = new System.Net.Mail.MailAddress(trimmedMail);
@@ -238,6 +293,22 @@
 
         //return email.Contains("@") && email.Contains("."); // Simple check, can be improved
     }
+
+    /* NE FONCTIONNE PAS COMME PRÉVUE ****** VA dire que edu.cegeptr.qc.ca n'est pas valide. Il faudrait une banque de  
+    private bool isValidDNS(string email)
+    {
+        //VERIFIE SI LE DOMAINE DU COURRIEL EST VALIDE
+        var domain = email.Split('@')[1]; 
+        try
+        {            
+            var hostEntry = Dns.GetHostEntry(domain);
+            return hostEntry.AddressList.Length > 0;
+        }
+        catch
+        {
+            return false; 
+        }
+    }*/
 
     private bool IsNumeric(string input)
     {

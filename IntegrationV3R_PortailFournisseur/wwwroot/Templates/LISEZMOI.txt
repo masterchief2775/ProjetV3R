@@ -1,0 +1,12 @@
+Pour faire un model de courriel idéal :
+
+- Allez sur outlook et rédigez exactement le courriel comment il doit ressembler.
+- Au lieu de mettre le nom d<une compagnie, venir mettre {Name}
+
+- Envoyez le courriel. (L'envoyer à sois même marche !)
+- Sur le courriel reçu, faite un click droit, puis "Afficher la source"
+- Prendre le html et le mettre dans un fichier HTML 
+
+-S'assurer que le pathing est correct à l'envoie (Devrait l'être si utilise les mêmes fichiers ou mêmes noms que ceux pour nos exemples)
+-Dans le fichier html, aller s'assurer que le charset=UTF-8 pour supporter les accents. 
+- Pour le lien de vérification, aller changer le href pour {Link}

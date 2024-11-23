@@ -153,6 +153,8 @@
     private List<Souscategoriesafter2008> fetchedSousCategories = new List<Souscategoriesafter2008>();
     private List<Souscategoriesafter2008> filteredSubCategories = new List<Souscategoriesafter2008>(); // To hold search results
 
+    public List<Licencesrbq> currentLicences = new List<Licencesrbq>();
+
 
     public async Task FetchDataDB()
     {     // Appel à la base de données pour récupérer les régions
@@ -161,20 +163,16 @@
         {
             // Appel à la base de données pour récupérer les régions
             fetchedSousCategories = await dbContext.Souscategoriesafter2008s.ToListAsync();
+            currentLicences = await dbContext.Licencesrbqs.ToListAsync();
         }
         catch (Exception ex)
         {
-            subCategoryError = "Erreur lors de la récupération des régions.";
+            subCategoryError = "Erreur lors de la récupération 'a la BD.";
             Console.WriteLine(ex.Message);
         }
-        BDFetched.InvokeAsync();
+        await BDFetched.InvokeAsync();
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        //Revérifier, peut être inutile
-
-    }
+    
 
     public void LoadSharedData()
     {

@@ -108,7 +108,7 @@
             // Récupération de l'extension du fichier pour la brochure
             var brochureExtension = Path.GetExtension(SingletonForm.BrochureFile.Name);
             var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
-            var brochurePath = Path.Combine(SingletonForm.UploadDirectory, brochureFileName);
+            var brochurePath = Path.Combine(Directory.GetCurrentDirectory(), brochureFileName);
 
             Brochure _brochure = new Brochure();
             _brochure.NomFichier = brochureFileName;

@@ -102,7 +102,7 @@
             productSearchError = "Erreur lors de la récupération des produits.";
             Console.WriteLine(ex.Message);
         }
-        BDFetched.InvokeAsync();
+        await BDFetched.InvokeAsync();
     }
 
     // Handle the form submission

@@ -9,16 +9,12 @@
   <ItemGroup>
     <Compile Remove="Data\Documents\**" />
     <Compile Remove="Data\Images\**" />
-    <Compile Remove="Data\NewFolder\**" />
     <Content Remove="Data\Documents\**" />
     <Content Remove="Data\Images\**" />
-    <Content Remove="Data\NewFolder\**" />
     <EmbeddedResource Remove="Data\Documents\**" />
     <EmbeddedResource Remove="Data\Images\**" />
-    <EmbeddedResource Remove="Data\NewFolder\**" />
     <None Remove="Data\Documents\**" />
     <None Remove="Data\Images\**" />
-    <None Remove="Data\NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +43,12 @@
 
   <ItemGroup>
     <Folder Include="Data\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Templates\ExempleCourriel.html" />
+    <None Include="wwwroot\Templates\LISEZMOI.txt" />
+    <None Include="wwwroot\Templates\troisrivieresEXEMPLE.jpg" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using IntegrationV3R_PortailFournisseur.Data.Models;
+﻿using IntegrationV3R_PortailFournisseur.Data;
+using IntegrationV3R_PortailFournisseur.Data.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Mail;
+
 
 
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
@@ -65,6 +67,12 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         [Parameter]
         public EventCallback UploadSuccessful { get; set; }
+
+        
+        public async void SendIt()
+        {
+            await SendMail();
+        }
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
@@ -173,7 +181,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 {
                     var brochureExtension = Path.GetExtension(BrochureFile.Name);
                     var brochureFileName = $"Brochure_{NomEntrepriseInput}{brochureExtension}";
-                    var brochurePath = Path.Combine(UploadDirectory, brochureFileName);
+                    var brochurePath = Path.Combine(Directory.GetCurrentDirectory(), brochureFileName);
                     using (var stream = new FileStream(SelectedBrochure.LienDocument, FileMode.Create))
                     {
                         await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
@@ -203,6 +211,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 _isUploadSuccessful = false;
             }
             
+            //
             if(_isUploadSuccessful)
             {
                 await SendMail();
@@ -220,6 +229,13 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 EnableSsl = true // Enable SSL for secure communication
             };
 
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Templates", "ExempleCourriel.html");
+            string body = File.ReadAllText(filePath);
+
+            string lienTemporaire = "https://en.wikipedia.org/wiki/Thumb_signal#/media/File:Jempol_Ngadep_Atas_(cropped).jpg";
+
+            body = body.Replace("{Link}", lienTemporaire);
+
             // Create the email message
             var mailMessage = new MailMessage
             {
@@ -227,13 +243,15 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 Subject = "Test d'envoie de courriel",
                 /* Le body du courriel peut être formatter en HTML selon les normes à la ville dans le projet. Il est donc possible d'instancier 
                    par la suite un courriel avec ce body d'html avec les informations du client*/
-                Body = "Ceci est un courriel pour vous laissez savoir que nous avons reçu votre demande d'adhésion à la liste des fournisseurs de la ville de Trois-Rivières" + '\n' +
+                Body = body,
+                /*"Ceci est un courriel pour vous laissez savoir que nous avons reçu votre demande d'adhésion à la liste des fournisseurs de la ville de Trois-Rivières" + '\n' +
                 '\n' + "Votre dossier est en attente de traitement. Vous recevrez un autre courriel lorsque la décision sera prise." + '\n' + '\n' +
-                "Merci et bonne journée !",
+                "Merci et bonne journée !",*/
                 IsBodyHtml = true // Set to true if you want to send HTML content
             };
 
-            mailMessage.To.Add(EmailInput);            
+            //mailMessage.To.Add(EmailInput); MIT EN COMMENTAIRES POUR TOUT DE SUITE AU CAS QUE MAILTRAP FAIL 
+            mailMessage.To.Add("gporlier97@gmail.com");
 
             // Send the email asynchronously
             try
