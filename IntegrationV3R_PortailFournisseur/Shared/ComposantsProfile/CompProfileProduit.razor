@@ -1,0 +1,23 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+<h5>Produits</h5>
+<div>
+    @if (Products != null && Products.Any())
+    {
+        @foreach (var product in Products)
+        {
+            <div class="product-entry mb-3 row">
+                <div class="col-6 mb-3">
+                    <strong>Comodité: </strong> @product.Comodite?.ComoditeTitreFr<br>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div>No products/services available.</div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<Produitsservice> Products { get; set; }
+}

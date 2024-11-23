@@ -1,0 +1,36 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+<h5>Finances</h5>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <strong>Numéro TPS:</strong> @Tps
+        </div>
+        <div class="col-md-6">
+            <strong>Numéro TVQ:</strong> @Tvq
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <strong>Conditions de paiement:</strong> @CodeConditionPaiement
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <strong>Devise:</strong> @Devise
+        </div>
+
+        <div class="col-md-6">
+            <strong>Mode de communication:</strong> @ModeCom
+        </div>
+    </div>
+
+@code {
+    [Parameter] public string Tps { get; set; }
+    [Parameter] public string Tvq { get; set; }
+    [Parameter] public string CodeConditionPaiement { get; set; }
+    [Parameter] public string Devise { get; set; }
+    [Parameter] public string ModeCom { get; set; }
+}

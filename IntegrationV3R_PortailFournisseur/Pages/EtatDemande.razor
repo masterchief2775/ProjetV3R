@@ -6,25 +6,26 @@
 @using IntegrationV3R_PortailFournisseur.Data.Models
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject ApplicationDbContext _context
-
+@inject StateContainer stateContainer
 
 <PageTitle>État de la demande</PageTitle>
 
-<div class="container">
+<div class="container-fluid etat-demande-container">
     @if (isUserAuthenticated)
     {
-        <h3>Suivi de votre demande</h3>
-        <p>Bonjour @fournisseur.NomEntreprise </p>
+        <h3 class="text-center mb-4">Suivi de votre demande</h3>
+        <p class="lead text-center">Bonjour @fournisseur.NomEntreprise </p>
+
         @if (fournisseur != null)
         {
-            <div class="tracking-status">
-                <p>Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
-                <p>Votre compte est actuellement : <strong>@etat</strong></p>
+            <div class="tracking-status mb-5">
+                <p class="text-center">Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+                <p class="text-center">Votre compte est actuellement : <strong>@etat</strong></p>
             </div>
         }
         else
         {
-            <p>Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
+            <p class="text-center text-warning">Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
         }
 
         <div class="container mt-5">
@@ -58,16 +59,18 @@
                     </div>
                 }
             </div>
-            <button @onclick="NavigateToProfile">Profile</button>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button class="btn btn-primary mx-2" @onclick="NavigateToProfile">Profile</button>
+                <button class="btn btn-secondary mx-2" @onclick="NavigateToFormulaireDemande">Formulaire Demande</button>
+            </div>
         </div>
     }
     else
     {
-        <p>Redirection vers la page de connexion...</p>
+        <p class="text-center text-warning">Redirection vers la page de connexion...</p>
     }
 </div>
-
-
 
 @code {
     private bool isUserAuthenticated = false;
@@ -111,7 +114,6 @@
                     {
                         etat = "Désactivé";
                     }
-
                 }
                 else
                 {
@@ -169,7 +171,16 @@
     {
         Navigation.NavigateTo("/profile");
     }
+
+    private void NavigateToFormulaireDemande()
+    {
+        Navigation.NavigateTo("/formulaire");
+        UpdateFinancePageState(false);
+    }
+
+    private void UpdateFinancePageState(bool value)
+    {
+        stateContainer.ShouldDisplayFinancePage = value;
+        stateContainer.NotifyStateChanged();
+    }
 }
-
-
-

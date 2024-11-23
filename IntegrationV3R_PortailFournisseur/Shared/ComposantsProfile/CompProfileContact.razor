@@ -1,0 +1,23 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+<h5>Contacts</h5>
+@if (Contacts != null && Contacts.Any())
+{
+    @foreach (var contact in Contacts)
+    {
+        <div class="contact-entry mb-3 row">
+            <div class="col-6 mb-3">
+                <strong>Nom du contact:</strong> @contact.NomContact<br>
+                <strong>Numéro de téléphone:</strong> @contact.NumTelContact<br>
+                <strong>Email:</strong> @contact.CourrielContact<br>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div>No contacts available.</div>
+}
+
+@code {
+    [Parameter] public List<Contact> Contacts { get; set; }
+}

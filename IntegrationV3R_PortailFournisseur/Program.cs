@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Blazored.SessionStorage;
 using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;
+using static IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire.NavbarFormulaire;
+using IntegrationV3R_PortailFournisseur.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,8 @@ builder.Services.AddHttpClient<DonneesQuebecService>(client =>
 });
 
 builder.Services.AddScoped<SingletonFormulaire>();
+
+builder.Services.AddSingleton<StateContainer>();
 
 var app = builder.Build();
 

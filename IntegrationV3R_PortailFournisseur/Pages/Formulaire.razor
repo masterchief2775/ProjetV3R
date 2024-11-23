@@ -7,14 +7,14 @@
 
 <CompPreremplissage @ref="compPreremplissage" OnDataFetched="HandleSharedData" BDFetched="NextBDFetch"/>
 
-<div class="container-fluid  formulaire-container">
+<div class="container-fluid formulaire-container">
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"/>
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
 		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
@@ -25,10 +25,15 @@
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
 		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
-	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">		
+	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
 		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
+	<!-- Conditionally display based on session value -->
+<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
+    <CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 </div>
+</div>
+
 
 
 @code {
@@ -40,7 +45,7 @@
 	private CompFormulaireProduit compProduit;
 	private CompFormulaireRBQ compRBQ;
 	private CompFormulaireBrochure compBrochure;
-	
+	private CompFormulaireFinances compFinance;
 
 	[Inject] private SingletonFormulaire SingletonForm { get; set; }
 
@@ -55,7 +60,7 @@
 	
 	private void SetFormCheckpoint(int pageIndex)
 	{
-		if(pageIndex > _checkpoint)
+		if (pageIndex > _checkpoint)
 		{
 			_checkpoint = pageIndex;
 			compNavbar.Checkpoint = pageIndex;
@@ -63,16 +68,17 @@
 	}
 
 	private void HandlePageSelected(int pageIndex)
-	{	
+	{
 		if (pageIndex <= _checkpoint)
-		{		
+		{
 			selectedPageIndex = pageIndex;
 		}
+
 	}
 
 	private void HandlePageSelectedNavbar(int pageIndex)
 	{
-		if(pageIndex < selectedPageIndex && selectedPageIndex == _checkpoint)
+		if (pageIndex < selectedPageIndex && selectedPageIndex == _checkpoint)
 		{
 			selectedPageIndex = pageIndex;
 		}
@@ -84,21 +90,22 @@
 					compIdentification.HandleSubmitReturn(pageIndex);
 					break;
 				case 1:
-					compAdresse.HandleSubmitReturn(pageIndex);					
+					compAdresse.HandleSubmitReturn(pageIndex);
 					break;
 				case 2:
-					compContact.HandleSubmitReturn(pageIndex);					
+					compContact.HandleSubmitReturn(pageIndex);
 					break;
 				case 3:
-					compProduit.HandleSubmitReturn(pageIndex);					
+					compProduit.HandleSubmitReturn(pageIndex);
 					break;
 				case 4:
-					compRBQ.HandleSubmitReturn(pageIndex);					
+					compRBQ.HandleSubmitReturn(pageIndex);
+					break;
+				case 5:
+					compFinance.HandleSubmitReturn(pageIndex);
 					break;
 			}
 		}
-		
-		
 	}
 
 	private void HandleSharedData(bool value)
@@ -131,4 +138,5 @@
 
 		Console.WriteLine("In FORMULAIRE");
 	}
+
 }

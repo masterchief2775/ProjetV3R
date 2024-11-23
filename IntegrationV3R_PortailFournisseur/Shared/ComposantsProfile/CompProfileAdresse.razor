@@ -1,0 +1,24 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+<div class="profile-section">
+    <h5>Adresse</h5>
+    <div class="row mb-3">
+        <div class="col-md-2"><strong>Numero civique:</strong> @NumeroCiv</div>
+        <div class="col-md-2"><strong>Rue:</strong> @Rue</div>
+        <div class="col-md-2"><strong>Ville:</strong> @Ville</div>
+        <div class="col-md-2"><strong>Province:</strong> @Province</div>
+        <div class="col-md-2"><strong>Code postal:</strong> @CodePostal</div>
+        <div class="col-md-2"><strong>Région:</strong> @RegionAdministrative</div>
+        <div class="col-md-2"><strong>Numéro de téléphone:</strong> @NumeroTelephone</div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string NumeroCiv { get; set; }
+    [Parameter] public string Rue { get; set; }
+    [Parameter] public string Ville { get; set; }
+    [Parameter] public string Province { get; set; }
+    [Parameter] public string CodePostal { get; set; }
+    [Parameter] public string RegionAdministrative { get; set; }
+    [Parameter] public string NumeroTelephone { get; set; }
+}

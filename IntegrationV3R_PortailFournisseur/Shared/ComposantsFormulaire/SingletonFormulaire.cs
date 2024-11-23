@@ -61,6 +61,13 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public Brochure SelectedCarteAffaire = new Brochure();
         public IBrowserFile BrochureFile { get; set; } = null;
         public IBrowserFile CarteVisiteFile { get; set; } = null;
+        // New properties for Finances
+        public string TpsInput { get; set; } = string.Empty;  // Numéro de TPS
+        public string TvqInput { get; set; } = string.Empty;  // Numéro de TVQ
+        public string ConditionPaiement { get; set; } = "Dans les 30 jours sans déduction"; // Default option for conditions
+        public string Devise { get; set; } = "CAD"; // Default to CAD
+        public string ModeCom { get; set; } = "email"; // Default to email for communication mode
+
 
         public SingletonFormulaire() { }        
                 

@@ -1,0 +1,58 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+<h5>Licences RBQ</h5>
+
+@if (Licences != null && Licences.Any())
+{
+    <div class="rbq-list">
+        @foreach (var rbq in Licences)
+        {
+            <div class="rbq-entry mb-3 row">
+                <div class="col-md-6">
+                    <strong>Numéro RBQ:</strong> @rbq.NumLicence
+                </div>
+                <div class="col-md-6">
+                    <strong>Statut de Licence:</strong> @rbq.StatutLicence
+                </div>
+                <div class="col-md-6">
+                    <strong>Categorie de licence:</strong> @rbq.Categorie
+                </div>
+
+                @if (rbq.SouscategorieLicencerbqs != null && rbq.SouscategorieLicencerbqs.Any())
+                {
+                    <div class="col-md-12">
+                        <strong>Sous-catégorie:</strong>
+                        <ul>
+                            @foreach (var sousCategorieLic in rbq.SouscategorieLicencerbqs)
+                            {
+                                @if (sousCategorieLic.IdSousCategorieNavigation != null)
+                                {
+                                    <li>@sousCategorieLic.IdSousCategorieNavigation.NomSousCategorieAfter2008</li>
+                                }
+                                else
+                                {
+                                    <li>Subcategory name not available</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-12">
+                        <p>No subcategory available.</p>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No RBQ licenses found.</p>
+}
+
+@code {
+    [Parameter]
+    public List<Licencesrbq> Licences { get; set; }
+}

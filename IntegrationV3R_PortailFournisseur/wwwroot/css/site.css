@@ -1,7 +1,10 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
+/*CSS DE BASE*/
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.container {
+    height: 100%;
 }
 
 h1:focus {
@@ -66,75 +69,388 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+    /*FIN DU CSS DE BASE DE BLAZOR*/
+
+
 
 /* CSS GLOBALE POUR LES PAGES DU FORMULAIRE DE DEMANDE */
 
-.formulaire-container .nav-tabs {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0; /* Remove space between tabs and form */
-    background-color: #a6a6a6; /* Match form background */
-    border-radius: 15px; /* Round corners for the tab container */
+.formulaire-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern sans-serif font */
+    background-color: #f4f4f4; /* Light gray background for the form container */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for a clean look */
+    max-width: 1200px;
+    margin: auto;
 }
 
-.formulaire-container .nav-item {
-    flex: 1;
-    margin: 0.4em;
-    cursor: pointer;
-}
-
-.formulaire-container .nav-link {
-    background-color: #a6a6a6; /* Match form background */
-    color: white; /* Text color */
-    text-align: center;
-    font-weight: bold;
-    padding: 10px;
-    border-radius: 15px; /* Round corners for tabs */
-    pointer-events: none; /* Disable pointer events */
-    cursor: pointer;
-}
-
-    .formulaire-container .nav-link.active {
-        background-color: #0076d5; /* Active tab color */
-        color: white; /* White text when selected */
-        border-radius: 15px; /* Round corners for active tab */
+    /* Tab Navigation */
+    .formulaire-container .nav-tabs {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        background-color: #ffffff; /* White background for tabs */
+        border-radius: 10px; /* Rounded corners for the tab container */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Shadow to make tabs pop */
+        padding: 8px 16px;
     }
 
-    .formulaire-container .nav-link.checkpoint {
-        background-color: #ED8C00; /* Active tab color */
-        color: white; /* White text when selected */
-        border-radius: 15px; /* Round corners for active tab */
+    .formulaire-container .nav-item {
+        flex: 1;
+        margin: 0 10px;
+        text-align: center;
     }
 
-    .formulaire-container .nav-link.done {
-        background-color: #68B545; /* Active tab color */
-        color: white; /* White text when selected */
-        border-radius: 15px; /* Round corners for active tab */
+    .formulaire-container .nav-link {
+        background-color: #f0f0f0; /* Light background for inactive tabs */
+        color: #555; /* Subtle dark color for inactive tab text */
+        padding: 12px 0;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+        cursor: pointer;
+        text-transform: uppercase;
     }
 
-.formulaire-container .form {
-    background-color: #a6a6a6;
-    padding: 20px;
-    border-radius: 15px;
-    border: groove #737373 2px;
-}
+        .formulaire-container .nav-link:hover {
+            background-color: #e1e1e1; /* Slightly darker when hovering */
+            transform: scale(1.05); /* Slight zoom effect on hover */
+        }
 
-.formulaire-container input {
-    border-radius: 20px;
-}
+        /* Active and Status-specific Tab Styles */
+        .formulaire-container .nav-link.active {
+            background-color: #0076d5; /* Bright blue for active tab */
+            color: white;
+        }
 
-.formulaire-container label {
-    font-weight: bolder;
-}
+        .formulaire-container .nav-link.checkpoint {
+            background-color: #ff9f00; /* Orange for checkpoint tab */
+            color: white;
+        }
 
-/* CSS GLOBALE POUR LE PROFILE */
+        .formulaire-container .nav-link.done {
+            background-color: #3cb043; /* Green for done tab */
+            color: white;
+        }
 
+    /* Form Styles */
+    .formulaire-container .form {
+        background-color: #ffffff; /* White background for the form */
+        padding: 30px;
+        border-radius: 10px;
+        border: none; /* Remove border */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Light shadow for subtle depth */
+    }
+
+    .formulaire-container label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333; /* Dark text for label */
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .formulaire-container input {
+        width: 100%; /* Make inputs fill the container */
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc; /* Light gray border for inputs */
+        margin-bottom: 15px;
+        font-size: 16px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    }
+
+        .formulaire-container input:focus {
+            outline: none;
+            border-color: #0076d5; /* Blue border on focus */
+            box-shadow: 0 0 8px rgba(0, 118, 213, 0.3); /* Soft blue glow on focus */
+        }
+
+    .formulaire-container .btn {
+        background-color: #0076d5; /* Bright blue button */
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+        .formulaire-container .btn:hover {
+            background-color: #005fa3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slight zoom effect on hover */
+        }
+
+    .formulaire-container .text-danger {
+        font-size: 14px;
+        color: #ff0000; /* Red color for error messages */
+        margin-top: 5px;
+    }
+
+/* Responsive Design for smaller screens */
+    @media (max-width: 768px) {
+        .formulaire-container {
+            padding: 20px; /* Reduce padding for small screens */
+        }
+
+            .formulaire-container .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .formulaire-container .nav-link {
+                margin: 5px 0;
+                font-size: 14px; /* Slightly smaller font size for mobile */
+            }
+
+            .formulaire-container .form {
+                padding: 20px;
+            }
+
+            .formulaire-container input,
+            .formulaire-container .btn {
+                font-size: 14px; /* Smaller font size for mobile inputs and button */
+            }
+    }
+
+/* CSS GLOBALE POUR PROFILE */
+
+/* Profile Container */
 .profile-container {
-    background-color: #a6a6a6;
-    border-radius: 10px;
-    border: groove 3px #1861ac;
-    padding: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Same modern sans-serif font */
+    background-color: #f4f4f4; /* Light gray background */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    max-width: 1200px;
+    margin: auto;
 }
+
+    /* Tab Navigation (same as formulaire) */
+    .profile-container .nav-tabs {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        background-color: #ffffff; /* White background for tabs */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+        padding: 8px 16px;
+    }
+
+    .profile-container .nav-item {
+        flex: 1;
+        margin: 0 10px;
+        text-align: center;
+    }
+
+    .profile-container .nav-link {
+        background-color: #f0f0f0; /* Light background for inactive tabs */
+        color: #555; /* Subtle dark color for inactive tab text */
+        padding: 12px 0;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+        .profile-container .nav-link:hover {
+            background-color: #e1e1e1; /* Slightly darker when hovering */
+            transform: scale(1.05); /* Slight zoom effect on hover */
+        }
+
+        /* Active and Status-specific Tab Styles */
+        .profile-container .nav-link.active {
+            background-color: #0076d5; /* Blue for active tab */
+            color: white;
+        }
+
+        .profile-container .nav-link.checkpoint {
+            background-color: #ff9f00; /* Orange for checkpoint tab */
+            color: white;
+        }
+
+        .profile-container .nav-link.done {
+            background-color: #3cb043; /* Green for done tab */
+            color: white;
+        }
+
+    /* Profile Content Form (same as formulaire container) */
+    .profile-container .form {
+        background-color: #ffffff; /* White background */
+        padding: 30px;
+        border-radius: 10px;
+        border: none; /* No border */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Light shadow for subtle depth */
+    }
+
+    .profile-container label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333; /* Dark text for labels */
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .profile-container input,
+    .profile-container select {
+        width: 100%; /* Full-width inputs */
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc; /* Light gray border */
+        margin-bottom: 15px;
+        font-size: 16px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    }
+
+        .profile-container input:focus,
+        .profile-container select:focus {
+            outline: none;
+            border-color: #0076d5; /* Blue border on focus */
+            box-shadow: 0 0 8px rgba(0, 118, 213, 0.3); /* Soft blue glow on focus */
+        }
+
+    .profile-container .btn {
+        background-color: #0076d5; /* Blue button */
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+
+        .profile-container .btn:hover {
+            background-color: #005fa3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slight zoom effect */
+        }
+
+    .profile-container .text-danger {
+        font-size: 14px;
+        color: #ff0000; /* Red for error messages */
+        margin-top: 5px;
+    }
+
+    /* Section Titles (same style as Formulaire) */
+    .profile-container .section-title {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: #0076d5;
+        margin-bottom: 20px;
+    }
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 20px; /* Reduced padding for smaller screens */
+    }
+
+        .profile-container .nav-tabs {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-container .nav-link {
+            margin: 5px 0;
+            font-size: 14px; /* Smaller font size for mobile */
+        }
+
+        .profile-container .form {
+            padding: 20px; /* Reduced padding for mobile */
+        }
+
+        .profile-container input,
+        .profile-container .btn {
+            font-size: 14px; /* Smaller font size for mobile inputs and button */
+        }
+}
+
+/* CSS GLOBAL POUR ETAT DEMANDE */
+
+/* État Demande Section */
+.etat-demande-container {
+    margin-bottom: 20px;
+    padding: 15px; /* Added padding for better spacing */
+    background-color: #f9f9f9; /* Light background to match other sections */
+    border-radius: 8px; /* Rounded corners for consistency */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow to stand out */
+}
+
+    /* Label for Etat Demande */
+    .etat-demande-container label {
+        font-size: 15px; /* Slightly larger font for better readability */
+        font-weight: 500; /* Consistent weight with other text */
+        color: #444; /* Slightly darker text for contrast */
+        margin-bottom: 8px; /* Uniform spacing for labels */
+        display: block;
+    }
+
+    /* Input and Select for Etat Demande */
+    .etat-demande-container input,
+    .etat-demande-container select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd; /* Lighter gray border for a softer look */
+        margin-bottom: 15px;
+        font-size: 16px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        /* Focused input/select for Etat Demande */
+        .etat-demande-container input:focus,
+        .etat-demande-container select:focus {
+            outline: none;
+            border-color: #0056b3; /* Darker blue for focus */
+            box-shadow: 0 0 8px rgba(0, 86, 179, 0.3); /* Soft blue glow on focus */
+        }
+
+        /* Status dropdown for Etat Demande */
+        .etat-demande-container select.status {
+            background-color: #fff;
+        }
+
+        /* Option style for Etat Demande */
+        .etat-demande-container select option {
+            padding: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+    /* Button for Etat Demande */
+    .etat-demande-container .btn-submit {
+        background-color: #007bff; /* Consistent blue button */
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        display: block;
+        width: 100%;
+        border: none;
+        margin-top: 15px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+        /* Button hover for Etat Demande */
+        .etat-demande-container .btn-submit:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slight scale effect for interaction */
+        }
+
+        /* Button focus for Etat Demande */
+        .etat-demande-container .btn-submit:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #007bff;
+        }
+
+
 
 /* ICONS */
 .icon {
@@ -161,13 +477,12 @@ a, .btn-link {
     border-radius: 10px;
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: black;
-}
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: black;
+    }
 
-
-/* RESPONSIVE */
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -176,8 +491,7 @@ a, .btn-link {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Background semi-transparent */
-    
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
 .modal-content {
@@ -186,11 +500,10 @@ a, .btn-link {
     padding: 20px;
     background-color: white;
     width: 90%;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: space-evenly;
-    flex-direction: row
-    
+    flex-direction: row;
 }
 
 .modal-leftSide {
@@ -201,7 +514,7 @@ a, .btn-link {
     align-items: flex-start;
 }
 
-.modal-boxSize{
+.modal-boxSize {
     width: 70%;
     margin: auto;
 }
@@ -210,23 +523,26 @@ a, .btn-link {
     width: 100%;
     max-width: fit-content;
     max-height: fit-content;
-    height: 100%
+    height: 100%;
 }
 
 @media only screen and (max-width: 800px) {
-    .modal-boxSize{
-        width:80%;
-        margin:auto;
+    .modal-boxSize {
+        width: 80%;
+        margin: auto;
     }
+
     .modal {
         font-size: smaller;
     }
 }
+
 @media only screen and (max-width: 600px) {
     .modal-boxSize {
         width: 100%;
         margin: auto;
     }
+
     .modal {
         font-size: smaller;
     }
@@ -242,14 +558,13 @@ a, .btn-link {
         font-size: small;
     }
 
-    .modal-img{
-        display:none;
-        width:none;
+    .modal-img {
+        display: none;
+        width: none;
     }
 
     .modal-leftSide {
         width: 100%;
-        
     }
 
     .modal-content {
@@ -266,3 +581,41 @@ a, .btn-link {
     font-size: 24px;
     cursor: pointer;
 }
+
+/* Reset radio buttons */
+input[type="radio"] {
+    appearance: none; /* Remove default styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s all ease;
+    margin-right: 10px;
+}
+
+    /* Checked state styling */
+    input[type="radio"]:checked {
+        border-color: #007BFF;
+        background-color: #007BFF;
+    }
+
+    /* Focus styling */
+    input[type="radio"]:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+/* Label styling */
+.radio-group label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+

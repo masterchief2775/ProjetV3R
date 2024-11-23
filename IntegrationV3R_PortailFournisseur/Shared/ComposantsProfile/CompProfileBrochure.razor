@@ -1,0 +1,24 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models
+
+<h3>Brochure</h3>
+
+@if (Brochures != null && Brochures.Any())
+{
+    @foreach (var brochure in Brochures)
+    {
+        <div class="mb-3">
+            <p>
+                <strong>@brochure.NomFichier:</strong> 
+                <a href="@brochure.LienDocument" target="_blank" class="btn btn-primary">Télécharger la brochure</a>
+            </p>
+        </div>
+    }
+}
+else
+{
+    <p>Aucune brochure n'est disponible pour le moment.</p>
+}
+
+@code {
+    [Parameter] public List<Brochure> Brochures { get; set; }
+}
