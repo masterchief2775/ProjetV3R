@@ -28,9 +28,9 @@
             <InputFile id="carteVisiteInput" OnChange="@(async e => await HandleCarteVisiteUpload(e))" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png" class="form-control" />
         </div>
 
-        @if (uploadedFiles.Any())
-        {
-            <h5>Fichiers téléchargés</h5>
+        <h5>Fichiers téléchargés</h5>
+        @if (SingletonForm.SelectedBrochure != null || SingletonForm.SelectedCarteAffaire != null)
+        {            
             <table class="table">
                 <thead>
                     <tr>
@@ -39,26 +39,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (uploadedFiles.Count == 0)
+                    @if (SingletonForm.SelectedBrochure != null)
                     {
                         <tr>
-                            <td>Aucun fichiers séléctionnés</td>                            
+                            <td>@SingletonForm.SelectedBrochure.NomFichier</td>
+                            <td>@String.Format("{0:F3}", SingletonForm.SelectedBrochure.Taille / (1024.0 * 1024.0))</td>
                         </tr>
                     }
-                    else
-                    foreach (var file in uploadedFiles)
+                    @if (SingletonForm.SelectedCarteAffaire != null)
                     {
                         <tr>
-                            <td>@file.Name</td>
-                            <td>@String.Format("{0:F3}", file.Size / (1024.0 * 1024.0))</td>
+                            <td>@SingletonForm.SelectedCarteAffaire.NomFichier</td>
+                            <td>@String.Format("{0:F3}", SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0))</td>
                         </tr>
                     }
+                    
                 </tbody>
             </table>
         }
         else
         {
-            <div>Aucun fichier téléchargé.</div>
+            <h6>Aucun fichier téléchargé.</h6>
         }
 
         <button type="button" class="btn btn-primary" @onclick="HandleSubmit">Soumettre</button>
@@ -77,7 +78,7 @@
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
 
-    private List<IBrowserFile> uploadedFiles = new();
+    //private List<IBrowserFile> uploadedFiles = new();
     private string fileError = string.Empty;
 
     private bool IsValidFileType(string contentType)
@@ -119,7 +120,7 @@
 
             // Confirmation de l'upload avec les nouveaux noms de fichiers
 
-            uploadedFiles.Add(SingletonForm.BrochureFile);
+            //uploadedFiles.Add(SingletonForm.BrochureFile);
         }
         else
         {
@@ -151,7 +152,7 @@
             _carteVisite.LienDocument = carteVisitePath;
             SingletonForm.SelectedCarteAffaire = _carteVisite; 
 
-            uploadedFiles.Add(SingletonForm.CarteVisiteFile);
+            //uploadedFiles.Add(SingletonForm.CarteVisiteFile);
         }
         else
         {

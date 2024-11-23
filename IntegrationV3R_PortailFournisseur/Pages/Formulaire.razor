@@ -29,11 +29,6 @@
 		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
 	</div>
 </div>
-<div class="nav-item px-3">
-	<button class="btn btn-link nav-link" @onclick="LogFormData">
-		<div class="oi oi-bullhorn" aria-hidden="true"> Log Form Data</div>
-	</button>
-</div>
 
 
 @code {
@@ -56,11 +51,7 @@
 
 	public int _FetchedComp = 1;
 
-	private void LogFormData()
-	{
-		SingletonForm.LogDataToConsole();
-	}
-
+	
 	private void SetFormCheckpoint(int pageIndex)
 	{
 		if(pageIndex > _checkpoint)
