@@ -10,6 +10,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Http;
 
 
 
@@ -68,14 +71,19 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string Devise { get; set; } = "CAD"; // Default to CAD
         public string ModeCom { get; set; } = "email"; // Default to email for communication mode
 
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SingletonFormulaire() { }        
+        public SingletonFormulaire(IHttpContextAccessor httpContextAccessor) 
+        {
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }        
                 
 
         [Parameter]
         public EventCallback UploadSuccessful { get; set; }
 
         
+
         public async void SendIt()
         {
             await SendMail();
@@ -216,7 +224,29 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             }
             await dbContext.SaveChangesAsync();
 
-            var check = dbContext.Fournisseurs.Where(f => f.FournisseurId == fournisseur.FournisseurId);  
+            //Créer un user
+            User user = new User
+            {
+                FournisseurId = fournisseur.FournisseurId,
+                Identifiant = fournisseur.CourrielEntreprise
+            };
+            dbContext.Users.Add(user);
+            await dbContext.SaveChangesAsync();
+
+
+            //Créer son mdp
+
+            string? ipConnexion = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            Motsdepass mdp = new Motsdepass
+            {
+                UserId = user.UserId,
+                Mdp = ComputeMd5Hash(PasswordInput),
+                IpChangementMdp = ipConnexion
+            };
+            dbContext.Motsdepasses.Add(mdp);
+            await dbContext.SaveChangesAsync();
+
+            var check = dbContext.Fournisseurs.FirstOrDefault(f => f.FournisseurId == fournisseur.FournisseurId);  
             
             if (check != null)
             {
@@ -228,6 +258,24 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 //FAIRE UN MODAL QUI DIT A L'UTILISATER QU'IL Y A UNE ERREUR
             }
         }
+
+        private string ComputeMd5Hash(string input)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+                byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                // Convertir le tableau de bytes en une chaîne hexadécimale
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++)
+                {
+                    sb.Append(hashBytes[i].ToString("x2"));
+                }
+                return sb.ToString();
+            }
+        }
+
         private async Task SendMail()
         {
             string adress = EmailInput;

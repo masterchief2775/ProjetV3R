@@ -87,33 +87,41 @@
 
         var hashedPassword = ComputeMd5Hash(mdpInput);
 
-        var user = await _context.Users
-            .Include(u => u.Motsdepasses)
-            .FirstOrDefaultAsync(u => u.Identifiant == identifiantInput);
+        var fournisseur =  _context.Fournisseurs.FirstOrDefault(f => f.Neq == identifiantInput || f.CourrielEntreprise == identifiantInput);       
 
-        if (user != null)
+        if (fournisseur != null)
         {
-            var passwordEntry = user.Motsdepasses.FirstOrDefault(m => m.Mdp == hashedPassword);
-
-            if (passwordEntry != null)
+            var user = await _context.Users
+            .Include(u => u.Motsdepasses)
+            .FirstOrDefaultAsync(u => u.FournisseurId == fournisseur.FournisseurId);
+            if (user != null)
             {
-                // Connexion réussie : stocker l'ID utilisateur dans le stockage de session sécurisé
-                await sessionStorage.SetItemAsync("UserId", user.UserId);
+                var passwordEntry = user.Motsdepasses.FirstOrDefault(m => m.Mdp == hashedPassword);
 
-                // Enregistrement de la connexion après une authentification réussie
-                await EnregistrerConnexion(user.UserId);
+                if (passwordEntry != null)
+                {
+                    // Connexion réussie : stocker l'ID utilisateur dans le stockage de session sécurisé
+                    await sessionStorage.SetItemAsync("UserId", user.UserId);
 
-                // Redirection vers la page EtatDemande
-                Navigation.NavigateTo("/etat-demande");
+                    // Enregistrement de la connexion après une authentification réussie
+                    await EnregistrerConnexion(user.UserId);
+
+                    // Redirection vers la page EtatDemande
+                    Navigation.NavigateTo("/etat-demande");
+                }
+                else
+                {
+                    mdpError = "Nom d'utilisateur ou mot de passe incorrect.";
+                }
             }
             else
             {
-                mdpError = "Mot de passe incorrect.";
+                identifiantError = "Nom d'utilisateur ou mot de passe incorrect.";
             }
         }
         else
         {
-            identifiantError = "Identifiant incorrect.";
+            mdpError = "Nom d'utilisateur ou mot de passe incorrect.";
         }
 
         // Hide the loading screen after the process is complete
