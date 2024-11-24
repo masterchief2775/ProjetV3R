@@ -22,6 +22,7 @@
         public string StatutLicence { get; set; } = "";
         public string TypeLicence { get; set; } = "";
         public string CategorieLicence { get; set; } = "";
+        public string Restriction { get; set; } = "";
 
     }
 }

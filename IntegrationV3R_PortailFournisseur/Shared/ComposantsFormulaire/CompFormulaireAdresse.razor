@@ -81,11 +81,8 @@
                 }
                 else
                 {
-                    <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.MunicipaliteInput">
-                    @if (!string.IsNullOrEmpty(villeError))
-                    {
-                        <div class="text-danger">@villeError</div>
-                    }
+                    <input type="text" class="form-control" id="villeInput" @bind="SingletonForm.NomMunicipaliteInput">
+                    
                 }
 
 
@@ -270,6 +267,8 @@
 
     private void HandleSubmit()
     {
+        Console.WriteLine("PROVINCE : " + SingletonForm.ProvinceInput);
+        Console.WriteLine("CODE MUNICIALITE : " + SingletonForm.MunicipaliteInput);
         // Reset errors
         ResetErrors();
 
@@ -333,11 +332,28 @@
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(SingletonForm.MunicipaliteInput))
+        if (SingletonForm.ProvinceInput == "4")
         {
-            villeError = "Le nom de la ville est requis.";
-            isValid = false;
+            if (string.IsNullOrWhiteSpace(SingletonForm.MunicipaliteInput))
+            {
+                villeError = "Le nom de la ville est requis.";
+                isValid = false;
+            }
         }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(SingletonForm.NomMunicipaliteInput))
+            {
+                villeError = "Le nom de la ville est requis.";
+                isValid = false;
+            }
+            else if(SingletonForm.NomMunicipaliteInput.Length > 64)
+            {
+                villeError = "Le nom de la ville doit être moins de 64 caractères.";
+                isValid = false;
+            }
+        }
+
 
         if (string.IsNullOrWhiteSpace(SingletonForm.ProvinceInput))
         {

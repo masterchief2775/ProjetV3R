@@ -16,10 +16,13 @@ using Microsoft.AspNetCore.Http;
 
 
 
+
 namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 {
     public class SingletonFormulaire
     {
+        public bool _isCreationForm = true;
+
         private static readonly object _lock = new object();
 
         // Properties to hold form data for identification
@@ -40,6 +43,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string NumeroTelephoneInput { get; set; } = string.Empty;
         public string NumeroPosteInput { get; set; } = string.Empty;
         public string SiteWebInput { get; set; } = string.Empty;
+        public string NomMunicipaliteInput { get; set; } = string.Empty;
 
         // Properties to hold data from contacts
         public List<ContactInput> ContactsInput = new List<ContactInput>();
@@ -60,10 +64,14 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         // Section pour Brochures 
         public string UploadDirectory { get; set; } = string.Empty;
+        public string OriginalBrochureName { get; set; } = string.Empty;
+        public string OriginalCarteAffaireName { get; set; } = string.Empty;
         public Brochure SelectedBrochure = new Brochure();
         public Brochure SelectedCarteAffaire = new Brochure();
         public IBrowserFile BrochureFile { get; set; } = null;
         public IBrowserFile CarteVisiteFile { get; set; } = null;
+
+
         // New properties for Finances
         public string TpsInput { get; set; } = string.Empty;  // Numéro de TPS
         public string TvqInput { get; set; } = string.Empty;  // Numéro de TVQ
@@ -72,10 +80,12 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public string ModeCom { get; set; } = "email"; // Default to email for communication mode
 
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private NavigationManager Navigation;
 
-        public SingletonFormulaire(IHttpContextAccessor httpContextAccessor) 
+        public SingletonFormulaire(IHttpContextAccessor httpContextAccessor, NavigationManager _navigation) 
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            Navigation = _navigation ?? throw new ArgumentNullException(nameof(_navigation));
         }        
                 
 
@@ -120,22 +130,44 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             // Création de l'adresse
             string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
             string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
-
-            Console.WriteLine(cleanedNumeroTelephone);
-            var adresse = new Adress
+            
+            if (ProvinceInput == "4")
             {
-                NumeroCivique = this.NumCiviqueInput,
-                Bureau = this.BureauInput,
-                Rue = this.RueInput,
-                CodeMunicipalite = this.MunicipaliteInput,
-                CodeProvince = this.ProvinceInput,
-                CodePostal = cleanedCodePostal,
-                NumTel = cleanedNumeroTelephone,
-                Poste = this.NumeroPosteInput,
-                FournisseurId = fournisseur.FournisseurId
-            };
-            dbContext.Adresses.Add(adresse);
-            await dbContext.SaveChangesAsync();
+                var adresse = new Adress
+                {
+                    NumeroCivique = this.NumCiviqueInput,
+                    Bureau = this.BureauInput,
+                    Rue = this.RueInput,
+                    CodeMunicipalite = this.MunicipaliteInput,
+                    NomMunicipalite = null,
+                    CodeProvince = this.ProvinceInput,
+                    CodePostal = cleanedCodePostal,
+                    NumTel = cleanedNumeroTelephone,
+                    Poste = this.NumeroPosteInput,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Adresses.Add(adresse);
+                await dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                var adresse = new Adress
+                {
+                    NumeroCivique = this.NumCiviqueInput,
+                    Bureau = this.BureauInput,
+                    Rue = this.RueInput,
+                    NomMunicipalite = this.NomMunicipaliteInput,
+                    CodeMunicipalite = null,
+                    CodeProvince = this.ProvinceInput,
+                    CodePostal = cleanedCodePostal,
+                    NumTel = cleanedNumeroTelephone,
+                    Poste = this.NumeroPosteInput,
+                    FournisseurId = fournisseur.FournisseurId
+                };
+                dbContext.Adresses.Add(adresse);
+                await dbContext.SaveChangesAsync();
+            }
+           
 
             // Ajouter les contacts
             foreach (var contactInput in this.ContactsInput)
@@ -175,6 +207,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             {
                 NumLicence = cleanedLicence,
                 StatutLicence = this.SelectedStatus,
+                TypeLicence= this.SelectedLicenseType,
                 Categorie = this.SelectedCategory,
                 FournisseurId = fournisseur.FournisseurId
             };
@@ -251,7 +284,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             if (check != null)
             {
                 await SendMail();
-                await UploadSuccessful.InvokeAsync(true);
+                Navigation.NavigateTo("/connexion?success=true");
             }
             else
             {
@@ -321,6 +354,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             {
                 Console.WriteLine($"Failed to send email: {ex.Message}");
             }
+
+
         }
     }
 

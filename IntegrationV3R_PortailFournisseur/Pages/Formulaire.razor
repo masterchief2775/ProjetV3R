@@ -7,6 +7,8 @@
 
 <CompPreremplissage @ref="compPreremplissage" OnDataFetched="HandleSharedData" BDFetched="NextBDFetch"/>
 
+<CompConfirmation @ref="compConfirmation" />
+
 <div class="container-fluid formulaire-container">
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
 
@@ -26,7 +28,7 @@
 		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"/>
 	</div>
 	<!-- Conditionally display based on session value -->
 <div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
@@ -46,6 +48,7 @@
 	private CompFormulaireRBQ compRBQ;
 	private CompFormulaireBrochure compBrochure;
 	private CompFormulaireFinances compFinance;
+	private CompConfirmation compConfirmation;
 
 	[Inject] private SingletonFormulaire SingletonForm { get; set; }
 
@@ -57,7 +60,10 @@
 
 	public int _FetchedComp = 1;
 
-	
+	private bool _isCreationForm = true;
+
+
+
 	private void SetFormCheckpoint(int pageIndex)
 	{
 		if (pageIndex > _checkpoint)
@@ -102,7 +108,7 @@
 					compRBQ.HandleSubmitReturn(pageIndex);
 					break;
 				case 5:
-					compFinance.HandleSubmitReturn(pageIndex);
+					compBrochure.HandleSubmitReturn(pageIndex);
 					break;
 			}
 		}
@@ -134,9 +140,12 @@
 			case 5:
 				compRBQ.FetchDataDB();
 				break;
-		}
+		}		
+	}
 
-		Console.WriteLine("In FORMULAIRE");
+	private void ShowConfirmation()
+	{
+		compConfirmation.Show();
 	}
 
 }

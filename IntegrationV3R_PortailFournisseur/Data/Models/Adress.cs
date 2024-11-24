@@ -27,6 +27,8 @@ public partial class Adress
 
     public DateTime Timestamps { get; set; }
 
+    public string? NomMunicipalite { get; set; }
+
     public virtual Municipalite CodeMunicipaliteNavigation { get; set; } = null!;
 
     public virtual Province CodeProvinceNavigation { get; set; } = null!;

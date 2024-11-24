@@ -31,8 +31,9 @@
                 <label for="statusSelect" class="form-label">Statut</label>
                 <select class="form-select" id="statusSelect" @bind="SingletonForm.SelectedStatus">
                     <option value="">Choisissez un statut</option>
-                    <option value="Active" >Valide</option>
-                    <option value="Invalide" >Invalide</option>
+                    <option value="Valide" >Valide</option>
+                    <option value="Valide avec restriction">Valide avec restriction</option>
+                    <option value="Non valide">Non valide</option>
                 </select>
                 @if (!string.IsNullOrEmpty(statusError))
                 {
@@ -179,7 +180,22 @@
     {
         SingletonForm.RBQNumberInput = SharedData.NumLicence;
 
-        SingletonForm.SelectedStatus = SharedData.StatutLicence;
+        if (SharedData.StatutLicence == "Active")
+        {
+            if(SharedData.Restriction == "Oui")
+            {
+                SingletonForm.SelectedStatus = "Valide avec restriction";
+            }
+            else
+            {
+                SingletonForm.SelectedStatus = "Valide";
+            }
+        }
+        else
+        {
+            SingletonForm.SelectedStatus = "Non valide";
+        }
+
         if (SharedData.StatutLicence != "Active")
             SingletonForm.SelectedStatus = "Invalide";
 
@@ -261,11 +277,7 @@
             categoryError = "La catégorie est requise.";
             isValid = false;
         }
-        else if (SingletonForm.SelectedCategory != "Generale" && SingletonForm.SelectedCategory != "Specialisee")
-        {
-            categoryError = "Catégorie " + SingletonForm.SelectedCategory + " invalide. Veuillez choisir parmis les choix";
-            isValid = false;
-        }
+        
 
         if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && !SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
         {

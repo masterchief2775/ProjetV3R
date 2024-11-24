@@ -494,6 +494,7 @@ a, .btn-link {
     background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
 }
 
+
 .modal-content {
     position: relative;
     margin: 15% auto;
@@ -504,6 +505,15 @@ a, .btn-link {
     display: flex;
     justify-content: space-evenly;
     flex-direction: row;
+}
+
+.modal-content-succes {
+    position: relative;
+    margin: 15% auto;
+    padding: 20px;
+    background-color: lawngreen;
+    width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);    
 }
 
 .modal-leftSide {
@@ -618,4 +628,20 @@ input[type="radio"] {
     margin-bottom: 10px;
     cursor: pointer;
 }
+
+/*Syle pour carte d'information à la confirmation*/
+.info-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+    .info-card p {
+        margin: 5px 0;
+        color: #333;
+    }
 

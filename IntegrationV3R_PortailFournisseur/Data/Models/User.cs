@@ -9,7 +9,7 @@ public partial class User
 
     public int FournisseurId { get; set; }
 
-    public string Identifiant { get; set; } = null!;
+    public string? Identifiant { get; set; }
 
     public DateTime DateCreation { get; set; }
 

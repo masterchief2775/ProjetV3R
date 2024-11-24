@@ -9,7 +9,7 @@ public partial class Brochure
 
     public int FournisseurId { get; set; }
 
-    public string NomFichier { get; set; } = null!;
+    public string? NomFichier { get; set; }
 
     public string TypeFichier { get; set; } = null!;
 

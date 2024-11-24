@@ -103,6 +103,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FournisseurId)
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurId");
+            entity.Property(e => e.NomMunicipalite)
+                .HasMaxLength(64)
+                .HasColumnName("nomMunicipalite");
             entity.Property(e => e.NumTel)
                 .HasMaxLength(10)
                 .HasColumnName("numTel");
@@ -161,7 +164,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnName("lienDocument");
             entity.Property(e => e.NoFichier).HasMaxLength(32);
             entity.Property(e => e.NomFichier)
-                .HasMaxLength(32)
+                .HasMaxLength(100)
                 .HasColumnName("nomFichier");
             entity.Property(e => e.Taille)
                 .HasColumnType("int(11)")
@@ -333,8 +336,6 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.Neq, "neq").IsUnique();
 
-            entity.HasIndex(e => e.NomEntreprise, "nomEntreprise").IsUnique();
-
             entity.Property(e => e.FournisseurId)
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurId");
@@ -394,6 +395,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.StatutLicence)
                 .HasMaxLength(10)
                 .HasColumnName("statutLicence");
+            entity.Property(e => e.TypeLicence)
+                .HasMaxLength(30)
+                .HasColumnName("typeLicence");
 
             entity.HasOne(d => d.Fournisseur).WithMany(p => p.Licencesrbqs)
                 .HasForeignKey(d => d.FournisseurId)
@@ -843,7 +847,7 @@ public partial class ApplicationDbContext : DbContext
                 .HasColumnType("int(11)")
                 .HasColumnName("fournisseurID");
             entity.Property(e => e.Identifiant)
-                .HasMaxLength(32)
+                .HasMaxLength(64)
                 .HasColumnName("identifiant");
 
             entity.HasOne(d => d.Fournisseur).WithMany(p => p.Users)

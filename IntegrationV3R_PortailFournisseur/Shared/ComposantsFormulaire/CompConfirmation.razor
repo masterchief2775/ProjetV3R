@@ -1,0 +1,206 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@inject ApplicationDbContext DbContext
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize">
+        <div>
+            <div class="modal-content">
+                <div class="">
+
+                    <div>
+                        <span class="close mb-2" @onclick="CloseModal">&times;</span>
+                        <h4>
+                            Confirmation
+                        </h4>
+
+                        <p style="">
+                            Confirmez-vous que les informations suivantes sont correct et exactes ?
+                        </p>
+                    </div>
+
+                    
+                    <div class="mt-2 border-top border-dark info-card">
+                        <h3>
+                            Identification
+                        </h3>  
+
+                        <p><strong>Nom de la compagnie :</strong> @SingletonForm.NomEntrepriseInput</p>                        
+                        <p><strong>Courriel entreprise (identifiant) :</strong> @SingletonForm.EmailInput</p>
+                        <p><strong>NEQ (identifiant) :</strong> @SingletonForm.NeqInput</p>
+                        <p><strong>Mot de passe :</strong> @SingletonForm.PasswordInput</p>
+                        
+                    </div>
+
+                    <div class="border-top border-dark info-card">
+                        <h3>
+                            Adresse
+                        </h3>  
+
+                        <p><strong>Adresse complète :</strong> @SingletonForm.NumCiviqueInput @SingletonForm.BureauInput @SingletonForm.RueInput </p>
+                        <p><strong>Ville/Province :</strong> @nomMunicipalite @nomProvince</p>
+                        <p><strong>Code Postal :</strong> @SingletonForm.CodePostalInput</p>                        
+                        <p><strong>Numéro téléphone:</strong> @SingletonForm.NumeroTelephoneInput @(
+                            SingletonForm.NumeroPosteInput != string.Empty ? "Poste " + SingletonForm.NumeroPosteInput : ""
+                            )</p>
+                        <p><strong>Site Web :</strong> @SingletonForm.SiteWebInput</p>
+                        
+                    </div>
+
+                    <div class="border-top border-dark info-card">
+                        <h3>
+                            Contacts
+                        </h3>  
+                        
+                        @foreach (ContactInput contact in SingletonForm.ContactsInput)
+                        {
+
+                            <h5 class="mt-3">
+                                Contact @numContact
+                            </h5>
+
+                            <p><strong>Nom du Contact :</strong> @contact.Prenom @contact.Nom </p>
+                            <p><strong>Fonction du Contact :</strong> @contact.Role </p>
+                            <p><strong>Courriel du Contact :</strong> @contact.Email </p>                        
+                            <p><strong>Téléphone du Contact:</strong> @contact.NumeroTelephone @(
+                            contact.Poste != string.Empty ? "Poste " + contact.Poste : ""
+                            )</p>
+                            <p><strong>Type de Téléphone :</strong> @contact.TypeTelephone</p>
+
+
+                            { numContact++; }
+                        }
+                        
+                    </div>
+
+                    <div class="border-top border-dark info-card">
+                        <h3>
+                            Produits et Services
+                        </h3>
+
+                        <p><strong>Description Produits et Services offerst :</strong> @SingletonForm.DescriptionProduitsServicesInput </p>
+
+                        <p><strong>Liste :</strong> </p>
+                        <div class="mx-2">
+                            @foreach (UnspscComodite comodite in SingletonForm.ProduitsServicesSelectionnesInput)
+                            {                            
+                                <p class="m-2"><strong>@comodite.ComoditeNombre -</strong> @comodite.ComoditeTitreFr</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="border-top border-dark info-card">
+                        <h3>
+                            Licence RBQ
+                        </h3>
+                        @if (!string.IsNullOrEmpty(SingletonForm.RBQNumberInput))
+                        {
+                            <p><strong>Numéro de licence :</strong> @SingletonForm.RBQNumberInput </p>
+                            <p><strong>Statut de la licence :</strong> @SingletonForm.SelectedStatus </p>
+                            <p><strong>Type de la licence :</strong> @SingletonForm.SelectedLicenseType </p>
+                            <p><strong>Catégorie de la licence :</strong> @SingletonForm.SelectedCategory </p>
+                            <div class="mx-2">
+                                @foreach (Souscategoriesafter2008 souscat in SingletonForm.SelectedSubCategories)
+                                {
+                                    <p class="m-2"><strong>@souscat.NumeroSousCategorieAfter2008 -</strong> @souscat.NomSousCategorieAfter2008</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p><strong>Aucune Licence attitré</strong></p>
+                        }
+                    </div>
+
+                    <div class="border-top border-dark info-card">
+                        <h3>
+                            Brochure
+                        </h3>
+                        
+                        @if (!string.IsNullOrEmpty(SingletonForm.SelectedBrochure.NomFichier))
+                        {                            
+                            <p><strong>Brochure à envoyé :</strong> @SingletonForm.OriginalBrochureName <strong> Taille :</strong> @StailleBrochure Mo </p>
+                        }
+                        else
+                        {
+                            <p><strong>Aucune document choisis comme brochure</strong></p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(SingletonForm.SelectedCarteAffaire.NomFichier))
+                        {                            
+                            <p><strong>Carte d'affaire à envoyé :</strong> @SingletonForm.OriginalCarteAffaireName <strong> Taille :</strong> @StailleCarteAffaire Mo </p>
+                        }
+                        else
+                        {
+                            <p><strong>Aucune document choisis comme carte d'affaire</strong></p>
+                        }
+
+                    </div>
+
+                    <button @onclick="SubmitForm" style="" class="btn btn-primary">Soumettre</button>
+
+                </div>
+
+            </div>
+
+            
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+    [Inject] private SingletonFormulaire SingletonForm { get; set; }
+
+    private bool IsVisible { get; set; } = false;
+
+    private string nomMunicipalite;
+    private string nomProvince;
+
+    private double? tailleBrochure;
+    private double? tailleCarteAffaire;
+    private string StailleBrochure;
+    private string StailleCarteAffaire;
+
+    private int numContact = 1;
+
+    public async Task Show()
+    {
+        numContact = 1;
+
+        if (SingletonForm.ProvinceInput == "4")
+        {
+            nomMunicipalite = DbContext.Municipalites.FirstOrDefault(m => m.CodeMunicipalite == SingletonForm.MunicipaliteInput).NomMunicipalite;
+        }
+        else
+        {
+            nomMunicipalite = SingletonForm.NomMunicipaliteInput;
+        }
+        nomProvince = DbContext.Provinces.FirstOrDefault(p => p.CodeProvince == SingletonForm.ProvinceInput).NomProvince;
+
+        tailleBrochure = SingletonForm.SelectedBrochure.Taille / (1024.0 * 1024.0);
+        StailleBrochure = @String.Format("{0:F2}", tailleBrochure);
+
+        tailleCarteAffaire = SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0);
+        StailleCarteAffaire = @String.Format("{0:F2}", tailleCarteAffaire);
+
+        IsVisible = true;
+        StateHasChanged();
+
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task SubmitForm()
+    {    
+       await SingletonForm.SaveDataAsync(DbContext);
+
+    }
+       
+}

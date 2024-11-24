@@ -6,7 +6,7 @@
 
 @inject IJSRuntime JSRuntime
 @inject IWebHostEnvironment Environment
-@inject ApplicationDbContext DbContext
+
 
 
 <div class="container-fluid mt-4">
@@ -39,21 +39,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (SingletonForm.SelectedBrochure != null)
+                    @if (!string.IsNullOrEmpty(SingletonForm.SelectedBrochure.NomFichier))
                     {
                         <tr>
-                            <td>@SingletonForm.SelectedBrochure.NomFichier</td>
-                            <td>@String.Format("{0:F3}", SingletonForm.SelectedBrochure.Taille / (1024.0 * 1024.0))</td>
+                            <td><strong>Brochure :</strong> @SingletonForm.OriginalBrochureName</td>
+                            <td>@String.Format("{0:F2}", SingletonForm.SelectedBrochure.Taille / (1024.0 * 1024.0))</td>
                         </tr>
                     }
-                    @if (SingletonForm.SelectedCarteAffaire != null)
+                    else
                     {
                         <tr>
-                            <td>@SingletonForm.SelectedCarteAffaire.NomFichier</td>
-                            <td>@String.Format("{0:F3}", SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0))</td>
+                            <td>Aucune brochure choisie</td>            
+                            <td> - </td>
                         </tr>
                     }
-                    
+                    @if (!string.IsNullOrEmpty(SingletonForm.SelectedCarteAffaire.NomFichier))
+                    {
+                        <tr>
+                            <td><strong>Carte d'affaire :</strong> @SingletonForm.OriginalCarteAffaireName</td>
+                            <td>@String.Format("{0:F2}", SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0))</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>Aucune carte d'affaire choisie</td>
+                            <td> - </td>
+                        </tr>
+                    }
+
                 </tbody>
             </table>
         }
@@ -62,7 +76,7 @@
             <h6>Aucun fichier téléchargé.</h6>
         }
 
-        <button type="button" class="btn btn-primary" @onclick="HandleSubmit">Soumettre</button>
+        <button type="button" class="btn btn-primary" @onclick="HandleSubmit">Suivant</button>
     </form>    
 </div>
 
@@ -75,11 +89,22 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+
+    [Parameter]
+    public EventCallback Confirmation { get; set; }
+
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
+
+    public bool _isCreation { get; set; }
 
 
     //private List<IBrowserFile> uploadedFiles = new();
     private string fileError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isCreation = SingletonForm._isCreationForm;
+    }
 
     private bool IsValidFileType(string contentType)
     {
@@ -103,6 +128,7 @@
 
         if(currentUploadSize < uploadLimit)
         {
+            SingletonForm.OriginalBrochureName = e.File.Name;
             SingletonForm.BrochureFile = e.File;
 
             // Récupération de l'extension du fichier pour la brochure
@@ -137,6 +163,7 @@
 
         if(currentUploadSize < uploadLimit)
         {
+            SingletonForm.OriginalCarteAffaireName = e.File.Name;
             SingletonForm.CarteVisiteFile = e.File;
 
             // Récupération de l'extension du fichier pour la carte de visite
@@ -165,13 +192,36 @@
 
     private async Task HandleSubmit()
     {
-        SingletonForm.UploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
-        if (!Directory.Exists(SingletonForm.UploadDirectory))
+        
+
+        if (fileError == string.Empty)
         {
-            Directory.CreateDirectory(SingletonForm.UploadDirectory);
+            SingletonForm.UploadDirectory = Path.Combine(Environment.WebRootPath, "uploads");
+            if (!Directory.Exists(SingletonForm.UploadDirectory))
+            {
+                Directory.CreateDirectory(SingletonForm.UploadDirectory);
+            }
+
+            if (_isCreation)
+            {
+                await Confirmation.InvokeAsync();
+            }
+
+            else
+            {
+                await Checkpoint.InvokeAsync(6);
+                await OnPageSelected.InvokeAsync(6);
+            }
         }
-        await SingletonForm.SaveDataAsync(DbContext);
+       
     }
-    
+
+    public async Task HandleSubmitReturn(int pageID)
+    {    
+        if (fileError == string.Empty)
+        {
+            await OnPageSelected.InvokeAsync(pageID);
+        }
+    }
 
 }

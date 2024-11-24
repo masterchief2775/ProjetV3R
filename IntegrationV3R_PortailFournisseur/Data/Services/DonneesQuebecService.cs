@@ -75,6 +75,9 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services
         [JsonPropertyName("Categorie")]
         public string CategorieLicence { get; set; }
 
+        [JsonPropertyName("Restriction")]
+        public string Restriction { get; set; }
+
 
 
 

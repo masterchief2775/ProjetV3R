@@ -19,7 +19,20 @@
 <PageTitle>Connexion</PageTitle>
 
 <LoadingScreen IsLoading="isLoading" />  <!-- Add the LoadingScreen component -->
-
+@if (showSuccessMessage)
+{
+    <div class="modal" style="display:block;">
+        <div class="modal-boxSize">
+            <div class="modal-content-succes">
+                <span class="close mb-2" @onclick="CloseMessage">&times;</span>
+                <h3>Le profile à été créé avec succès! </h3>
+                <p class="mt-4">Vous devriez recevoir un courriel de confirmation sous peux.</p>
+                <p>Merci de votre confiance !</p>
+                
+            </div>
+        </div>        
+    </div>
+}
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
     <div class="row w-100">
         <div class="col-md-6 col-lg-4 mx-auto">
@@ -63,6 +76,24 @@
     private string mdpError = string.Empty;
 
     private bool isLoading = false;  // This controls the loading screen visibility
+
+    private bool showSuccessMessage;
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (queryParams.TryGetValue("success", out var success) && success == "true")
+        {
+            showSuccessMessage = true;
+        }        
+    }
+
+    private void CloseMessage()
+    {
+        showSuccessMessage = false;
+    }
 
     private async Task HandleSubmit()
     {
