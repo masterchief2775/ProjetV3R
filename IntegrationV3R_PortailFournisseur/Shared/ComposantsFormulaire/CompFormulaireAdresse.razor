@@ -21,7 +21,7 @@
                         <option value="@province.CodeProvince" >@province.NomProvince</option>
                     }
                 </select>
-                @if (!string.IsNullOrEmpty(regionError))
+                @if (!string.IsNullOrEmpty(provinceError))
                 {
                     <div class="text-danger">@provinceError</div>
                 }
@@ -148,6 +148,9 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
+    [Parameter]
+    public int? userid { get; set; } = null;
+
     private bool[] _selectionRegionAdministrative = new bool[17];
 
 
@@ -180,9 +183,28 @@
         }
         catch (Exception ex)
         {
-            regionError = "Erreur lors de la récupération à la BD";
+            provinceError = "Erreur lors de la récupération à la BD";
             Console.WriteLine(ex.Message);
         }        
+
+        if (userid != null)
+        {
+            FormatTelephoneNumber(SingletonForm.NumeroTelephoneInput);
+            FormatCodePostal(SingletonForm.CodePostalInput);
+            CheckMunicipaliteCorrespondance();
+            StateHasChanged();
+            /*
+            var connectedUser = await dbContext.Users
+                .Include(u => u.Fournisseur)
+                .ThenInclude(f => f.Adresses)
+                .ThenInclude(a => a.CodeMunicipalite)
+                .FirstOrDefaultAsync(u => u.UserId == userid);
+
+            Municipalite thisMunicipalite = connectedUser.Fournisseur.Adresses.FirstOrDefault().CodeMunicipaliteNavigation;
+            SelectMunicipalite(thisMunicipalite);
+        */
+        }
+
         await BDFetched.InvokeAsync(true);
     }    
 
@@ -193,7 +215,7 @@
         SingletonForm.MunicipaliteInput = SharedData.NomVille;
         SingletonForm.CodePostalInput = SharedData.CodePostal;
         SingletonForm.NumeroTelephoneInput = SharedData.NumTelephone;
-        SingletonForm.RegionInput = SharedData.CodeRegionAdministrative;
+        //SingletonForm.RegionInput = SharedData.CodeRegionAdministrative;
 
         SingletonForm.ProvinceInput = "4";
 
@@ -205,12 +227,25 @@
 
     private void CheckMunicipaliteCorrespondance()
     {
-        foreach(var municipalite in fetchedMunicipalites)
+        if (userid == null)
         {
-            if(municipalite.NomMunicipalite.ToUpper() == SingletonForm.MunicipaliteInput)
+            foreach (var municipalite in fetchedMunicipalites)
             {
-                SingletonForm.MunicipaliteInput = municipalite.CodeMunicipalite;
-                municipaliteChoisie = municipalite;
+                if (municipalite.NomMunicipalite.ToUpper() == SingletonForm.MunicipaliteInput)
+                {
+                    SingletonForm.MunicipaliteInput = municipalite.CodeMunicipalite;
+                    municipaliteChoisie = municipalite;
+                }
+            }
+        }
+        else
+        {
+            foreach (var municipalite in fetchedMunicipalites)
+            {
+                if (municipalite.CodeMunicipalite == SingletonForm.MunicipaliteInput)
+                {                    
+                    municipaliteChoisie = municipalite;
+                }
             }
         }
     }
@@ -257,6 +292,7 @@
 
         municipaliteSearch = string.Empty;
         filteredMunicipalites.Clear();
+        StateHasChanged();
     }
 
     private void ChangeMunicipalite()
@@ -266,9 +302,7 @@
     }
 
     private void HandleSubmit()
-    {
-        Console.WriteLine("PROVINCE : " + SingletonForm.ProvinceInput);
-        Console.WriteLine("CODE MUNICIALITE : " + SingletonForm.MunicipaliteInput);
+    {        
         // Reset errors
         ResetErrors();
 
@@ -369,6 +403,7 @@
         else if (!Regex.IsMatch(SingletonForm.CodePostalInput, @"^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$") && !Regex.IsMatch(SingletonForm.CodePostalInput, @"^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$"))
         {
             codePostalError = "Le code postal doit être au formet A0A 0A0";
+            isValid = false;
         }
 
         // Validate phone number format
@@ -391,13 +426,6 @@
                 numeroPosteError = "Le numero de poste doit être numérique et au plus de 5 chiffres.";
                 isValid = false;
             }
-        }
-        
-
-        if (string.IsNullOrWhiteSpace(SingletonForm.RegionInput))
-        {
-            regionError = "La région est requise.";
-            isValid = false;
         }
 
         return isValid;
@@ -460,5 +488,19 @@
             SingletonForm.CodePostalInput = value;
         }
     }
-    
+
+    private void FormatCodePostal(string e)
+    {
+        // Format the postal code as the user types
+        var value = e;
+        if (value.Length == 6)
+        {
+            SingletonForm.CodePostalInput = $"{value.Substring(0, 3)} {value.Substring(3, 3)}";
+        }
+        else
+        {
+            SingletonForm.CodePostalInput = value;
+        }
+    }
+
 }

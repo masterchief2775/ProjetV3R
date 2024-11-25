@@ -13,6 +13,7 @@ using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
+using System.Linq;
 
 
 
@@ -81,18 +82,101 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         private readonly IHttpContextAccessor _httpContextAccessor;
         private NavigationManager Navigation;
+        private ApplicationDbContext dbContext;
 
-        public SingletonFormulaire(IHttpContextAccessor httpContextAccessor, NavigationManager _navigation) 
+        public SingletonFormulaire(IHttpContextAccessor httpContextAccessor, NavigationManager _navigation, ApplicationDbContext _dbContext) 
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             Navigation = _navigation ?? throw new ArgumentNullException(nameof(_navigation));
+            dbContext = _dbContext ?? throw new ArgumentNullException(nameof(_dbContext));
         }        
                 
 
         [Parameter]
         public EventCallback UploadSuccessful { get; set; }
 
+       
+
+        public async Task FetchUser(int id)
+        {            
+			var user = await dbContext.Users
+			   .Include(u => u.Fournisseur)
+				   .ThenInclude(f => f.Adresses)
+			   .Include(u => u.Fournisseur)
+				   .ThenInclude(f => f.Contacts)
+			   .Include(u => u.Fournisseur)
+				   .ThenInclude(f => f.Finances)
+			   .Include(u => u.Fournisseur)
+				   .ThenInclude(f => f.Produitsservices)
+					   .ThenInclude(p => p.Comodite) // Including Comodite
+			   .Include(u => u.Fournisseur)
+				   .ThenInclude(f => f.Licencesrbqs)
+					   .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
+			   .FirstOrDefaultAsync(u => u.UserId == id);
+
+
+            //SET FOURNISSEUR
+            Fournisseur fournisseur = user.Fournisseur;
+            NomEntrepriseInput = fournisseur.NomEntreprise;
+            NeqInput = fournisseur.Neq;
+            EmailInput = fournisseur.CourrielEntreprise;
+            PasswordInput = string.Empty;
+            RepeatPasswordInput = string.Empty;
+
+			//SET ADRESSE
+			ICollection<Adress> adresses = user.Fournisseur.Adresses;
+            Adress adresse = adresses.SingleOrDefault();
+            NumCiviqueInput = adresse.NumeroCivique;
+            BureauInput = adresse.Bureau;
+            RueInput = adresse.Rue;
+            if(!string.IsNullOrEmpty(adresse.CodeMunicipalite))
+                MunicipaliteInput = adresse.CodeMunicipalite;
+            else
+                NomMunicipaliteInput = adresse.NomMunicipalite;
+            ProvinceInput = adresse.CodeProvince;
+            CodePostalInput = adresse.CodePostal;
+            NumeroTelephoneInput = adresse.NumTel;
+            NumeroPosteInput = adresse.Poste;
+            SiteWebInput = fournisseur.SiteWeb;
+
+            //SET CONTACT 
+            //ICollection<Contact> Contacts = user.Fournisseur.Contacts;
+            //List<Contact> contacts = Contacts.ToList();
+
+            var Contacts = await dbContext.Users
+                .Where(u => u.UserId == id)
+                .SelectMany(u => u.Fournisseur.Contacts)
+                .ToListAsync();
+                /*
+                .Where(c => c.FournisseurId == user.FournisseurId)
+                .SelectMany()*/
         
+
+            Console.WriteLine("**********************************************" + Contacts.Count);
+            foreach (Contact contact in Contacts)
+            {
+                ContactInput toAdd = new ContactInput
+                {
+                    Prenom = contact.PrenomContact,
+                    Nom = contact.NomContact,
+                    Role = contact.FonctionContact,
+                    Email = contact.CourrielContact,
+                    NumeroTelephone = contact.NumTelContact,
+                    Poste = contact.PosteTelContact,
+                    TypeTelephone = contact.TypeTel,
+
+                    PrenomError = string.Empty,
+                    NomError = string.Empty,
+                    RoleError = string.Empty,
+                    EmailError = string.Empty,
+                    NumeroTelephoneError = string.Empty,
+                    PosteError = string.Empty,
+                    TypeTelephoneError = string.Empty
+                };
+
+                ContactsInput.Add(toAdd);
+            }
+		}
 
         public async void SendIt()
         {

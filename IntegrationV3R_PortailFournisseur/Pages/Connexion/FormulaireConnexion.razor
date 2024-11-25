@@ -15,6 +15,7 @@
 @inject NavigationManager Navigation
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject ApplicationDbContext _context
+@inject StateContainer stateContainer
 
 <PageTitle>Connexion</PageTitle>
 
@@ -60,6 +61,7 @@
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Se connecter</button>
+                            <button class="btn btn-secondary mx-2" @onclick="NavigateToFormulaireDemande">Formulaire Demande</button>
                         </div>
                     </form>
                 </div>
@@ -132,7 +134,7 @@
                 if (passwordEntry != null)
                 {
                     // Connexion réussie : stocker l'ID utilisateur dans le stockage de session sécurisé
-                    await sessionStorage.SetItemAsync("UserId", user.UserId);
+                    await sessionStorage.SetItemAsync("UserId", user.UserId);                    
 
                     // Enregistrement de la connexion après une authentification réussie
                     await EnregistrerConnexion(user.UserId);
@@ -192,5 +194,17 @@
         // Insertion de la nouvelle connexion dans la base de données
         _context.Connexions.Add(nouvelleConnexion);
         await _context.SaveChangesAsync();
+    }
+
+    private void NavigateToFormulaireDemande()
+    {
+        Navigation.NavigateTo("/formulaire");
+        UpdateFinancePageState(false);
+    }
+
+    private void UpdateFinancePageState(bool value)
+    {
+        stateContainer.ShouldDisplayFinancePage = value;
+        stateContainer.NotifyStateChanged();
     }
 }

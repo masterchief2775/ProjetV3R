@@ -85,6 +85,9 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
+    [Parameter]
+    public int? userid { get; set; } = null;
+
     private string neqInput = string.Empty;
     private string nomEntrepriseInput = string.Empty;
     private string emailInput = string.Empty;
@@ -98,6 +101,7 @@
     private string repeatPasswordError = string.Empty;
 
     private List<Fournisseur> currentFournisseurs = new List<Fournisseur>();
+    private Fournisseur connectedFournisseur;
 
 
     public void LoadSharedData()
@@ -122,9 +126,18 @@
             emailError = "Erreur lors de la récupération à la BD, veuillez réessayer";
             Console.WriteLine(ex.Message);
         }
+
+        if(userid != null)
+        {
+            connectedFournisseur = dbContext.Users
+                .Where(u => u.UserId == userid)
+                .Select(u => u.Fournisseur)
+                .FirstOrDefault();
+        }
+
         await BDFetched.InvokeAsync(true);       
     }
-        
+
 
     private void HandleSubmit()
     {
@@ -186,7 +199,7 @@
             {
                 foreach(Fournisseur fournisseur in currentFournisseurs)
                 {
-                    if(fournisseur.Neq == SingletonForm.NeqInput)
+                    if(fournisseur.Neq == SingletonForm.NeqInput && fournisseur.Neq != connectedFournisseur.Neq )
                     {
                         neqError = "Ce NEQ est déjà inscrit dans la liste de fournisseurs pour" + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
                         isValid = false;
@@ -210,14 +223,14 @@
         {
             foreach (Fournisseur fournisseur in currentFournisseurs)
             {
-                if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput)
+                if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput && fournisseur.NomEntreprise != connectedFournisseur.NomEntreprise)
                 {
                     nomEntrepriseError = "Ce nom est déjà inscrit dans la liste de fournisseurs. Veulliez confirmer qu'il est bien écrit";
                     isValid = false;
                 }
             }
         }
-       
+
 
         // Validation for Email
         if (string.IsNullOrWhiteSpace(SingletonForm.EmailInput))
@@ -234,7 +247,7 @@
         {
             foreach (Fournisseur fournisseur in currentFournisseurs)
             {
-                if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput)
+                if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput && fournisseur.CourrielEntreprise != connectedFournisseur.CourrielEntreprise)
                 {
                     emailError = "Ce courriel est déjà inscrit dans la liste de fournisseurs pour " + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
                     isValid = false;
@@ -243,24 +256,47 @@
         }
 
         // Validation for Password
-        if (SingletonForm.PasswordInput == string.Empty)
+        if(userid == null)
         {
-            passwordError = "Un mot de passe est requis";
-            isValid = false;
+            if (SingletonForm.PasswordInput == string.Empty)
+            {
+                passwordError = "Un mot de passe est requis";
+                isValid = false;
+            }
+            else if (string.IsNullOrWhiteSpace(SingletonForm.PasswordInput) || SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 ||
+                !HasUpperCase(SingletonForm.PasswordInput) || !HasLowerCase(SingletonForm.PasswordInput) || !HasDigit(SingletonForm.PasswordInput) || !HasSpecialChar(SingletonForm.PasswordInput))
+            {
+                passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+                isValid = false;
+            }
+
+            // Check if passwords match
+            if (SingletonForm.PasswordInput != SingletonForm.RepeatPasswordInput)
+            {
+                repeatPasswordError = "Les mots de passe ne correspondent pas.";
+                isValid = false;
+            }
         }
-        else if (string.IsNullOrWhiteSpace(SingletonForm.PasswordInput) || SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 ||
-            !HasUpperCase(SingletonForm.PasswordInput) || !HasLowerCase(SingletonForm.PasswordInput) || !HasDigit(SingletonForm.PasswordInput) || !HasSpecialChar(SingletonForm.PasswordInput))
+        else
         {
-            passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
-            isValid = false;
+            if (!string.IsNullOrEmpty(SingletonForm.PasswordInput))
+            {
+                if (SingletonForm.PasswordInput.Length < 7 || SingletonForm.PasswordInput.Length > 12 || !HasUpperCase(SingletonForm.PasswordInput) ||
+                !HasLowerCase(SingletonForm.PasswordInput) || !HasDigit(SingletonForm.PasswordInput) || !HasSpecialChar(SingletonForm.PasswordInput))
+                {
+                    passwordError = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+                    isValid = false;
+                }
+
+                // Check if passwords match
+                if (SingletonForm.PasswordInput != SingletonForm.RepeatPasswordInput)
+                {
+                    repeatPasswordError = "Les mots de passe ne correspondent pas.";
+                    isValid = false;
+                }
+            }
         }
 
-        // Check if passwords match
-        if (SingletonForm.PasswordInput != SingletonForm.RepeatPasswordInput)
-        {
-            repeatPasswordError = "Les mots de passe ne correspondent pas.";
-            isValid = false;
-        }
 
         return isValid;
     }
