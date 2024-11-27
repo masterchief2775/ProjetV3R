@@ -48,6 +48,9 @@
                 <button class="btn btn-outline-primary mb-2 @((isProductsVisible ? "active" : ""))" @onclick="ShowProducts">
                     Produits
                 </button>
+                <button class="btn btn-outline-primary mb-2 @((isBrochuresVisible ? "active" : ""))" @onclick="ShowBrochures">
+                    Brochures
+                </button>
             </div> <!-- nav-pills -->
         </div> <!-- col-md-3 -->
         <!-- Main Content Area -->
@@ -124,6 +127,18 @@
                 </div>
             }
 
+            @if (isBrochuresVisible)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>Brochures</strong>
+                    </div>
+                    <div class="card-body">
+                        <CompProfileBrochure Brochures="@brochures" />
+                    </div>
+                </div>
+            }
+
             <!-- Button to navigate to the formulaire page -->
             <div class="text-end">
                 <button class="btn btn-primary" @onclick="GoToFormulaire">
@@ -150,6 +165,7 @@
     private bool isProductsVisible = false;
     private bool isRBQLicencesVisible = false;
     private bool isFinancesVisible = false;
+    private bool isBrochuresVisible = false;
 
     private bool showSuccessModifyMessage;
 
@@ -172,6 +188,7 @@
     private List<Licencesrbq> rbqDetails = new List<Licencesrbq>();
     private List<Municipalite> municipalites = new List<Municipalite>();
     private List<Province> provinces = new List<Province>();
+    private List<Brochure> brochures = new List<Brochure>();
 
     private void ShowIdentification() { SetVisibility("Identification"); }
     private void ShowAddress() { SetVisibility("Address"); }
@@ -179,6 +196,7 @@
     private void ShowProducts() { SetVisibility("Products"); }
     private void ShowRBQLicences() { SetVisibility("RBQLicences"); }
     private void ShowFinances() { SetVisibility("Finances"); }
+    private void ShowBrochures() { SetVisibility("Brochures"); }
 
     private void SetVisibility(string section)
     {
@@ -188,6 +206,7 @@
         isProductsVisible = section == "Products";
         isRBQLicencesVisible = section == "RBQLicences";
         isFinancesVisible = section == "Finances";
+        isBrochuresVisible = section == "Brochures";
     }
 
     private void CloseMessage()
@@ -242,10 +261,12 @@
                     .ThenInclude(f => f.Finances)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
-                        .ThenInclude(p => p.Comodite) // Including Comodite
+                        .ThenInclude(p => p.Comodite) 
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Licencesrbqs)
-                        .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
+                        .ThenInclude(l => l.SouscategorieLicencerbqs)
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Brochures)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user != null)
@@ -304,6 +325,7 @@
                     rbqDetails = fournisseur.Licencesrbqs.ToList();
                     products = fournisseur.Produitsservices.ToList(); // This already includes Comodite
                     contacts = fournisseur.Contacts.ToList();
+                    brochures = fournisseur.Brochures.ToList();
                 }
             }
         }

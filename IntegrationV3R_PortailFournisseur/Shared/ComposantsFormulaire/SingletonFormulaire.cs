@@ -96,7 +96,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         public EventCallback UploadSuccessful { get; set; }
 
         public string EtatDemande { get; set; }
-
+//*******************************************SET FOR INFOS MODIFY***********************************
         public async Task FetchUser(int id)
         {
             var user = await dbContext.Users
@@ -175,6 +175,8 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             DescriptionProduitsServicesInput = fournisseur.DetailsEntreprise;
             List<Produitsservice> produits = user.Fournisseur.Produitsservices.ToList();
 
+            ProduitsServicesSelectionnesInput.Clear();
+
             foreach (Produitsservice produit in produits) 
             {
                 UnspscComodite comodite = produit.Comodite;
@@ -189,6 +191,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             SelectedCategory = licence.Categorie;
             List<SouscategorieLicencerbq> souscategories = licence.SouscategorieLicencerbqs.ToList();
 
+            SelectedSubCategories.Clear();
             foreach(SouscategorieLicencerbq souscategorie in souscategories)
             {
                 var entry = souscategorie.IdSousCategorieNavigation;
@@ -224,7 +227,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 }           
             
 		}
-
+//*****************************************MODIFY FORM************************************************
         public async Task ModifyDataAsync(ApplicationDbContext dbContext, int? id)
         {
             var user = await dbContext.Users
@@ -236,15 +239,15 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                    .ThenInclude(f => f.Finances)
                .Include(u => u.Fournisseur)
                    .ThenInclude(f => f.Produitsservices)
-                       .ThenInclude(p => p.Comodite) // Including Comodite
+                       .ThenInclude(p => p.Comodite) 
                .Include(u => u.Fournisseur)
                    .ThenInclude(f => f.Licencesrbqs)
-                       .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
+                       .ThenInclude(l => l.SouscategorieLicencerbqs) 
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Brochures)
                .FirstOrDefaultAsync(u => u.UserId == id);
 
-            //MODIFY FOURNISSEUR
+//MODIFY FOURNISSEUR
             user.Fournisseur.NomEntreprise = NomEntrepriseInput;
             user.Fournisseur.Neq = NeqInput;
             user.Fournisseur.CourrielEntreprise = EmailInput;
@@ -253,7 +256,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             await dbContext.SaveChangesAsync();
 
-            //MODIFY ADRESSE
+//MODIFY ADRESSE
             string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
             string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
             Console.WriteLine(MunicipaliteInput + "**********************************");
@@ -273,9 +276,267 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
             await dbContext.SaveChangesAsync();
 
+//MODIFY CONTACTS
+            List<Contact> contacts = user.Fournisseur.Contacts.ToList();
+
+            if (contacts.Count == ContactsInput.Count)
+            {
+                int index = 0;
+                foreach (Contact contact in contacts)
+                {
+                    string cleanedTelephone = Regex.Replace(ContactsInput[index].NumeroTelephone, @"-", "");
+                    contact.PrenomContact = ContactsInput[index].Prenom;
+                    contact.NomContact = ContactsInput[index].Nom;
+                    contact.FonctionContact = ContactsInput[index].Role;
+                    contact.CourrielContact = ContactsInput[index].Email;
+                    contact.TypeTel = ContactsInput[index].TypeTelephone;
+                    contact.NumTelContact = cleanedTelephone;
+                    contact.PosteTelContact = ContactsInput[index].Poste;
+                    index++;
+                }
+            }
+            else if (contacts.Count < ContactsInput.Count)
+            {
+                int currentContacts = contacts.Count;
+                int newContacts = ContactsInput.Count;
+                int toCreate = newContacts - currentContacts;
+
+                for (int i = 0; i < currentContacts + toCreate; i++)
+                {
+                    if (i < currentContacts)
+                    {
+                        string cleanedTelephone = Regex.Replace(ContactsInput[i].NumeroTelephone, @"-", "");
+                        contacts[i].PrenomContact = ContactsInput[i].Prenom;
+                        contacts[i].NomContact = ContactsInput[i].Nom;
+                        contacts[i].FonctionContact = ContactsInput[i].Role;
+                        contacts[i].CourrielContact = ContactsInput[i].Email;
+                        contacts[i].TypeTel = ContactsInput[i].TypeTelephone;
+                        contacts[i].NumTelContact = cleanedTelephone;
+                        contacts[i].PosteTelContact = ContactsInput[i].Poste;
+                    }
+                    else
+                    {
+                        string cleanedTelephone = Regex.Replace(ContactsInput[i].NumeroTelephone, @"-", "");
+                        var contact = new Contact
+                        {
+                            PrenomContact = ContactsInput[i].Prenom,
+                            NomContact = ContactsInput[i].Nom,
+                            FonctionContact = ContactsInput[i].Role,
+                            CourrielContact = ContactsInput[i].Email,
+                            TypeTel = ContactsInput[i].TypeTelephone,
+                            NumTelContact = cleanedTelephone,
+                            PosteTelContact = ContactsInput[i].Poste,
+                            FournisseurId = user.FournisseurId
+                        };
+                        dbContext.Add(contact);
+                    }
+                }
+
+            }
+            else if (contacts.Count > ContactsInput.Count)
+            {
+                int currentContacts = contacts.Count;
+                int newContacts = ContactsInput.Count;
+                int toDelete = currentContacts - newContacts;
+
+                for (int i = 0; i < currentContacts; i++)
+                {
+                    if (i < currentContacts - toDelete)
+                    {
+                        string cleanedTelephone = Regex.Replace(ContactsInput[i].NumeroTelephone, @"-", "");
+                        contacts[i].PrenomContact = ContactsInput[i].Prenom;
+                        contacts[i].NomContact = ContactsInput[i].Nom;
+                        contacts[i].FonctionContact = ContactsInput[i].Role;
+                        contacts[i].CourrielContact = ContactsInput[i].Email;
+                        contacts[i].TypeTel = ContactsInput[i].TypeTelephone;
+                        contacts[i].NumTelContact = cleanedTelephone;
+                        contacts[i].PosteTelContact = ContactsInput[i].Poste;
+                    }
+                    else
+                    {
+                        dbContext.Remove(contacts[i]);
+                    }
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+
+//MODIFY PRODUITS
+            List<Produitsservice> produits = user.Fournisseur.Produitsservices.ToList();
+
+            if(produits.Count == ProduitsServicesSelectionnesInput.Count)
+            {
+                int index = 0;
+                foreach (Produitsservice produit in produits)
+                {
+                    produit.ComoditeId = ProduitsServicesSelectionnesInput[index].ComoditeId;
+                    index++;
+                }
+            }
+            else if(produits.Count < ProduitsServicesSelectionnesInput.Count)
+            {
+                int currentProduits = produits.Count;
+                int newProduits = ProduitsServicesSelectionnesInput.Count;
+                int toCreate = newProduits - currentProduits;
+
+                for (int i = 0; i < currentProduits + toCreate; i++)
+                {
+                    if (i < currentProduits)
+                    {
+                        produits[i].ComoditeId = ProduitsServicesSelectionnesInput[i].ComoditeId;
+                    }
+                    else
+                    {
+                        var produit = new Produitsservice
+                        {
+                            ComoditeId = ProduitsServicesSelectionnesInput[i].ComoditeId,
+                            FournisseurId = user.FournisseurId
+                        };
+                        dbContext.Add(produit);
+                    }
+                }
+            }
+            else if (produits.Count > ProduitsServicesSelectionnesInput.Count)
+            {
+                int currentProduits = produits.Count;
+                int newProduits = ProduitsServicesSelectionnesInput.Count;
+                int toDelete = currentProduits - newProduits;
+
+                for (int i = 0; i < currentProduits; i++)
+                {
+                    if (i < currentProduits - toDelete)
+                    {
+                        produits[i].ComoditeId = ProduitsServicesSelectionnesInput[i].ComoditeId;
+                    }
+                    else
+                    {
+                        dbContext.Remove(produits[i]);
+                    }
+                }
+            }
+            await dbContext.SaveChangesAsync();
+
+//MODIFY RBQ
+            Licencesrbq licence = user.Fournisseur.Licencesrbqs.SingleOrDefault();
+            string cleanedLicence = Regex.Replace(RBQNumberInput, @"-", "");
+            licence.NumLicence = cleanedLicence;            
+            licence.StatutLicence = SelectedStatus;
+            licence.TypeLicence = SelectedLicenseType;
+            licence.Categorie = SelectedCategory;
+
+            List<SouscategorieLicencerbq> sousCategories = licence.SouscategorieLicencerbqs.ToList();
+                        
+
+            if(sousCategories.Count == SelectedSubCategories.Count)
+            {
+                int index = 0;
+                foreach (SouscategorieLicencerbq liaison in sousCategories)
+                {                    
+                    liaison.IdSousCategorie = SelectedSubCategories[index].SousCategorieAfter2008Id;
+                    index++;                                        
+                }
+            }
+            else if(sousCategories.Count < SelectedSubCategories.Count)
+            {
+                int currentSubs = sousCategories.Count;
+                int newSubs = SelectedSubCategories.Count;
+                int toCreate = newSubs - currentSubs;
+
+                for (int i = 0; i < currentSubs + toCreate; i++)
+                {
+                    if (i < currentSubs)
+                    {                        
+                        sousCategories[i].IdSousCategorie = SelectedSubCategories[i].SousCategorieAfter2008Id;
+                    }
+                    else
+                    {
+                        var sub = new SouscategorieLicencerbq
+                        {
+                            IdSousCategorie = SelectedSubCategories[i].SousCategorieAfter2008Id,
+                            IdLicence = licence.RbqId
+                        };
+                        dbContext.Add(sub);
+                    }
+                }
+            }
+            else if (sousCategories.Count > SelectedSubCategories.Count)
+            {
+                int currentSubs = sousCategories.Count;
+                int newSubs = SelectedSubCategories.Count;
+                int toDelete = currentSubs - newSubs;
+
+                for (int i = 0; i < currentSubs; i++)
+                {
+                    if (i < currentSubs - toDelete)
+                    {
+                        sousCategories[i].IdSousCategorie = SelectedSubCategories[i].SousCategorieAfter2008Id;
+                    }
+                    else
+                    {
+                        dbContext.Remove(sousCategories[i]);
+                    }
+                }
+            }
+            await dbContext.SaveChangesAsync();
+
+//MODIFY BROCHURE
+
+            List<Brochure> brochures = user.Fournisseur.Brochures.ToList();            
+
+            foreach(Brochure thisBrochure in brochures)
+            {
+                if (thisBrochure.NoFichier == "Brochure")
+                {
+                    if(BrochureFile != null)
+                    {
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), SelectedBrochure.LienDocument);
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
+                        }
+                        thisBrochure.LienDocument = SelectedBrochure.LienDocument;
+                        thisBrochure.NomFichier = SelectedBrochure.NomFichier;
+                        thisBrochure.Taille = SelectedBrochure.Taille;
+                        thisBrochure.TypeFichier = SelectedBrochure.TypeFichier;
+                    } 
+                }
+                else
+                {
+                    if (CarteVisiteFile != null)
+                    {
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), SelectedCarteAffaire.LienDocument);
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await CarteVisiteFile.OpenReadStream(75000000).CopyToAsync(stream);
+                        }
+                        thisBrochure.LienDocument = SelectedCarteAffaire.LienDocument;
+                        thisBrochure.NomFichier = SelectedCarteAffaire.NomFichier;
+                        thisBrochure.Taille = SelectedCarteAffaire.Taille;
+                        thisBrochure.TypeFichier = SelectedCarteAffaire.TypeFichier;
+                    }
+                }
+            }
+
+            //MODIFT OR ADD FINANCES
+            Finance finance = user.Fournisseur.Finances.SingleOrDefault();
+
+            if(user.Fournisseur.EtatDemande == "Approuvée" && finance != null)
+            {
+                Console.WriteLine("TEST SUCCESS 1");
+            }
+            if (user.Fournisseur.EtatDemande == "Approuvée")
+            {
+                Console.WriteLine("TEST SUCCESS 2");
+            }
+            if (finance != null)
+            {
+                Console.WriteLine("TEST SUCCESS 3");
+            }
+
             Navigation.NavigateTo("/profile?success=true");
         }
 
+//************************************CREATE FORM********************************************
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
 
@@ -407,7 +668,6 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 {
                     await BrochureFile.OpenReadStream(75000000).CopyToAsync(stream);
                 }
-                /********************************************************************************************************************************************************************************************/
                 SelectedBrochure.FournisseurId = fournisseur.FournisseurId;
                 dbContext.Brochures.Add(SelectedBrochure);
             }

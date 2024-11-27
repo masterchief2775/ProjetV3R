@@ -45,7 +45,7 @@
 	@if (_isUserAccepted)
 	{
 		<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
-			<CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+			<CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"/>
 		</div>
 	}	
 </div>

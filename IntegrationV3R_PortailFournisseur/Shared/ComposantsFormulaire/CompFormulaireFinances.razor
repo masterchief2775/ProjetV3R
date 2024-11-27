@@ -85,7 +85,7 @@
         </div>
 
         <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary">Suivant</button>
+            <button type="submit" class="btn btn-primary" >Suivant</button>
         </div>
     </form>
 </div>
@@ -95,6 +95,11 @@
 
     [Parameter] public EventCallback<int> OnPageSelected { get; set; }
     [Parameter] public EventCallback<int> Checkpoint { get; set; }
+    [Parameter]
+    public EventCallback Confirmation { get; set; }
+
+    [Parameter]
+    public int userid { get; set; }
 
     private List<Conditionspaiement> PaymentConditions { get; set; } = new();
     private string tpsError = string.Empty;
@@ -146,16 +151,15 @@
         }
     }
 
-    private void HandleSubmit()
+    private async Task HandleSubmit()
     {
         ResetErrors();
 
         var isValid = ValidateInputs();
-        if (isValid)
+        //*************************************************/
+        if (true)        
         {
-            LogToConsole();
-            Checkpoint.InvokeAsync(1);
-            OnPageSelected.InvokeAsync(1);
+            await Confirmation.InvokeAsync();
         }
     }
 
