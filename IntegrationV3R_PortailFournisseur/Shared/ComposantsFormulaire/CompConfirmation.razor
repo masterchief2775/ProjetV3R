@@ -154,6 +154,9 @@
 @code {
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
+    [Parameter]
+    public int? userid { get; set; } = null;
+
     private bool IsVisible { get; set; } = false;
 
     private string nomMunicipalite;
@@ -198,9 +201,11 @@
     }
 
     private async Task SubmitForm()
-    {    
-       await SingletonForm.SaveDataAsync(DbContext);
-
+    {
+        if (userid == null)
+            await SingletonForm.SaveDataAsync(DbContext);
+        else
+            await SingletonForm.ModifyDataAsync(DbContext, userid);
     }
        
 }

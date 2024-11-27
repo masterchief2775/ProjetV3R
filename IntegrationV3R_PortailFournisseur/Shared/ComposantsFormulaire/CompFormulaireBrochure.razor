@@ -93,9 +93,15 @@
     [Parameter]
     public EventCallback Confirmation { get; set; }
 
+    [Parameter]
+    public bool _isUserAccepted { get; set; }
+
+    [Parameter]
+    public bool _isCreation { get; set; }
+
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
-    public bool _isCreation { get; set; }
+    
 
 
     //private List<IBrowserFile> uploadedFiles = new();
@@ -202,7 +208,7 @@
                 Directory.CreateDirectory(SingletonForm.UploadDirectory);
             }
 
-            if (_isCreation)
+            if (_isCreation || (!_isCreation && !_isUserAccepted))
             {
                 await Confirmation.InvokeAsync();
             }

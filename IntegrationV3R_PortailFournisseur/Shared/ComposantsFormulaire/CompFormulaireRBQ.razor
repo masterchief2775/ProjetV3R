@@ -141,6 +141,9 @@
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
 
+    [Parameter]
+    public int? userid { get; set; } = null;
+
 
     private string subCategorySearch = string.Empty;
 
@@ -156,7 +159,7 @@
     private List<Souscategoriesafter2008> filteredSubCategories = new List<Souscategoriesafter2008>(); // To hold search results
 
     public List<Licencesrbq> currentLicences = new List<Licencesrbq>();
-
+    private Licencesrbq connectedLicence = null;
 
     public async Task FetchDataDB()
     {     // Appel à la base de données pour récupérer les régions
@@ -172,6 +175,18 @@
             subCategoryError = "Erreur lors de la récupération 'a la BD.";
             Console.WriteLine(ex.Message);
         }
+
+        if (userid != null)
+        {
+            Fournisseur connectedFournisseur = dbContext.Users
+                .Where(u => u.UserId == userid)
+                .Select(u => u.Fournisseur)
+                .FirstOrDefault();
+            connectedLicence = connectedFournisseur.Licencesrbqs.Where(f => f.FournisseurId == connectedFournisseur.FournisseurId).FirstOrDefault();
+
+            FormatRbqNumber(connectedLicence.NumLicence);
+        }
+
         await BDFetched.InvokeAsync();
     }
 
@@ -252,11 +267,23 @@
             string cleanRBQ = Regex.Replace(SingletonForm.RBQNumberInput, @"-", "");
             foreach(Licencesrbq licence in currentLicences)
             {
-                if(licence.NumLicence == SingletonForm.RBQNumberInput)
-                {
-                    rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
-                    isValid = false;
+                if (userid != null)
+                {                   
+                    if (licence.NumLicence == SingletonForm.RBQNumberInput && licence.NumLicence != connectedLicence.NumLicence)
+                    {
+                        rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
+                        isValid = false;
+                    }
                 }
+                else
+                {
+                    if (licence.NumLicence == SingletonForm.RBQNumberInput)
+                    {
+                        rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
+                        isValid = false;
+                    }
+                }
+
             }
 
         }
@@ -277,7 +304,7 @@
             categoryError = "La catégorie est requise.";
             isValid = false;
         }
-        
+
 
         if (!string.IsNullOrWhiteSpace(SingletonForm.RBQNumberInput) && !SingletonForm.SelectedSubCategories.Any()) // Check if at least one sub-category is selected
         {
@@ -318,6 +345,31 @@
     private void FormatRbqNumber(ChangeEventArgs e)
     {
         var input = e.Value.ToString();
+        // Remove non-digit characters
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        // Format input to ####-####-##
+        if (input.Length > 0)
+        {
+            // Append hyphens as necessary
+            if (input.Length > 8)
+            {
+                input = input.Insert(8, "-");
+            }
+            if (input.Length > 4)
+            {
+                input = input.Insert(4, "-");
+            }
+            // Limit to 12 characters
+            input = input.Substring(0, Math.Min(input.Length, 12));
+        }
+
+        SingletonForm.RBQNumberInput = input; // Update the input value
+    }
+
+    private void FormatRbqNumber(string e)
+    {
+        var input = e;
         // Remove non-digit characters
         input = new string(input.Where(char.IsDigit).ToArray());
 

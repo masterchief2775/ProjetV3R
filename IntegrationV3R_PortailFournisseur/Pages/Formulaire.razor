@@ -12,10 +12,11 @@
 	<CompPreremplissage @ref="compPreremplissage" OnDataFetched="HandleSharedData" BDFetched="NextBDFetch" />
 }
 
-<CompConfirmation @ref="compConfirmation" />
+<CompConfirmation @ref="compConfirmation" userid="userId"/>
 
 <div class="container-fluid formulaire-container">
-	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" />
+	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" 
+		_isUserAccepted="_isUserAccepted"/>
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"
@@ -26,21 +27,27 @@
 			userid="userId"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
-		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" 
+			userid="userId"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
 		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
-		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
+		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" 
+			userid="userId"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
-		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"/>
+		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"
+			_isCreation="_isCreationForm" _isUserAccepted="_isUserAccepted"/>
 	</div>
 	<!-- Conditionally display based on session value -->
-<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
-    <CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
-</div>
+	@if (_isUserAccepted)
+	{
+		<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
+			<CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" />
+		</div>
+	}	
 </div>
 
 
@@ -69,7 +76,9 @@
 
 	private bool _isCreationForm = true;
 
-	public int? userId;
+	private bool _isUserAccepted = false;
+
+	public int? userId = null;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -79,6 +88,12 @@
 			_isCreationForm = false;
 
 			await SingletonForm.FetchUser((int)userId);
+
+			if (SingletonForm.EtatDemande == "Approuvée")
+			{				
+				_isUserAccepted = true;
+			}
+			
 			NextBDFetch();
 		}
 		else

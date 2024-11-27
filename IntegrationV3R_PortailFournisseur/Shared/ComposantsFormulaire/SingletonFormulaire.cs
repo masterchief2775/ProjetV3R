@@ -95,24 +95,26 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
         [Parameter]
         public EventCallback UploadSuccessful { get; set; }
 
-       
+        public string EtatDemande { get; set; }
 
         public async Task FetchUser(int id)
-        {            
-			var user = await dbContext.Users
-			   .Include(u => u.Fournisseur)
-				   .ThenInclude(f => f.Adresses)
-			   .Include(u => u.Fournisseur)
-				   .ThenInclude(f => f.Contacts)
-			   .Include(u => u.Fournisseur)
-				   .ThenInclude(f => f.Finances)
-			   .Include(u => u.Fournisseur)
-				   .ThenInclude(f => f.Produitsservices)
-					   .ThenInclude(p => p.Comodite) // Including Comodite
-			   .Include(u => u.Fournisseur)
-				   .ThenInclude(f => f.Licencesrbqs)
-					   .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
-			   .FirstOrDefaultAsync(u => u.UserId == id);
+        {
+            var user = await dbContext.Users
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Adresses)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Contacts)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Finances)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Produitsservices)
+                       .ThenInclude(p => p.Comodite) // Including Comodite
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Licencesrbqs)
+                       .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Brochures)
+               .FirstOrDefaultAsync(u => u.UserId == id);
 
 
             //SET FOURNISSEUR
@@ -123,13 +125,16 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             PasswordInput = string.Empty;
             RepeatPasswordInput = string.Empty;
 
-			//SET ADRESSE
-			ICollection<Adress> adresses = user.Fournisseur.Adresses;
+            //SET ETAT DEMANDE POUR VOIR SI SHOW FINANCE
+            EtatDemande = fournisseur.EtatDemande;
+
+            //SET ADRESSE
+            ICollection<Adress> adresses = user.Fournisseur.Adresses;
             Adress adresse = adresses.SingleOrDefault();
             NumCiviqueInput = adresse.NumeroCivique;
             BureauInput = adresse.Bureau;
             RueInput = adresse.Rue;
-            if(!string.IsNullOrEmpty(adresse.CodeMunicipalite))
+            if (!string.IsNullOrEmpty(adresse.CodeMunicipalite))
                 MunicipaliteInput = adresse.CodeMunicipalite;
             else
                 NomMunicipaliteInput = adresse.NomMunicipalite;
@@ -139,20 +144,9 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             NumeroPosteInput = adresse.Poste;
             SiteWebInput = fournisseur.SiteWeb;
 
-            //SET CONTACT 
-            //ICollection<Contact> Contacts = user.Fournisseur.Contacts;
-            //List<Contact> contacts = Contacts.ToList();
-
-            var Contacts = await dbContext.Users
-                .Where(u => u.UserId == id)
-                .SelectMany(u => u.Fournisseur.Contacts)
-                .ToListAsync();
-                /*
-                .Where(c => c.FournisseurId == user.FournisseurId)
-                .SelectMany()*/
-        
-
-            Console.WriteLine("**********************************************" + Contacts.Count);
+            //SET CONTACTS 
+            ContactsInput.Clear();
+            List<Contact> Contacts = user.Fournisseur.Contacts.ToList();            
             foreach (Contact contact in Contacts)
             {
                 ContactInput toAdd = new ContactInput
@@ -176,24 +170,114 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
                 ContactsInput.Add(toAdd);
             }
+
+            //SET PRODUITS
+            DescriptionProduitsServicesInput = fournisseur.DetailsEntreprise;
+            List<Produitsservice> produits = user.Fournisseur.Produitsservices.ToList();
+
+            foreach (Produitsservice produit in produits) 
+            {
+                UnspscComodite comodite = produit.Comodite;
+                ProduitsServicesSelectionnesInput.Add(comodite);
+            } 
+            
+            //SET LICENCE RBQ
+            var licence = fournisseur.Licencesrbqs.SingleOrDefault();
+            RBQNumberInput = licence.NumLicence;
+            SelectedStatus = licence.StatutLicence;
+            SelectedLicenseType = licence.TypeLicence;
+            SelectedCategory = licence.Categorie;
+            List<SouscategorieLicencerbq> souscategories = licence.SouscategorieLicencerbqs.ToList();
+
+            foreach(SouscategorieLicencerbq souscategorie in souscategories)
+            {
+                var entry = souscategorie.IdSousCategorieNavigation;
+                SelectedSubCategories.Add(entry);
+            }
+
+            //SET BROCHURES 
+            List<Brochure> brochures = fournisseur.Brochures.ToList();
+            
+            foreach(Brochure brochure in brochures)
+            {
+                if (brochure.NoFichier == "Brochure")
+                {
+                    SelectedBrochure = brochure;
+                    OriginalBrochureName = brochure.NomFichier;
+                }
+                if (brochure.NoFichier == "Carte Affaire")
+                {
+                    SelectedCarteAffaire = brochure;
+                    OriginalCarteAffaireName = brochure.NomFichier;
+                }
+            }
+                        
+            var finances = fournisseur.Finances.SingleOrDefault();
+            if (finances != null)
+                if (string.IsNullOrEmpty(finances.Tps))
+                {
+                    TpsInput = finances.Tps;
+                    TvqInput = finances.Tvq;
+                    ConditionPaiement = finances.CodeConditionPaiement;
+                    Devise = finances.Devise;
+                    ModeCom = finances.ModeCom;
+                }           
+            
 		}
 
-        public async void SendIt()
+        public async Task ModifyDataAsync(ApplicationDbContext dbContext, int? id)
         {
-            await SendMail();
+            var user = await dbContext.Users
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Adresses)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Contacts)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Finances)
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Produitsservices)
+                       .ThenInclude(p => p.Comodite) // Including Comodite
+               .Include(u => u.Fournisseur)
+                   .ThenInclude(f => f.Licencesrbqs)
+                       .ThenInclude(l => l.SouscategorieLicencerbqs) // Ensure SouscategorieLicencerbqs is included here
+                .Include(u => u.Fournisseur)
+                    .ThenInclude(f => f.Brochures)
+               .FirstOrDefaultAsync(u => u.UserId == id);
+
+            //MODIFY FOURNISSEUR
+            user.Fournisseur.NomEntreprise = NomEntrepriseInput;
+            user.Fournisseur.Neq = NeqInput;
+            user.Fournisseur.CourrielEntreprise = EmailInput;
+            user.Fournisseur.DetailsEntreprise = DescriptionProduitsServicesInput;
+            user.Fournisseur.SiteWeb = SiteWebInput;
+
+            await dbContext.SaveChangesAsync();
+
+            //MODIFY ADRESSE
+            string cleanedCodePostal = Regex.Replace(this.CodePostalInput, @"\s+", "");
+            string cleanedNumeroTelephone = Regex.Replace(this.NumeroTelephoneInput, @"-", "");
+            Console.WriteLine(MunicipaliteInput + "**********************************");
+
+            Adress adresse = user.Fournisseur.Adresses.SingleOrDefault();
+            adresse.NumeroCivique = NumCiviqueInput;
+            adresse.Rue = RueInput;
+            adresse.Bureau = BureauInput;
+            if(!string.IsNullOrEmpty(MunicipaliteInput))
+                adresse.CodeMunicipalite = MunicipaliteInput;
+            else
+                adresse.NomMunicipalite = NomMunicipaliteInput;
+            adresse.CodeProvince = ProvinceInput;
+            adresse.CodePostal = cleanedCodePostal;
+            adresse.NumTel = cleanedNumeroTelephone;
+            adresse.Poste = NumeroPosteInput;
+
+            await dbContext.SaveChangesAsync();
+
+            Navigation.NavigateTo("/profile?success=true");
         }
 
         public async Task SaveDataAsync(ApplicationDbContext dbContext)
         {
-            bool _isUploadSuccessful = true; 
-            try
-            {
-               
-            }
-            catch (Exception ex)
-            {
-                _isUploadSuccessful = false;
-            }
 
             var fournisseur = new Fournisseur
             {

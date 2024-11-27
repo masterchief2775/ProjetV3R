@@ -80,6 +80,7 @@
     private bool isLoading = false;  // This controls the loading screen visibility
 
     private bool showSuccessMessage;
+   
 
     protected override void OnInitialized()
     {
@@ -94,7 +95,7 @@
 
     private void CloseMessage()
     {
-        showSuccessMessage = false;
+        showSuccessMessage = false;        
     }
 
     private async Task HandleSubmit()

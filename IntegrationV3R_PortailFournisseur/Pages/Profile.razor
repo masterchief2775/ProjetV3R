@@ -12,7 +12,19 @@
 <PageTitle>Profil</PageTitle>
 
 <LoadingScreen IsLoading="isLoading" />
-
+@if (showSuccessModifyMessage)
+{
+    <div class="modal" style="display:block;">
+        <div class="modal-boxSize">
+            <div class="modal-content-succes">
+                <span class="close mb-2" @onclick="CloseMessage">&times;</span>
+                <h3>Le profile à été modifié avec succès! </h3>
+                <p class="mt-4">Si les changements ne prennent pas place immédiatement, veuillez rafraîchir la page.</p>
+                <p>Merci de votre confiance !</p>
+            </div>
+        </div>
+    </div>
+}
 <div class="container-fluid profile-container">
     <div class="row">
         <!-- Sidebar with Navigation -->
@@ -139,6 +151,8 @@
     private bool isRBQLicencesVisible = false;
     private bool isFinancesVisible = false;
 
+    private bool showSuccessModifyMessage;
+
     private string numeroCiv = "";
     private string rue = "";
     private string ville = "";
@@ -176,6 +190,11 @@
         isFinancesVisible = section == "Finances";
     }
 
+    private void CloseMessage()
+    {
+        showSuccessModifyMessage = false;
+    }
+
     private void GoToFormulaire()
     {
         Navigation.NavigateTo("/formulaire");
@@ -191,6 +210,14 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
+
+        var uri = new Uri(Navigation.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        if (queryParams.TryGetValue("success", out var success) && success == "true")
+        {
+            showSuccessModifyMessage = true;
+        }
 
         municipalites = await dbContext.Municipalites.Include(m => m.CodeTerritoireNavigation).ToListAsync();
         provinces = await dbContext.Provinces.ToListAsync();
@@ -237,10 +264,15 @@
                         numeroCiv = address.NumeroCivique;
                         rue = address.Rue;
                         var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
-                        ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
+                        ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";                        
 
                         var provinceObj = provinces.FirstOrDefault(p => p.CodeProvince == address.CodeProvince);
                         province = provinceObj?.NomProvince ?? "Province Inconnue";
+
+                        if (address.CodeProvince != "4")
+                        {
+                            ville = address.NomMunicipalite;
+                        }
 
                         codePostal = address.CodePostal;
                         numeroTelephone = address.NumTel;
@@ -250,6 +282,11 @@
                             var regionAdminCode = municipality.CodeTerritoireNavigation.CodeRegionAdministrative;
                             var regionAdmin = regionAdministrativeList.FirstOrDefault(r => r.CodeRegionAdministrative == regionAdminCode);
                             regionAdministrative = regionAdmin?.NomRegionAmdin ?? "Région administrative Inconnue";
+                        }
+
+                        if(address.CodeProvince != "4")
+                        {
+                            regionAdministrative = "Hors du Québec";
                         }
                     }
 

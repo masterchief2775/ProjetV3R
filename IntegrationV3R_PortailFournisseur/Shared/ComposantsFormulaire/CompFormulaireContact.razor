@@ -108,13 +108,20 @@
     public EventCallback<int> Checkpoint { get; set; }
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
+    [Parameter]
+    public int? userid { get; set; } = null;
+
     //private List<Contact> contacts = new List<Contact>();
     private string errorMessage = string.Empty;
 
     protected override void OnInitialized()
     {
         // Initialize with one contact
-        SingletonForm.ContactsInput.Add(new ContactInput());
+        if(userid == null)
+        {
+            SingletonForm.ContactsInput.Add(new ContactInput());
+        }
+
     }
 
     private void AddContact()
@@ -190,7 +197,7 @@
             OnPageSelected.InvokeAsync(pageID);
         }
     }
-    
+
     private void FormatTelephoneNumber(ChangeEventArgs e, ContactInput contact)
     {
         var input = e.Value?.ToString() ?? string.Empty;
@@ -227,7 +234,15 @@
         contact.EmailError = string.IsNullOrWhiteSpace(contact.Email) || !contact.Email.Contains("@") ? "Un email valide est requis." : string.Empty;
 
         // Updated phone number validation
-        contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis (format: XXX-XXX-XXXX)." : string.Empty;
+        //contact.NumeroTelephoneError = string.IsNullOrWhiteSpace(contact.NumeroTelephone) || !Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") ? "Un numéro de téléphone valide est requis (format: XXX-XXX-XXXX)." : string.Empty;
+        if (string.IsNullOrEmpty(contact.NumeroTelephone))
+        {
+            contact.NumeroTelephoneError = "Un numero de téléphone est requis";
+        }
+        else if (!Regex.IsMatch(contact.NumeroTelephone, @"^\d{3}-\d{3}-\d{4}$") && userid == null)
+        {
+            contact.NumeroTelephoneError = "Un numéro de téléphone valide est requis (format: XXX-XXX-XXXX).";
+        }
 
         contact.TypeTelephoneError = string.IsNullOrWhiteSpace(contact.TypeTelephone) ? "Le type de téléphone est requis." : string.Empty;
 
