@@ -104,16 +104,16 @@
         <div class="mb-3">
             <h5>Sous-catégories sélectionnées</h5>
             <ul>
-                @if (SingletonForm.SelectedSubCategories.Any())
+                @if (SingletonForm.SelectedSubCategories.Any() && SingletonForm.SelectedSubCategories[0] != null)
                 {
                     foreach (var category in SingletonForm.SelectedSubCategories)
                     {
                         <li>
                             <strong>@category.NumeroSousCategorieAfter2008 - @category.NomSousCategorieAfter2008</strong>
-                            <button type="button" class="btn btn-link text-danger btn-sm"
+                            <button type="button" class="btn-supprimer btn-sm"
                             @onclick="() => RemoveSubCategory(category)"
-                            style="margin-left: 10px; padding: 0;">
-                                &times;
+                            style="padding-top: 4px;padding-right: 4px; padding-left: 7px; padding-bottom:7px;">
+                                <img src="/icons/deletewhite.png" alt="" class="me-1 icon" />
                             </button>
                         </li>
                     }
@@ -140,6 +140,8 @@
     public EventCallback<int> Checkpoint { get; set; }
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
+    [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
 
     [Parameter]
     public int? userid { get; set; } = null;
@@ -243,6 +245,7 @@
         {
             CheckForEmptyRBQ();
 
+            await _isModifValid.InvokeAsync(true);
             // Proceed with further logic, e.g., saving the data or navigating to another page
             await OnPageSelected.InvokeAsync(pageID); // Adjust the argument as necessary  
         }

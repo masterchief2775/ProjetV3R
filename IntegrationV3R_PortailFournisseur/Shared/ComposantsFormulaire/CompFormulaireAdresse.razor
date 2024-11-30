@@ -149,6 +149,9 @@
     public EventCallback<bool> BDFetched { get; set; }
 
     [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
+
+    [Parameter]
     public int? userid { get; set; } = null;
 
     private bool[] _selectionRegionAdministrative = new bool[17];
@@ -328,6 +331,7 @@
         // If valid, export and log data to console
         if (isValid)
         {    
+            _isModifValid.InvokeAsync(true);
             OnPageSelected.InvokeAsync(pageID);
         }
     }

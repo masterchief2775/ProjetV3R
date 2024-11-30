@@ -1,0 +1,80 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using System.Security.Cryptography
+@using System.Text
+@inject ApplicationDbContext DbContext
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize">
+        <div>
+            <div class="modal-content">
+                <div class="">
+
+                    <div>
+                        <span class="close mb-2" @onclick="CloseModal">&times;</span>
+                        <h3>
+                            Êtes-vous certain de vouloir réactiver votre profil ?
+                        </h3>
+                    </div>
+
+                    <button @onclick="Action" class="btn btn-primary mt-3">Réactiver profil</button>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public int? userid { get; set; } = null;
+
+    [Parameter]
+    public EventCallback<int> ReactivateUser { get; set; }    
+
+    private bool IsVisible { get; set; } = false;
+
+    public async Task Show()
+    {
+
+        IsVisible = true;
+        StateHasChanged();
+
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task Action()
+    {
+        await ReactivateUser.InvokeAsync();
+    }
+
+    private string ComputeMd5Hash(string input)
+    {
+        using (MD5 md5 = MD5.Create())
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convertir le tableau de bytes en une chaîne hexadécimale
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
+    }
+
+}

@@ -168,7 +168,38 @@ a, .btn-link {
         }
 
     .formulaire-container .btn {
-        background-color: #0076d5; /* Bright blue button */
+        background-color: #0076d5;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+        .formulaire-container .btn:hover {
+            background-color: #005fa3; /* Darker blue on hover */
+            transform: scale(1.05); /* Slight zoom effect on hover */
+        }
+
+    .btn-supprimer {
+        background-color: #E5004D;
+        color: white;
+        font-weight: 600;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+        .btn-supprimer:hover {
+            background-color: #A50037;
+        }
+
+    .btn-success {
+        background-color: #68B545;
         color: white;
         font-weight: 600;
         border: none;
@@ -179,10 +210,11 @@ a, .btn-link {
         text-transform: uppercase;
     }
 
-        .formulaire-container .btn:hover {
-            background-color: #005fa3; /* Darker blue on hover */
-            transform: scale(1.05); /* Slight zoom effect on hover */
+        .btn-success:hover {
+            background-color: #4D8732;
         }
+    
+        
 
     .formulaire-container .text-danger {
         font-size: 14px;

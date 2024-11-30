@@ -1,0 +1,174 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using System.Security.Cryptography
+@using System.Text
+@inject ApplicationDbContext DbContext
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize">
+        <div>
+            <div class="modal-content p-5" style="width:fit-content;">
+                <div class="">
+
+                    <div>
+                        <span class="close mb-2" @onclick="CloseModal">&times;</span>
+                        <h3>
+                            Changement de mot de passe
+                        </h3>
+                    </div>
+
+                    <div class="">Veuillez entrer votre mot de passe actuel par raison de sécurité</div>
+
+                    <input type="password" class="form-control border border-dark" @bind="inputMDP" placeholder="Mot de passe actuel" style="width:fit-content;" />
+                    @if (!string.IsNullOrEmpty(errorMDP))
+                    {
+                        <div class="text-danger">@errorMDP</div>
+                    }
+
+                    <div class ="mt-5" style="display:flex; flex-direction:row; justify-content:left">
+                        <div>
+                            <label >Nouveau mot de passe</label>
+                            <input type="password" class="form-control" @bind="newPassword" placeholder="Nouveau mot de passe" style="width:fit-content;" />
+                            @if (!string.IsNullOrEmpty(errorNewPassword))
+                            {
+                                <div class="text-danger">@errorNewPassword</div>
+                            }
+                        </div>
+                        
+                        <div class="mx-3">
+                            <label>Confirmation mot de passe</label>
+                            <input type="password" class="form-control " @bind="confirmNewPassword" placeholder="Confirmation mot de passe" style="width:fit-content;" />
+                            @if (!string.IsNullOrEmpty(errorConfirmationNewPassword))
+                            {
+                                <div class="text-danger">@errorConfirmationNewPassword</div>
+                            }
+                        </div>                        
+
+                    </div>
+                    
+                    <button @onclick="CheckMPD" class="btn btn-primary mt-3">Changer mot de passe</button>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public int? userid { get; set; } = null;
+
+    [Parameter]
+    public EventCallback<string> ChangePassword { get; set; }
+
+    [Parameter]
+    public Motsdepass currentMDP { get; set; }
+
+    private string errorMDP = string.Empty;
+    private string errorNewPassword = string.Empty;
+    private string errorConfirmationNewPassword = string.Empty;
+
+    private bool IsVisible { get; set; } = false;
+
+    private string inputMDP;
+    private string newPassword;
+    private string confirmNewPassword;
+
+    private int numContact = 1;
+
+    public async Task Show()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task CheckMPD()
+    {
+        errorMDP = string.Empty;
+        errorNewPassword = string.Empty;
+        errorConfirmationNewPassword = string.Empty;
+
+        string hashedMDP = string.Empty;
+        var specialChars = "!@#$%^&*()_+-=[]{}|;':\",.<>?/`~";
+        bool isValid = true;
+
+        if (string.IsNullOrEmpty(inputMDP))
+        {
+            errorMDP = "Veuillez entrer votre mot de passe actuel";
+            isValid = false;
+        }
+        else
+        {
+            hashedMDP = ComputeMd5Hash(inputMDP);
+            if (hashedMDP != currentMDP.Mdp)
+            {
+                errorMDP = "Mot de passe ne correspond pas au mot de passe actuel";
+                isValid = false;
+            }
+        }
+
+        
+
+        if (string.IsNullOrEmpty(newPassword))
+        {
+            errorNewPassword = "Un mot de passe est requis";
+            isValid = false;
+        }
+        else if (newPassword.Any(char.IsWhiteSpace) || newPassword.Length < 7 || newPassword.Length > 12 ||
+            !newPassword.Any(char.IsUpper) || !newPassword.Any(char.IsLower) || !newPassword.Any(char.IsDigit) || !newPassword.Any(c => specialChars.Contains(c)))
+        {
+            errorNewPassword = "Le mot de passe doit contenir entre 7 et 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+            isValid = false;
+        }
+
+
+        if (string.IsNullOrEmpty(confirmNewPassword))
+        {
+            errorConfirmationNewPassword = "Veuillez confirmer le mot de passe";
+            isValid = false;
+        }
+        else if (newPassword != confirmNewPassword)
+        {
+            errorConfirmationNewPassword = "Les mots de passe ne correspondent pas.";
+            isValid = false;
+        }        
+
+        if (isValid)
+        {
+            CloseModal();
+            var newMDP = ComputeMd5Hash(newPassword);            
+            await ChangePassword.InvokeAsync(newMDP);
+        }
+    }
+
+    private string ComputeMd5Hash(string input)
+    {
+        using (MD5 md5 = MD5.Create())
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convertir le tableau de bytes en une chaîne hexadécimale
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
+    }
+
+}

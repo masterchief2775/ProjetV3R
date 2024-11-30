@@ -84,19 +84,22 @@
                         <div class="text-danger">@contact.PosteError</div>
                     }
                 </div>
-
                 @if (i > 0) // Only show the button for contacts after the first one
                 {
-                    <button type="button" class="btn btn-danger mt-2" @onclick="() => RemoveContact(contact)">Supprimer</button>
+                    <div>
+                        <button type="button" class="btn-supprimer mb-3" style="height:fit-content;width:fit-content;" @onclick="() => RemoveContact(contact)">Supprimer  <img src="/icons/deletewhite.png" alt="" class="me-1 icon" /></button>
+                    </div>
                 }
+                
             </div>
+            
             <hr /> <!-- Separator line between contacts -->
         }
 
         <div class="d-flex align-items-center mb-3">
-            <button type="button" class="btn btn-success" @onclick="AddContact">Ajouter un contact</button>
+            <button type="button" class="btn btn-success" @onclick="AddContact">Ajouter un contact <img src="/icons/add.png" alt="" class="me-1 icon" /></button>
         </div>
-        <button type="submit" class="btn btn-primary">Confirmer</button>
+        <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
 </div>
 
@@ -106,6 +109,10 @@
 
     [Parameter]
     public EventCallback<int> Checkpoint { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
+
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
     [Parameter]
@@ -193,7 +200,7 @@
 
         if (isValid)
         {
-
+            _isModifValid.InvokeAsync(true);
             OnPageSelected.InvokeAsync(pageID);
         }
     }

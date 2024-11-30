@@ -12,43 +12,54 @@
 	<CompPreremplissage @ref="compPreremplissage" OnDataFetched="HandleSharedData" BDFetched="NextBDFetch" />
 }
 
-<CompConfirmation @ref="compConfirmation" userid="userId"/>
+<CompConfirmation @ref="compConfirmation" userid="userId" _isUserAccepted="_isUserAccepted"/>
 
 <div class="container-fluid formulaire-container">
 	<NavbarFormulaire @ref="compNavbar" OnPageSelected="HandlePageSelectedNavbar" CurrentPage="selectedPageIndex" 
-		_isUserAccepted="_isUserAccepted"/>
+		_isUserAccepted="_isUserAccepted" _isModif="!_isCreationForm"/>
 
 	<div style="display:@(selectedPageIndex == 0 ? "block" : "none")">
 		<CompFormulaireIdentification @ref="compIdentification" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"
-			userid="userId"/>
+			userid="userId" _isModifValid="SetModif"/>
 	</div>
 	<div style="display:@(selectedPageIndex == 1 ? "block" : "none")">
-		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" 
-			userid="userId"/>
+		<CompFormulaireAdresse @ref="compAdresse" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"
+			userid="userId" _isModifValid="SetModif" />
 	</div>
 	<div style="display:@(selectedPageIndex == 2 ? "block" : "none")">
-		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" 
-			userid="userId"/>
+		<CompFormulaireContact @ref="compContact" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint"
+			userid="userId" _isModifValid="SetModif" />
 	</div>
 	<div style="display:@(selectedPageIndex == 3 ? "block" : "none")">
-		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" />
+		<CompFormulaireProduit @ref="compProduit" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"
+			_isModifValid="SetModif" />
 	</div>
 	<div style="display:@(selectedPageIndex == 4 ? "block" : "none")">
-		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch" 
-			userid="userId"/>
+		<CompFormulaireRBQ @ref="compRBQ" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" BDFetched="NextBDFetch"
+			userid="userId" _isModifValid="SetModif" />
 	</div>
 	<div style="display:@(selectedPageIndex == 5 ? "block" : "none")">
 		<CompFormulaireBrochure @ref="compBrochure" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"
-			_isCreation="_isCreationForm" _isUserAccepted="_isUserAccepted"/>
+			_isCreation="_isCreationForm" _isUserAccepted="_isUserAccepted" _isModifValid="SetModif" />
 	</div>
 	<!-- Conditionally display based on session value -->
 	@if (_isUserAccepted)
 	{
 		<div style="display:@(selectedPageIndex == 6 ? "block" : "none")">
-			<CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"/>
+			<CompFormulaireFinances @ref="compFinance" OnPageSelected="HandlePageSelected" Checkpoint="SetFormCheckpoint" Confirmation="ShowConfirmation"
+					_isModifValid="SetModif" />
 		</div>
-	}	
+	}
+	@if (!_isCreationForm)
+	{
+		<CompRetour @ref="compRetour" RetourProfil="ReturnProfile"/>
+		<div style="display:flex; flex-direction:row;">
+			<button class="btn btn-primary m-3" @onclick="HandleConfirm">Confirmer</button>
+			<button class="btn btn-primary m-3" @onclick="ShowReturn">Retour au profil</button>
+		</div>		
+	}
 </div>
+
 
 
 
@@ -63,6 +74,9 @@
 	private CompFormulaireBrochure compBrochure;
 	private CompFormulaireFinances compFinance;
 	private CompConfirmation compConfirmation;
+	private CompRetour compRetour;
+
+	private CancellationTokenSource _cancellationTokenSource;
 
 	[Inject] private SingletonFormulaire SingletonForm { get; set; }
 
@@ -78,22 +92,30 @@
 
 	private bool _isUserAccepted = false;
 
+	private bool _isModifValid = false;
+
 	public int? userId = null;
 
 	protected override async Task OnInitializedAsync()
 	{
+		_cancellationTokenSource?.Cancel();
+		_cancellationTokenSource?.Dispose();
+		_cancellationTokenSource = new CancellationTokenSource();
+
 		userId = await sessionStorage.GetItemAsync<int?>("UserId");
 		if (userId != null)
 		{
 			_isCreationForm = false;
 
-			await SingletonForm.FetchUser((int)userId);
+			await SingletonForm.FetchUser((int)userId, _cancellationTokenSource.Token);
 
 			if (SingletonForm.EtatDemande == "Approuvée")
 			{				
 				_isUserAccepted = true;
 			}
-			
+			_checkpoint = 6;
+			compNavbar.SetLabelPublic();
+
 			NextBDFetch();
 		}
 		else
@@ -110,6 +132,11 @@
 			_checkpoint = pageIndex;
 			compNavbar.Checkpoint = pageIndex;
 		}
+	}
+
+	private void SetModif(bool value)
+	{
+		_isModifValid = value;
 	}
 
 	private void HandlePageSelected(int pageIndex)
@@ -154,6 +181,42 @@
 		}
 	}
 
+
+
+	private void HandleConfirm()
+	{
+		_isModifValid = false;
+		switch (selectedPageIndex)
+		{
+			case 0:
+				compIdentification.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 1:
+				compAdresse.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 2:
+				compContact.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 3:
+				compProduit.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 4:
+				compRBQ.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 5:
+				compBrochure.HandleSubmitReturn(selectedPageIndex);
+				break;
+			case 6:
+				compFinance.HandleSubmitReturn(selectedPageIndex);
+				break;
+
+		}
+		if (_isModifValid)
+		{
+			compConfirmation.Show();
+		}
+	}
+
 	private void HandleSharedData(bool value)
 	{
 		compIdentification.LoadSharedData();
@@ -189,6 +252,16 @@
 	private void ShowConfirmation()
 	{
 		compConfirmation.Show();
+	}
+
+	private void ShowReturn()
+	{
+		compRetour.Show();
+	}
+
+	private void ReturnProfile()
+	{
+		Navigation.NavigateTo("/profil");
 	}
 
 }

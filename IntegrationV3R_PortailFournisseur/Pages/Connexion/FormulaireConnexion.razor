@@ -24,11 +24,25 @@
 {
     <div class="modal" style="display:block;">
         <div class="modal-boxSize">
-            <div class="modal-content-succes">
+            <div class="modal-content" style="display:block;">
                 <span class="close mb-2" @onclick="CloseMessage">&times;</span>
-                <h3>Le profile à été créé avec succès! </h3>
+                <h3>Le profil à été créé avec succès! </h3>
                 <p class="mt-4">Vous devriez recevoir un courriel de confirmation sous peux.</p>
                 <p>Merci de votre confiance !</p>
+                
+            </div>
+        </div>        
+    </div>
+}
+@if (showDeactivateMessage)
+{
+    <div class="modal" style="display:block;">
+        <div class="modal-boxSize">
+            <div class="modal-content" style="display:block;">
+                <span class="close mb-2" @onclick="CloseDeactivateMessage">&times;</span>
+                <h3>Le profile à été désactivé avec succès </h3>
+                <p class="mt-4">*Pour le réactiver, veuillez vous connecter et le le réactiver dans le profil ou contacter la ville*</p>
+                <p class="">Merci !</p>
                 
             </div>
         </div>        
@@ -80,9 +94,12 @@
     private bool isLoading = false;  // This controls the loading screen visibility
 
     private bool showSuccessMessage;
-   
+    private bool showDeactivateMessage;
 
-    protected override void OnInitialized()
+    private bool _navigationHandled = false;
+
+
+    protected override async void OnInitialized()
     {
         var uri = new Uri(Navigation.Uri);
         var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -91,11 +108,33 @@
         {
             showSuccessMessage = true;
         }        
+        if(queryParams.TryGetValue("deactivate", out var deactivate) && deactivate == "true")
+        {
+            showDeactivateMessage = true; 
+        }
+
+        var userId = sessionStorage.GetItemAsync<int?>("UserId");
+
+        if(await userId <= 0)
+        {
+            Console.WriteLine("NULL USER");
+            await sessionStorage.SetItemAsync("UserId", -1);
+        }
+
+        if(await userId > 0)
+        {
+            Navigation.NavigateTo("/profil");
+        }
     }
 
     private void CloseMessage()
     {
         showSuccessMessage = false;        
+    }
+
+    private void CloseDeactivateMessage()
+    {
+        showDeactivateMessage = false;        
     }
 
     private async Task HandleSubmit()
@@ -141,7 +180,7 @@
                     await EnregistrerConnexion(user.UserId);
 
                     // Redirection vers la page EtatDemande
-                    Navigation.NavigateTo("/etat-demande");
+                    Navigation.NavigateTo("/profil");
                 }
                 else
                 {

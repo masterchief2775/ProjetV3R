@@ -54,7 +54,9 @@
                     {
                         <li>
                             <strong>@product.ComoditeNombre - @product.ComoditeTitreFr</strong>
-                            <button type="button" class="btn btn-link text-danger btn-sm" @onclick="() => RemoveProduct(product)" style="margin-left: 10px; padding: 0;">&times;</button>
+                            <button type="button" class="btn-supprimer btn-sm" @onclick="() => RemoveProduct(product)" style="padding-top: 4px;padding-right: 4px; padding-left: 7px; padding-bottom:7px;">
+                                <img src="/icons/deletewhite.png" alt="" class="me-1 icon" />
+                            </button>
                         </li>
                     }
                 }
@@ -76,6 +78,8 @@
     public EventCallback<int> Checkpoint { get; set; }
     [Parameter]
     public EventCallback<bool> BDFetched { get; set; }
+    [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
 
     [Inject] private SingletonFormulaire SingletonForm { get; set; }
 
@@ -131,6 +135,7 @@
 
         if (isValid)
         {
+            await _isModifValid.InvokeAsync(true);
             await OnPageSelected.InvokeAsync(pageID);
         }        
     }

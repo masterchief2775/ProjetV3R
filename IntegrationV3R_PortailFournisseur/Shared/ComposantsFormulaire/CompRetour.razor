@@ -1,0 +1,81 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using System.Security.Cryptography
+@using System.Text
+@inject ApplicationDbContext DbContext
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize">
+        <div>
+            <div class="modal-content" style="width:fit-content;">
+                <div class="">
+
+                    <div>
+                        <span class="close mb-2" @onclick="CloseModal">&times;</span>
+                        <h2 style="color:red;">
+                            Attention !
+                        </h2>
+                    </div>
+
+                    <div class="form-text">Vous allez perdre vos modifications si vous retournez sur votre profil</div>
+                    
+                    <h6 class="">Êtes-vous certain de vouloir retourner au profil ?</h6>
+
+                    <div style="display:flex; flex-direction:row;">
+                        <button @onclick="Confirmation" class="btn btn-supprimer mt-3">Oui</button>
+                        <button @onclick="CloseModal" class="btn btn-supprimer mt-3 mx-3">Non</button>
+                    </div>
+                    
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public int? userid { get; set; } = null;
+
+    [Parameter]
+    public EventCallback RetourProfil { get; set; }
+
+    [Parameter]
+    public Motsdepass currentMDP { get; set; }
+
+    private string errorMDP = string.Empty;
+
+    private bool IsVisible { get; set; } = false;
+
+    private string inputMDP;
+
+    private int numContact = 1;
+
+    public async Task Show()
+    {
+
+        IsVisible = true;
+        StateHasChanged();
+
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private void Confirmation()
+    {
+        RetourProfil.InvokeAsync();
+    }
+
+
+}

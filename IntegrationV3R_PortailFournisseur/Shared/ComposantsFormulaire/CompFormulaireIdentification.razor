@@ -46,26 +46,30 @@
             </div>
         </div>
 
-        <h5>Informations de connexion</h5>
+        @if(userid == null)
+        {
+            <h5>Informations de connexion</h5>
 
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label for="passwordInput" class="form-label">Mot de passe*</label>
-                <input type="password" class="form-control" id="passwordInput" @bind="SingletonForm.PasswordInput">
-                @if (!string.IsNullOrEmpty(passwordError))
-                {
-                    <div class="text-danger">@passwordError</div>
-                }
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label for="passwordInput" class="form-label">Mot de passe*</label>
+                    <input type="password" class="form-control" id="passwordInput" @bind="SingletonForm.PasswordInput">
+                    @if (!string.IsNullOrEmpty(passwordError))
+                    {
+                        <div class="text-danger">@passwordError</div>
+                    }
+                </div>
+                <div class="col-md-3">
+                    <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe*</label>
+                    <input type="password" class="form-control" id="repeatPasswordInput" @bind="SingletonForm.RepeatPasswordInput">
+                    @if (!string.IsNullOrEmpty(repeatPasswordError))
+                    {
+                        <div class="text-danger">@repeatPasswordError</div>
+                    }
+                </div>
             </div>
-            <div class="col-md-3">
-                <label for="repeatPasswordInput" class="form-label">Répéter le mot de passe*</label>
-                <input type="password" class="form-control" id="repeatPasswordInput" @bind="SingletonForm.RepeatPasswordInput">
-                @if (!string.IsNullOrEmpty(repeatPasswordError))
-                {
-                    <div class="text-danger">@repeatPasswordError</div>
-                }
-            </div>
-        </div>
+        }
+
 
         <button type="submit" class="btn btn-primary">Suivant</button>
     </form>
@@ -87,6 +91,9 @@
 
     [Parameter]
     public int? userid { get; set; } = null;
+
+    [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
 
     private string neqInput = string.Empty;
     private string nomEntrepriseInput = string.Empty;
@@ -150,7 +157,7 @@
         // If valid, log the data and navigate
         if (isValid)
         {
-            LogToConsole();
+
             Checkpoint.InvokeAsync(1);
             OnPageSelected.InvokeAsync(1);
         }
@@ -167,8 +174,8 @@
 
         // If valid, log the data and navigate
         if (isValid)
-        {            
-            LogToConsole();            
+        {
+            _isModifValid.InvokeAsync(true);          
             OnPageSelected.InvokeAsync(pageID);
             //Navigation.NavigateTo("/formulaireDemandeAdresse");
         }
@@ -299,15 +306,6 @@
 
 
         return isValid;
-    }
-
-    private void LogToConsole()
-    {
-        Console.WriteLine($"Nom de l'entreprise: {SingletonForm.NomEntrepriseInput}");
-        Console.WriteLine($"NEQ: {SingletonForm.NeqInput}");
-        Console.WriteLine($"Email: {SingletonForm.EmailInput}");
-        // Be cautious with logging sensitive data like passwords
-        Console.WriteLine($"Mot de passe: {SingletonForm.PasswordInput}");
     }
 
     private bool IsValidEmail(string email)

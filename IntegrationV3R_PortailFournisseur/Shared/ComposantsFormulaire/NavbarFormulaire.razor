@@ -102,14 +102,30 @@
     [Parameter]
     public bool _isUserAccepted { get; set; } = false;
 
+    [Parameter]
+    public bool _isModif { get; set; } = false;
+
 
 
     public int Checkpoint { get; set; }
 
     protected override void OnInitialized()
     {
-        _onglets[0] = "active";
+        if (_isModif)
+        {
+            _onglets[0] = " checkpoint";
+            _onglets[1] = " active";
+            _onglets[2] = " active";
+            _onglets[3] = " active";
+            _onglets[4] = " active";
+            _onglets[5] = " active";
+            _onglets[6] = " active";
+            StateHasChanged();
+        }
+        SetLabels();        
     }
+
+
 
     private void ChangePage(int id)
     {
@@ -118,49 +134,83 @@
         OnPageSelected.InvokeAsync(_currentPage);
     }
 
-    private void SetLabels()
+    public void SetLabelPublic()
     {
-        StateHasChanged();
+        _isModif = true;
+        Checkpoint = 6;
+        SetLabels();
+    }
+
+    private void SetLabels()
+    {        
         for (int i = 0; i < _onglets.Length; i++)
         {
             _onglets[i] = "";
 
-            if (i == _currentPage)
+            if (!_isModif)
             {
-                _onglets[i] = " active";
-            }
-            else if (i < Checkpoint && i != _currentPage)
-            {
-                _onglets[i] = " done";
-            }
-            else if (i == Checkpoint)
-            {
-                _onglets[i] = " checkpoint";
+                if (i == _currentPage)
+                {
+                    _onglets[i] = " active";
+                }
+                else if (i < Checkpoint && i != _currentPage)
+                {
+                    _onglets[i] = " done";
+                }
+                else if (i == Checkpoint)
+                {
+                    _onglets[i] = " checkpoint";
+                }
+                else
+                {
+                    _onglets[i] = "";
+                }
             }
             else
             {
-                _onglets[i] = "";
-            }
-        }
+                if (i == _currentPage)
+                {
+                    _onglets[i] = " checkpoint";
+                }
+                else
+                {
+                    _onglets[i] = " active";
+                }
+            }            
+        }        
     }
 
     private string GetIcon(int index)
     {
-        if (index == _currentPage)
+        if (!_isModif)
         {
-            return "/icons/clock.png";  // Path to your active icon
-        }
-        else if (index < Checkpoint)
-        {
-            return "/icons/check-mark.png";  // Path to your "done" checkmark icon
-        }
-        else if (index == Checkpoint)
-        {
-            return "/icons/check.png";  // Path to your checkpoint icon
+            if (index == _currentPage)
+            {
+                return "/icons/clock.png";  // Path to your active icon
+            }
+            else if (index < Checkpoint)
+            {
+                return "/icons/check-mark.png";  // Path to your "done" checkmark icon
+            }
+            else if (index == Checkpoint)
+            {
+                return "/icons/check.png";  // Path to your checkpoint icon
+            }
+            else
+            {
+                return "";  // No icon for tabs that are neither done nor active
+            }
         }
         else
         {
-            return "";  // No icon for tabs that are neither done nor active
+            if (index == _currentPage)
+            {
+                return "/icons/check.png";
+            }
+            else
+            {
+                return "";
+            }
         }
     }
 }

@@ -1,27 +1,29 @@
-ï»¿@page "/profile"
-@using IntegrationV3R_PortailFournisseur.Shared.ComposantsProfile
+@page "/profil"
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
-
-@inject ApplicationDbContext dbContext
-@inject NavigationManager Navigation
+@using IntegrationV3R_PortailFournisseur.Shared.ComposantsProfile
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
-@inject IJSRuntime JSRuntime
+@inject ApplicationDbContext _context
 @inject StateContainer stateContainer
 
 <PageTitle>Profil</PageTitle>
+
 <CompConfirmation @ref="compConfirmation" currentMDP="mdp" DeactivateUser="DeactivateUser"></CompConfirmation>
 <CompReactivation @ref="compReactivation" ReactivateUser="ReactivateUser"></CompReactivation>
+<CompChangementMDP @ref="compChangementMDP" currentMDP="mdp" ChangePassword="ChangePassword"></CompChangementMDP>
 
 <LoadingScreen IsLoading="isLoading" />
 @if (showSuccessModifyMessage)
 {
     <div class="modal" style="display:block;">
         <div class="modal-boxSize">
-            <div class="modal-content-succes">
+            <div class="modal-content" style="display:block;">
                 <span class="close mb-2" @onclick="CloseMessage">&times;</span>
-                <h3>Le profile Ã  Ã©tÃ© modifiÃ© avec succÃ¨s! </h3>
-                <p class="mt-4">Si les changements ne prennent pas place immÃ©diatement, veuillez rafraÃ®chir la page.</p>
+                <h3>Le profile à été modifié avec succès! </h3>
+                <p class="mt-4">Si les changements ne prennent pas place immédiatement, veuillez rafraîchir la page.</p>
                 <p>Merci de votre confiance !</p>
             </div>
         </div>
@@ -41,12 +43,12 @@
                 <button class="btn btn-outline-primary mb-2 @((isRBQLicencesVisible ? "active" : ""))" @onclick="ShowRBQLicences">
                     Licence RBQ
                 </button>
-                @if(finance != null)
+                @if (finance != null)
                 {
                     <button class="btn btn-outline-primary mb-2 @((isFinancesVisible ? "active" : ""))" @onclick="ShowFinances">
                         Finances
                     </button>
-                }                
+                }
                 <button class="btn btn-outline-primary mb-2 @((isContactsVisible ? "active" : ""))" @onclick="ShowContacts">
                     Contacts
                 </button>
@@ -145,42 +147,158 @@
             }
 
             <!-- Button to navigate to the formulaire page -->
-            <div  style="display:flex;flex-direction:column;">          
-                <div class ="text-end mb-3">
-                    <button class="btn" @onclick="GoToFormulaire">
+            <div style="display:flex;flex-direction:column;">
+                <div class="text-end mb-3">
+                    <button class="btn" @onclick="NavigateToFormulaireDemande">
                         Modifier ses informations
                     </button>
                 </div>
-               
-                @if(etatCompte)
+                <div class="text-end mb-3">
+                    <button class="btn" @onclick="ShowChangementMDP">
+                        Changer le mot de passe
+                    </button>
+                </div>
+
+                @if (etatCompte)
                 {
                     <div class="text-end">
                         <button class="btn-supprimer" @onclick="ShowConfirmation">
-                            DÃ©sactiver le compte
+                            Désactiver le compte
                         </button>
-                    </div>                    
+                    </div>
                 }
                 else
                 {
                     <div class="text-end">
                         <button class="btn-success" @onclick="ShowConfirmationReactivate">
-                            RÃ©activer le compte
+                            Réactiver le compte
                         </button>
-                    </div>                    
+                    </div>
                 }
 
             </div>
         </div> <!-- col-md-9 -->
     </div> <!-- row -->
 </div> <!-- container-fluid -->
+
+<div class="container-fluid etat-demande-container">
+    @if (isUserAuthenticated)
+    {
+        <h3 class="text-center mb-4">Suivi de votre demande</h3>
+        <p class="lead text-center">Bonjour @fournisseur.NomEntreprise </p>
+
+        @if (fournisseur != null)
+        {
+            <div class="tracking-status mb-5">
+                <p class="text-center">Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+                <p class="text-center">Votre compte est actuellement : <strong>@etat</strong></p>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-warning">Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
+        }
+        @if (statut == "Approuvée" && finance == null)
+        {
+            <p class="text-center text-danger"><strong>****** - Veuillez modifier votre profil pour inclure vos informations de finances - ***** </strong></p>
+        }
+
+        <div class="container mt-5">
+            <h3 class="text-center mb-4">État de votre demande :</h3>
+
+            <div class="d-flex justify-content-center align-items-center tracking-status">
+                <!-- Demande reçue -->
+                <div class="step-container text-center">
+                    <i class="fas fa-file-alt fa-4x step-icon"></i>
+                    <p>Demande reçue</p>
+                </div>
+
+                <!-- Ligne reliant les icônes -->
+                <div class="line"></div>
+
+                <!-- En cours de traitement -->
+                <div class="step-container text-center">
+                    <i class="fas fa-clock fa-4x step-icon"></i>
+                    <p>En cours de traitement</p>
+                </div>
+
+                @if (statut == "Approuvée" || statut == "Rejetée")
+                {
+                    <!-- Ligne reliant les icônes -->
+                    <div class="line"></div>
+
+                    <!-- Demande approuvée ou refusée -->
+                    <div class="step-container text-center">
+                        <i class="@GetFinalStepIcon() fa-4x step-icon"></i>
+                        <p>@GetFinalStepText()</p>
+                    </div>
+                }
+                
+            </div>
+            
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-warning">Redirection vers la page de connexion...</p>
+    }
+</div>
+
+
+
 @code {
-    private bool isUserAuthenticated = false;
-    private Fournisseur fournisseur;
+    //POUR ETAT DEMANDE     
+
+    // Statut de la demande
+    private string statut = "En attente";
+    private string etat = "Désactivé";
+    private int fournisseurId = 1;
+
+    private string GetStatusClass(string status)
+    {
+        if (fournisseur != null && fournisseur.EtatDemande == status)
+        {
+            return "active";
+        }
+        else if (IsStatusCompleted(status))
+        {
+            return "completed";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private bool IsStatusCompleted(string status)
+    {
+        var statusOrder = new List<string> { "En attente", "Approuvée", "Rejetée" };
+        var currentIndex = statusOrder.IndexOf(fournisseur.EtatDemande);
+        var statusIndex = statusOrder.IndexOf(status);
+
+        return statusIndex <= currentIndex;
+    }
+
+    private string GetFinalStepIcon()
+    {
+        return statut == "Approuvée" ? "fas fa-check-circle" : "fas fa-times-circle";
+    }
+
+    private string GetFinalStepText()
+    {
+        return statut == "Approuvée" ? "Demande Approuvée" : "Demande Rejetée";
+    }
+
+
+    //POUR PROFIL
+
+
     private bool isLoading = false;
-    private Finance finance;
-    private Motsdepass mdp;
+
+    private Motsdepass mdp;    
     private CompConfirmation compConfirmation;
     private CompReactivation compReactivation;
+    private CompChangementMDP compChangementMDP;
     private bool etatCompte;
 
     [Parameter] public EventCallback<bool> BDFetched { get; set; }
@@ -244,19 +362,6 @@
         showSuccessModifyMessage = false;
     }
 
-    private void GoToFormulaire()
-    {
-        Navigation.NavigateTo("/formulaire");
-        UpdateFinancePageState(true);
-    }
-
-    private void UpdateFinancePageState(bool value)
-    {
-        stateContainer.ShouldDisplayFinancePage = value;
-        stateContainer.NotifyStateChanged();
-    }
-
-
 
     protected void ShowConfirmation()
     {
@@ -266,6 +371,11 @@
     protected void ShowConfirmationReactivate()
     {
         compReactivation.Show();
+    }
+
+    protected void ShowChangementMDP()
+    {
+        compChangementMDP.Show();
     }
 
     protected async Task DeactivateUser()
@@ -279,36 +389,66 @@
     {
         fournisseur.EtatCompte = true;
         await dbContext.SaveChangesAsync();
-        Navigation.NavigateTo("/profile", true);
+        Navigation.NavigateTo("/profil", true);
     }
 
-    protected override async Task OnInitializedAsync()
+    private void NavigateToFormulaireDemande()
     {
+        Navigation.NavigateTo("/formulaire");
+    }
+
+    private void ChangePassword(string newMDP)
+    {
+        var ipConnexion = HttpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        mdp.IpChangementMdp = ipConnexion;
+        mdp.Mdp = newMDP;        
+        dbContext.SaveChangesAsync();
+        Navigation.NavigateTo("/profil?success=true", true);
+    }
+
+    //HYBRIDE
+    private Fournisseur fournisseur;
+    private Finance finance;
+    private User user;
+
+    private bool isUserAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {        
         isLoading = true;
-
-        var uri = new Uri(Navigation.Uri);
-        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        if (queryParams.TryGetValue("success", out var success) && success == "true")
-        {
-            showSuccessModifyMessage = true;
-        }
-
-        municipalites = await dbContext.Municipalites.Include(m => m.CodeTerritoireNavigation).ToListAsync();
-        provinces = await dbContext.Provinces.ToListAsync();
-        var regionAdministrativeList = await dbContext.Regionadministratives.ToListAsync();
-        var conditionPaiementList = await dbContext.Conditionspaiements.ToListAsync();
-        var sousCategories = await dbContext.SouscategorieLicencerbqs
-                            .Include(s => s.IdSousCategorieNavigation)  // Ensure we include the navigation property to the subcategory
-                            .ToListAsync();  // Fetching all subcategories
-
+        // Lire l'ID utilisateur depuis le stockage sécurisé
         var userId = await sessionStorage.GetItemAsync<int?>("UserId");
 
-        if (userId == null) { Navigation.NavigateTo("/connexion"); }
+        if (userId == null)
+        {
+            // L'utilisateur n'est pas connecté, redirection vers la page de connexion
+            Navigation.NavigateTo("/connexion");
+        }
         else
         {
             isUserAuthenticated = true;
-            var user = await dbContext.Users
+            
+
+            var uri = new Uri(Navigation.Uri);
+            var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("success", out var success) && success == "true")
+            {
+                showSuccessModifyMessage = true;
+            }
+
+
+            municipalites = await dbContext.Municipalites.Include(m => m.CodeTerritoireNavigation).ToListAsync();
+            provinces = await dbContext.Provinces.ToListAsync();
+            var regionAdministrativeList = await dbContext.Regionadministratives.ToListAsync();
+            var conditionPaiementList = await dbContext.Conditionspaiements.ToListAsync();
+            var sousCategories = await dbContext.SouscategorieLicencerbqs
+                                .Include(s => s.IdSousCategorieNavigation)  // Ensure we include the navigation property to the subcategory
+                                .ToListAsync();  // Fetching all subcategories
+
+
+
+            user = await dbContext.Users
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Adresses)
                 .Include(u => u.Fournisseur)
@@ -317,13 +457,15 @@
                     .ThenInclude(f => f.Finances)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Produitsservices)
-                        .ThenInclude(p => p.Comodite) 
+                        .ThenInclude(p => p.Comodite)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Licencesrbqs)
                         .ThenInclude(l => l.SouscategorieLicencerbqs)
                 .Include(u => u.Fournisseur)
                     .ThenInclude(f => f.Brochures)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            finance = user.Fournisseur.Finances.SingleOrDefault();            
 
             if (user != null)
             {
@@ -344,7 +486,7 @@
                         numeroCiv = address.NumeroCivique;
                         rue = address.Rue;
                         var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
-                        ville = municipality?.NomMunicipalite ?? "MunicipalitÃ© Inconnu";                        
+                        ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
 
                         var provinceObj = provinces.FirstOrDefault(p => p.CodeProvince == address.CodeProvince);
                         province = provinceObj?.NomProvince ?? "Province Inconnue";
@@ -361,12 +503,12 @@
                         {
                             var regionAdminCode = municipality.CodeTerritoireNavigation.CodeRegionAdministrative;
                             var regionAdmin = regionAdministrativeList.FirstOrDefault(r => r.CodeRegionAdministrative == regionAdminCode);
-                            regionAdministrative = regionAdmin?.NomRegionAmdin ?? "RÃ©gion administrative Inconnue";
+                            regionAdministrative = regionAdmin?.NomRegionAmdin ?? "Région administrative Inconnue";
                         }
 
-                        if(address.CodeProvince != "4")
+                        if (address.CodeProvince != "4")
                         {
-                            regionAdministrative = "Hors du QuÃ©bec";
+                            regionAdministrative = "Hors du Québec";
                         }
                     }
 
@@ -385,12 +527,34 @@
                     products = fournisseur.Produitsservices.ToList(); // This already includes Comodite
                     contacts = fournisseur.Contacts.ToList();
                     brochures = fournisseur.Brochures.ToList();
+
+                    statut = fournisseur.EtatDemande;
+                    isLoading = false;
+                    if (fournisseur.EtatCompte == true)
+                    {
+                        etat = "Activé";
+                    }
+                    else
+                    {
+                        etat = "Désactivé";
+                    }
+                }
+                else
+                {
+                    // Gérer le cas où le fournisseur est nul
+                    Console.WriteLine("Le fournisseur est null pour cet utilisateur.");
+                    Navigation.NavigateTo("/erreur");
+                    return;
                 }
             }
+            else
+            {
+                // Gérer le cas où l'utilisateur n'est pas trouvé
+                Console.WriteLine("L'utilisateur n'est pas trouvé dans la base de données.");
+                Navigation.NavigateTo("/erreur");
+            }
         }
-
-        isLoading = false;
     }
 
-
+    
 }

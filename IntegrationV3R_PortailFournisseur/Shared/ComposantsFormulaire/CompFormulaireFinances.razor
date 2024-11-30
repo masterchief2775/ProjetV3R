@@ -1,6 +1,7 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Shared.ComposantsProfile
 @using Microsoft.EntityFrameworkCore
 @using IntegrationV3R_PortailFournisseur.Data.Models
+@using System.Text.RegularExpressions
 
 @inject IServiceScopeFactory ScopeFactory
 @inject ApplicationDbContext dbContext
@@ -12,7 +13,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label for="tpsInput" class="form-label">Numéro de TPS</label>
-                <input type="text" class="form-control" id="tpsInput" @bind="SingletonForm.TpsInput" placeholder="Entrez le numéro de TPS">
+                <input type="text" class="form-control" id="tpsInput" @bind="SingletonForm.TpsInput" maxlength="15" placeholder="Entrez le numéro de TPS">
                 @if (!string.IsNullOrEmpty(tpsError))
                 {
                     <div class="text-danger mt-1 small">@tpsError</div>
@@ -21,7 +22,7 @@
 
             <div class="col-md-6">
                 <label for="tvqInput" class="form-label">Numéro de TVQ</label>
-                <input type="text" class="form-control" id="tvqInput" @bind="SingletonForm.TvqInput" placeholder="Entrez le numéro de TVQ">
+                <input type="text" class="form-control" id="tvqInput" @bind="SingletonForm.TvqInput" maxlength="16" placeholder="Entrez le numéro de TVQ">
                 @if (!string.IsNullOrEmpty(tvqError))
                 {
                     <div class="text-danger mt-1 small">@tvqError</div>
@@ -36,7 +37,7 @@
                     <option value="" disabled selected>Veuillez sélectionner une condition</option>
                     @foreach (var condition in PaymentConditions)
                     {
-                        <option value="@condition.NomConditionsPaiements">@condition.NomConditionsPaiements</option>
+                        <option value="@condition.CodeConditionsPaiements">@condition.NomConditionsPaiements</option>
                     }
                 </select>
                 @if (!string.IsNullOrEmpty(paymentConditionsError))
@@ -69,17 +70,18 @@
                 <fieldset class="border p-3">
                     <legend class="fs-6">Mode de communication</legend>
                     <div class="form-check">
-                        <input type="radio" class="form-check-input" id="email" name="ModeCom"
-                               checked="@(SingletonForm.ModeCom == "Courriel")"
-                               @onchange="@(() => SingletonForm.ModeCom = "Courriel")">
-                        <label class="form-check-label" for="email">Courriel</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" id="courier" name="ModeCom"
-                               checked="@(SingletonForm.ModeCom == "Courrier régulier")"
-                               @onchange="@(() => SingletonForm.ModeCom = "Courrier régulier")">
-                        <label class="form-check-label" for="courier">Courrier régulier</label>
-                    </div>
+                        <select class="form-select" id="ModeCom" @bind="SingletonForm.ModeCom">
+                            <option value="">Choissisez un mode de communication</option>
+                            <option value="Courriel">Courriel</option>
+                            <option value="Courrier">Courrier</option>
+                            <option value="Téléphone">Téléphone</option>
+                            <option value="Télécopieur">Télécopieur</option>
+                        </select>
+                        @if (!string.IsNullOrEmpty(modeCommunicationError))
+                        {
+                            <div class="text-danger mt-1 small">@modeCommunicationError</div>
+                        }
+                    </div>                    
                 </fieldset>
             </div>
         </div>
@@ -97,6 +99,8 @@
     [Parameter] public EventCallback<int> Checkpoint { get; set; }
     [Parameter]
     public EventCallback Confirmation { get; set; }
+    [Parameter]
+    public EventCallback<bool> _isModifValid { get; set; }
 
     [Parameter]
     public int userid { get; set; }
@@ -105,6 +109,7 @@
     private string tpsError = string.Empty;
     private string tvqError = string.Empty;
     private string paymentConditionsError = string.Empty;
+    private string modeCommunicationError = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,7 +150,7 @@
         // If valid, log the data and navigate
         if (isValid)
         {
-            LogToConsole();
+            _isModifValid.InvokeAsync(true);
             OnPageSelected.InvokeAsync(pageID);
             //Navigation.NavigateTo("/formulaireDemandeAdresse");
         }
@@ -157,7 +162,7 @@
 
         var isValid = ValidateInputs();
         //*************************************************/
-        if (true)        
+        if (isValid)        
         {
             await Confirmation.InvokeAsync();
         }
@@ -168,27 +173,54 @@
         tpsError = string.Empty;
         tvqError = string.Empty;
         paymentConditionsError = string.Empty;
+        modeCommunicationError = string.Empty;
     }
 
     private bool ValidateInputs()
     {
         var isValid = true;
 
-        if (!string.IsNullOrWhiteSpace(SingletonForm.TpsInput) && !IsNumeric(SingletonForm.TpsInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.TpsInput))
         {
-            tpsError = "Le numéro de TPS doit être numérique.";
+            tpsError = "Le numéro de TPS est requis.";
+            isValid = false;
+        }
+        else if (SingletonForm.TpsInput.Length < 15)
+        {
+            tpsError = "Le numéro de TPS est composé de 15 caractères.";
+            isValid = false;
+        }
+        else if (!Regex.IsMatch(SingletonForm.TpsInput, @"^\d{9}RT\d{4}$"))
+        {
+            tpsError = "Le numéro de TPS est formatter de 9 chiffres, suivis de RT, puis 4 autres chiffres (#########RT####).";
             isValid = false;
         }
 
-        if (!string.IsNullOrWhiteSpace(SingletonForm.TvqInput) && !IsNumeric(SingletonForm.TvqInput))
+        if (string.IsNullOrWhiteSpace(SingletonForm.TvqInput))
         {
-            tvqError = "Le numéro de TVQ doit être numérique.";
+            tvqError = "Le numéro de TVQ est requis.";
+            isValid = false;
+        }
+        else if (SingletonForm.TvqInput.Length < 16)
+        {
+            tvqError = "Le numéro de TVQ est composé de 16 caractères.";
+            isValid = false;
+        }
+        else if (!Regex.IsMatch(SingletonForm.TvqInput, @"^\d{10}TQ\d{4}$"))
+        {
+            tvqError = "Le numéro de TVQ est formaté de 10 chiffres, suivis de TQ puis de 4 autres chiffres (##########TQ####).";
             isValid = false;
         }
 
         if (string.IsNullOrEmpty(SingletonForm.ConditionPaiement))
         {
             paymentConditionsError = "Veuillez sélectionner une condition de paiement.";
+            isValid = false;
+        }
+
+        if (string.IsNullOrEmpty(SingletonForm.ModeCom))
+        {
+            modeCommunicationError = "Veuillez choisir un mode de communication";
             isValid = false;
         }
 

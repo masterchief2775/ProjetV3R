@@ -74,11 +74,11 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
 
         // New properties for Finances
-        public string TpsInput { get; set; } = string.Empty;  // Numéro de TPS
-        public string TvqInput { get; set; } = string.Empty;  // Numéro de TVQ
-        public string ConditionPaiement { get; set; } = "Dans les 30 jours sans déduction"; // Default option for conditions
-        public string Devise { get; set; } = "CAD"; // Default to CAD
-        public string ModeCom { get; set; } = "email"; // Default to email for communication mode
+        public string TpsInput { get; set; } = string.Empty;
+        public string TvqInput { get; set; } = string.Empty;
+        public string ConditionPaiement { get; set; } = "Dans les 30 jours sans déduction";
+        public string Devise { get; set; } = "CAD";
+        public string ModeCom { get; set; } = "Courriel";
 
         private readonly IHttpContextAccessor _httpContextAccessor;
         private NavigationManager Navigation;
@@ -97,7 +97,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 
         public string EtatDemande { get; set; }
 //*******************************************SET FOR INFOS MODIFY***********************************
-        public async Task FetchUser(int id)
+        public async Task FetchUser(int id, CancellationToken token)
         {
             var user = await dbContext.Users
                .Include(u => u.Fournisseur)
@@ -194,7 +194,7 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
             SelectedSubCategories.Clear();
             foreach(SouscategorieLicencerbq souscategorie in souscategories)
             {
-                var entry = souscategorie.IdSousCategorieNavigation;
+                var entry = dbContext.Souscategoriesafter2008s.Where(s => s.SousCategorieAfter2008Id == souscategorie.IdSousCategorie).FirstOrDefault();
                 SelectedSubCategories.Add(entry);
             }
 
@@ -214,17 +214,18 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                     OriginalCarteAffaireName = brochure.NomFichier;
                 }
             }
-                        
+            
+
+            //SET FINANCES
             var finances = fournisseur.Finances.SingleOrDefault();
-            if (finances != null)
-                if (string.IsNullOrEmpty(finances.Tps))
-                {
-                    TpsInput = finances.Tps;
-                    TvqInput = finances.Tvq;
-                    ConditionPaiement = finances.CodeConditionPaiement;
-                    Devise = finances.Devise;
-                    ModeCom = finances.ModeCom;
-                }           
+            if (finances != null)               
+            {
+                TpsInput = finances.Tps;
+                TvqInput = finances.Tvq;
+                ConditionPaiement = finances.CodeConditionPaiement;
+                Devise = finances.Devise;
+                ModeCom = finances.ModeCom;
+            }           
             
 		}
 //*****************************************MODIFY FORM************************************************
@@ -517,23 +518,34 @@ namespace IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
                 }
             }
 
-            //MODIFT OR ADD FINANCES
+//MODIFT OR ADD FINANCES
             Finance finance = user.Fournisseur.Finances.SingleOrDefault();
 
-            if(user.Fournisseur.EtatDemande == "Approuvée" && finance != null)
+            if(user.Fournisseur.EtatDemande == "Approuvée" && finance == null)
             {
-                Console.WriteLine("TEST SUCCESS 1");
+                var newFinance = new Finance
+                {
+                    Tvq = TvqInput,
+                    Tps = TpsInput,
+                    CodeConditionPaiement = ConditionPaiement,
+                    Devise = Devise,
+                    ModeCom = ModeCom,
+                    FournisseurId = user.FournisseurId
+                };
+                dbContext.Add(newFinance);
             }
-            if (user.Fournisseur.EtatDemande == "Approuvée")
+            else if (user.Fournisseur.EtatDemande == "Approuvée" && finance != null)
             {
-                Console.WriteLine("TEST SUCCESS 2");
-            }
-            if (finance != null)
-            {
-                Console.WriteLine("TEST SUCCESS 3");
-            }
+                finance.Tvq = TvqInput;
+                finance.Tps = TpsInput;
+                finance.CodeConditionPaiement = ConditionPaiement;
+                finance.Devise = Devise;
+                finance.ModeCom = ModeCom;
+            }            
 
-            Navigation.NavigateTo("/profile?success=true");
+            await dbContext.SaveChangesAsync();
+
+            Navigation.NavigateTo("/profil?success=true");
         }
 
 //************************************CREATE FORM********************************************

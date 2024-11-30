@@ -99,10 +99,13 @@
                             <p><strong>Type de la licence :</strong> @SingletonForm.SelectedLicenseType </p>
                             <p><strong>Catégorie de la licence :</strong> @SingletonForm.SelectedCategory </p>
                             <div class="mx-2">
-                                @foreach (Souscategoriesafter2008 souscat in SingletonForm.SelectedSubCategories)
+                                @if (SingletonForm.SelectedSubCategories.Any() && SingletonForm.SelectedSubCategories[0] != null)
                                 {
-                                    <p class="m-2"><strong>@souscat.NumeroSousCategorieAfter2008 -</strong> @souscat.NomSousCategorieAfter2008</p>
-                                }
+                                    foreach (Souscategoriesafter2008 souscat in SingletonForm.SelectedSubCategories)
+                                    {
+                                        <p class="m-2"><strong>@souscat.NumeroSousCategorieAfter2008 -</strong> @souscat.NomSousCategorieAfter2008</p>
+                                    }
+                                }                                
                             </div>
                         }
                         else
@@ -136,6 +139,23 @@
 
                     </div>
 
+
+                    @if (_isUserAccepted)
+                    {
+                        <div class="border-top border-dark info-card">
+                            <h3>
+                                Finances
+                            </h3>
+                           
+                            <p><strong>Code TPS :</strong> @SingletonForm.TpsInput</p>                            
+                            <p><strong>Code TVQ :</strong> @SingletonForm.TvqInput</p>
+                            <br />
+                            <p><strong>Condition Paiement :</strong> @nomConditionPaiement</p>
+                            <p><strong>Devise :</strong> @SingletonForm.Devise</p>
+                            <p><strong>Mode de communication :</strong> @SingletonForm.ModeCom</p>
+                        </div>
+                    }                    
+
                     <button @onclick="SubmitForm" style="" class="btn btn-primary">Soumettre</button>
 
                 </div>
@@ -157,6 +177,9 @@
     [Parameter]
     public int? userid { get; set; } = null;
 
+    [Parameter]
+    public bool _isUserAccepted{ get; set; }
+
     private bool IsVisible { get; set; } = false;
 
     private string nomMunicipalite;
@@ -166,6 +189,8 @@
     private double? tailleCarteAffaire;
     private string StailleBrochure;
     private string StailleCarteAffaire;
+
+    private string nomConditionPaiement;
 
     private int numContact = 1;
 
@@ -188,6 +213,9 @@
 
         tailleCarteAffaire = SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0);
         StailleCarteAffaire = @String.Format("{0:F2}", tailleCarteAffaire);
+
+        var conditionPayment = DbContext.Conditionspaiements.FirstOrDefault(c => c.CodeConditionsPaiements == SingletonForm.ConditionPaiement);
+        nomConditionPaiement = conditionPayment.NomConditionsPaiements;
 
         IsVisible = true;
         StateHasChanged();

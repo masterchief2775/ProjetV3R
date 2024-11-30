@@ -1,0 +1,108 @@
+﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using System.Security.Cryptography
+@using System.Text
+@inject ApplicationDbContext DbContext
+
+<div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
+    <div class="modal-boxSize">
+        <div>
+            <div class="modal-content">
+                <div class="">
+
+                    <div>
+                        <span class="close mb-2" @onclick="CloseModal">&times;</span>   
+                        <h3>
+                            Êtes-vous certain de vouloir désactiver votre profile ?
+                        </h3>
+                    </div>
+                   
+                    <div class="form-text">Veuillez entrer votre mot de passe pour confirmer </div>  
+
+                    <input type="password" class="form-control" @bind="inputMDP" placeholder="Mot de passe" style="width:35%;" />
+
+                    @if (!string.IsNullOrEmpty(errorMDP))
+                    {
+                        <div class="text-danger">@errorMDP</div>
+                    }                       
+                        
+                    <button @onclick="CheckMPD" class="btn btn-supprimer mt-3">Désactiver profile</button>
+
+                </div>
+
+            </div>
+
+            
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+
+    [Parameter]
+    public int? userid { get; set; } = null;
+
+    [Parameter]
+    public EventCallback<int> DeactivateUser { get; set; }
+
+    [Parameter]
+    public Motsdepass currentMDP{ get; set; }
+
+    private string errorMDP = string.Empty;
+
+    private bool IsVisible { get; set; } = false;
+
+    private string inputMDP;
+
+    private int numContact = 1;
+
+    public async Task Show()
+    {
+
+        IsVisible = true;
+        StateHasChanged();
+
+    }
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    private async Task CheckMPD()
+    {
+        errorMDP = string.Empty;
+        string hashedMDP = ComputeMd5Hash(inputMDP);
+        if(hashedMDP == currentMDP.Mdp)
+        {
+            CloseModal();
+            await DeactivateUser.InvokeAsync();
+        }
+        else
+        {
+            errorMDP = "Mot de passe ne conrrespond pas au mot de passe actuel";
+        }
+    }
+
+    private string ComputeMd5Hash(string input)
+    {
+        using (MD5 md5 = MD5.Create())
+        {
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+            // Convertir le tableau de bytes en une chaîne hexadécimale
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.Length; i++)
+            {
+                sb.Append(hashBytes[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
+    }
+       
+}
