@@ -7,7 +7,6 @@
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsProfile
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject ApplicationDbContext _context
-@inject StateContainer stateContainer
 
 <PageTitle>Profil</PageTitle>
 
@@ -29,6 +28,18 @@
         </div>
     </div>
 }
+<div class="logout-container" style="display:flex; flex-direction:row-reverse">
+    <div class="text-end">
+        <button class="btn btn-outline-danger button-logout" @onclick="Logout">Déconnexion <img src="/icons/deconnexionblack.png" class="me-1 icon"
+                             style="margin-top: 4px;margin-right: 4px; margin-left: 7px; margin-bottom:7px;" />
+        </button>
+    </div> 
+    <div class="text-end">
+        <button class="btn btn-outline-primary button-primary mx-3" @onclick="MontrerEtat">
+            État demande
+        </button>
+    </div>
+</div>
 <div class="container-fluid profile-container">
     <div class="row">
         <!-- Sidebar with Navigation -->
@@ -159,7 +170,7 @@
                     </button>
                 </div>
 
-                @if (etatCompte)
+                @if (etatCompte && statut== "Approuvée")
                 {
                     <div class="text-end">
                         <button class="btn-supprimer" @onclick="ShowConfirmation">
@@ -167,7 +178,7 @@
                         </button>
                     </div>
                 }
-                else
+                @if (!etatCompte && statut != "Approuvée")
                 {
                     <div class="text-end">
                         <button class="btn-success" @onclick="ShowConfirmationReactivate">
@@ -181,68 +192,81 @@
     </div> <!-- row -->
 </div> <!-- container-fluid -->
 
-<div class="container-fluid etat-demande-container">
-    @if (isUserAuthenticated)
-    {
-        <h3 class="text-center mb-4">Suivi de votre demande</h3>
-        <p class="lead text-center">Bonjour @fournisseur.NomEntreprise </p>
-
-        @if (fournisseur != null)
-        {
-            <div class="tracking-status mb-5">
-                <p class="text-center">Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
-                <p class="text-center">Votre compte est actuellement : <strong>@etat</strong></p>
-            </div>
-        }
-        else
-        {
-            <p class="text-center text-warning">Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
-        }
-        @if (statut == "Approuvée" && finance == null)
-        {
-            <p class="text-center text-danger"><strong>****** - Veuillez modifier votre profil pour inclure vos informations de finances - ***** </strong></p>
-        }
-
-        <div class="container mt-5">
-            <h3 class="text-center mb-4">État de votre demande :</h3>
-
-            <div class="d-flex justify-content-center align-items-center tracking-status">
-                <!-- Demande reçue -->
-                <div class="step-container text-center">
-                    <i class="fas fa-file-alt fa-4x step-icon"></i>
-                    <p>Demande reçue</p>
-                </div>
-
-                <!-- Ligne reliant les icônes -->
-                <div class="line"></div>
-
-                <!-- En cours de traitement -->
-                <div class="step-container text-center">
-                    <i class="fas fa-clock fa-4x step-icon"></i>
-                    <p>En cours de traitement</p>
-                </div>
-
-                @if (statut == "Approuvée" || statut == "Rejetée")
+@if (_showEtatDemande)
+{
+    <div class="modal" style="display:block;">
+    <div class="modal-boxSize">
+        <div class="modal-content" style="display:block;">
+            <span class="close mb-2" @onclick="CloseEtat">&times;</span>
+            <div class="container-fluid etat-demande-container">
+                @if (isUserAuthenticated)
                 {
-                    <!-- Ligne reliant les icônes -->
-                    <div class="line"></div>
+                    <h3 class="text-center mb-4">Suivi de votre demande</h3>
+                    <p class="lead text-center">Bonjour @fournisseur.NomEntreprise </p>
 
-                    <!-- Demande approuvée ou refusée -->
-                    <div class="step-container text-center">
-                        <i class="@GetFinalStepIcon() fa-4x step-icon"></i>
-                        <p>@GetFinalStepText()</p>
+                    @if (fournisseur != null)
+                    {
+                        <div class="tracking-status mb-5">
+                            <p class="text-center">Votre demande est actuellement : <strong>@fournisseur.EtatDemande</strong></p>
+                            <p class="text-center">Votre compte est actuellement : <strong>@etat</strong></p>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-warning">Impossible de trouver votre demande. Veuillez réessayer plus tard.</p>
+                    }
+
+                    @if (statut == "Approuvée" && finance == null)
+                    {
+                        <p class="text-center text-danger"><strong>****** - Veuillez modifier votre profil pour inclure vos informations de finances - ***** </strong></p>
+                    }
+
+                    <div class="container mt-5">
+                        <h3 class="text-center mb-4">État de votre demande :</h3>
+
+                        <div class="d-flex justify-content-center align-items-center tracking-status">
+                            <!-- Demande reçue -->
+                            <div class="step-container text-center">
+                                <i class="fas fa-file-alt fa-4x step-icon"></i>
+                                <p>Demande reçue</p>
+                            </div>
+
+                            <!-- Ligne reliant les icônes -->
+                            <div class="line"></div>
+
+                            <!-- En cours de traitement -->
+                            <div class="step-container text-center">
+                                <i class="fas fa-clock fa-4x step-icon"></i>
+                                <p>En cours de traitement</p>
+                            </div>
+
+                            @if (statut == "Approuvée" || statut == "Rejetée")
+                            {
+                                <!-- Ligne reliant les icônes -->
+                                <div class="line"></div>
+
+                                <!-- Demande approuvée ou refusée -->
+                                <div class="step-container text-center">
+                                    <i class="@GetFinalStepIcon() fa-4x step-icon"></i>
+                                    <p>@GetFinalStepText()</p>
+                                </div>
+                            }
+
+                        </div>
+
                     </div>
                 }
-                
+                else
+                {
+                    <p class="text-center text-warning">Redirection vers la page de connexion...</p>
+                }
+                </div>
             </div>
-            
         </div>
-    }
-    else
-    {
-        <p class="text-center text-warning">Redirection vers la page de connexion...</p>
-    }
-</div>
+    </div>
+}
+
+
 
 
 
@@ -253,6 +277,8 @@
     private string statut = "En attente";
     private string etat = "Désactivé";
     private int fournisseurId = 1;
+
+    private bool _showEtatDemande = false;
 
     private string GetStatusClass(string status)
     {
@@ -268,6 +294,16 @@
         {
             return "";
         }
+    }
+
+    private void MontrerEtat()
+    {
+        _showEtatDemande = true;
+    }
+
+    private void CloseEtat()
+    {
+        _showEtatDemande = false;
     }
 
     private bool IsStatusCompleted(string status)
@@ -382,6 +418,7 @@
     {
         fournisseur.EtatCompte = false;
         await dbContext.SaveChangesAsync();
+        await sessionStorage.ClearAsync();
         Navigation.NavigateTo("/connexion?deactivate=true");
     }
 
@@ -413,6 +450,12 @@
 
     private bool isUserAuthenticated = false;
 
+    private void Logout()
+    {
+        sessionStorage.ClearAsync();
+        Navigation.NavigateTo("/");
+    }
+
     protected override async Task OnInitializedAsync()
     {        
         isLoading = true;
@@ -427,7 +470,7 @@
         else
         {
             isUserAuthenticated = true;
-            
+
 
             var uri = new Uri(Navigation.Uri);
             var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
@@ -529,6 +572,17 @@
                     brochures = fournisseur.Brochures.ToList();
 
                     statut = fournisseur.EtatDemande;
+
+                    //LOGIQUE POUR SHOW MODAL ETAT DEMANDE
+                    if (statut == "Approuvée")
+                    {
+                        _showEtatDemande = false;
+                    }
+                    else
+                    {
+                        _showEtatDemande = true;
+                    }
+
                     isLoading = false;
                     if (fournisseur.EtatCompte == true)
                     {
@@ -537,6 +591,7 @@
                     else
                     {
                         etat = "Désactivé";
+                        _showEtatDemande = true;
                     }
                 }
                 else

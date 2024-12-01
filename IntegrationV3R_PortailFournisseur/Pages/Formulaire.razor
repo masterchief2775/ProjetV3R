@@ -1,6 +1,8 @@
 ﻿@page "/formulaire"
 @inject NavigationManager Navigation
 @using IntegrationV3R_PortailFournisseur.Data.Models
+@using IntegrationV3R_PortailFournisseur.Data.Services
+@using IntegrationV3R_PortailFournisseur.Data.Services.Scoped;
 @using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire
 @using Microsoft.JSInterop
 
@@ -50,13 +52,18 @@
 					_isModifValid="SetModif" />
 		</div>
 	}
+	<CompRetour @ref="compRetour" RetourProfil="ReturnProfile" _isCreationForm="_isCreationForm"/>
 	@if (!_isCreationForm)
 	{
-		<CompRetour @ref="compRetour" RetourProfil="ReturnProfile"/>
+		
 		<div style="display:flex; flex-direction:row;">
 			<button class="btn btn-primary m-3" @onclick="HandleConfirm">Confirmer</button>
 			<button class="btn btn-primary m-3" @onclick="ShowReturn">Retour au profil</button>
-		</div>		
+		</div>
+	}
+	else
+	{
+		<button class="btn btn-primary m-3" @onclick="ShowReturn">Retour à la connexion</button>
 	}
 </div>
 
@@ -250,7 +257,7 @@
 	}	
 
 	private void ShowConfirmation()
-	{
+	{		
 		compConfirmation.Show();
 	}
 
@@ -261,7 +268,14 @@
 
 	private void ReturnProfile()
 	{
-		Navigation.NavigateTo("/profil");
+		if (_isCreationForm)
+		{
+			Navigation.NavigateTo("/");
+		}
+		else
+		{
+			Navigation.NavigateTo("/profil");
+		}		
 	}
 
 }

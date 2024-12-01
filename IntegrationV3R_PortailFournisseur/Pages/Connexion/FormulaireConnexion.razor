@@ -8,6 +8,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Components
 @using IntegrationV3R_PortailFournisseur.Data.Models
+@using IntegrationV3R_PortailFournisseur.Data.Services.Scoped
 
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -15,7 +16,6 @@
 @inject NavigationManager Navigation
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @inject ApplicationDbContext _context
-@inject StateContainer stateContainer
 
 <PageTitle>Connexion</PageTitle>
 
@@ -85,6 +85,8 @@
 </div>
 
 @code {
+    [Inject]
+    private SendMailService mailService { get; set; }
     private string identifiantInput = string.Empty;
     private string mdpInput = string.Empty;
 
@@ -101,6 +103,7 @@
 
     protected override async void OnInitialized()
     {
+        //mailService.SendMailConfirmCreate("Les meilleurs du quartier", "test@hihi.com", "");
         var uri = new Uri(Navigation.Uri);
         var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
@@ -239,12 +242,8 @@
     private void NavigateToFormulaireDemande()
     {
         Navigation.NavigateTo("/formulaire");
-        UpdateFinancePageState(false);
+        //UpdateFinancePageState(false);
     }
 
-    private void UpdateFinancePageState(bool value)
-    {
-        stateContainer.ShouldDisplayFinancePage = value;
-        stateContainer.NotifyStateChanged();
-    }
+    
 }

@@ -2,6 +2,7 @@
 @using Microsoft.JSInterop
 @using System.IO
 @using IntegrationV3R_PortailFournisseur.Data.Models;
+@using IntegrationV3R_PortailFournisseur.Data.Services.Scoped;
 
 
 @inject IJSRuntime JSRuntime
@@ -143,7 +144,7 @@
             // Récupération de l'extension du fichier pour la brochure
             var brochureExtension = Path.GetExtension(SingletonForm.BrochureFile.Name);
             var brochureFileName = $"Brochure_{SingletonForm.NomEntrepriseInput}{brochureExtension}";
-            var brochurePath = Path.Combine("wwwroot/uploads", brochureFileName);
+            var brochurePath = Path.Combine("/uploads", brochureFileName);
 
             Brochure _brochure = new Brochure();
             _brochure.NomFichier = brochureFileName;
@@ -178,7 +179,7 @@
             // Récupération de l'extension du fichier pour la carte de visite
             var carteVisiteExtension = Path.GetExtension(SingletonForm.CarteVisiteFile.Name);
             var carteVisiteFileName = $"CarteAffaire_{SingletonForm.NomEntrepriseInput}{carteVisiteExtension}";
-            var carteVisitePath = Path.Combine("wwwroot/uploads", carteVisiteFileName);
+            var carteVisitePath = Path.Combine("/uploads", carteVisiteFileName);
 
             Brochure _carteVisite = new Brochure();
             _carteVisite.NomFichier = carteVisiteFileName;

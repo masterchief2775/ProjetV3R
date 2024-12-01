@@ -15,10 +15,19 @@
                             Attention !
                         </h2>
                     </div>
+                    @if (!_isCreationForm)
+                    {
+                        <div class="form-text">Vous allez perdre vos modifications si vous retournez sur votre profil</div>
 
-                    <div class="form-text">Vous allez perdre vos modifications si vous retournez sur votre profil</div>
-                    
-                    <h6 class="">Êtes-vous certain de vouloir retourner au profil ?</h6>
+                        <h6 class="">Êtes-vous certain de vouloir retourner au profil ?</h6>
+                    }
+                    else
+                    {
+                            <div class="form-text">Vous allez perdre votre progrès si vous retournez à la page de connexion</div>
+
+                            <h6 class="">Êtes-vous certain de vouloir retourner à la connexion ?</h6>
+                    }
+
 
                     <div style="display:flex; flex-direction:row;">
                         <button @onclick="Confirmation" class="btn btn-supprimer mt-3">Oui</button>
@@ -42,7 +51,7 @@
 @code {
 
     [Parameter]
-    public int? userid { get; set; } = null;
+    public bool _isCreationForm { get; set; }
 
     [Parameter]
     public EventCallback RetourProfil { get; set; }

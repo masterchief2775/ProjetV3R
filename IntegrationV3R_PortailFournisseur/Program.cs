@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Blazored.SessionStorage;
-using IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire;
 using static IntegrationV3R_PortailFournisseur.Shared.ComposantsFormulaire.NavbarFormulaire;
 using IntegrationV3R_PortailFournisseur.Shared;
+using IntegrationV3R_PortailFournisseur.Data.Services.Scoped;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +26,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     new MySqlServerVersion(new Version(8, 0, 18))));
 
 
-builder.Services.AddSingleton<SharedDataService>();
+builder.Services.AddScoped<SharedDataService>();
+builder.Services.AddScoped<SendMailService>();
 
 builder.Services.AddHttpClient<DonneesQuebecService>(client =>
 {
@@ -34,8 +35,6 @@ builder.Services.AddHttpClient<DonneesQuebecService>(client =>
 });
 
 builder.Services.AddScoped<SingletonFormulaire>();
-
-builder.Services.AddSingleton<StateContainer>();
 
 var app = builder.Build();
 

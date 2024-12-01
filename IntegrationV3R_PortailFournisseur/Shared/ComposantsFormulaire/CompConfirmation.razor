@@ -1,4 +1,5 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data.Models;
+@using IntegrationV3R_PortailFournisseur.Data.Services.Scoped;
 @inject ApplicationDbContext DbContext
 
 <div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
@@ -214,8 +215,11 @@
         tailleCarteAffaire = SingletonForm.SelectedCarteAffaire.Taille / (1024.0 * 1024.0);
         StailleCarteAffaire = @String.Format("{0:F2}", tailleCarteAffaire);
 
-        var conditionPayment = DbContext.Conditionspaiements.FirstOrDefault(c => c.CodeConditionsPaiements == SingletonForm.ConditionPaiement);
-        nomConditionPaiement = conditionPayment.NomConditionsPaiements;
+        if (_isUserAccepted)
+        {
+            var conditionPayment = DbContext.Conditionspaiements.FirstOrDefault(c => c.CodeConditionsPaiements == SingletonForm.ConditionPaiement);
+            nomConditionPaiement = conditionPayment.NomConditionsPaiements;
+        }       
 
         IsVisible = true;
         StateHasChanged();
