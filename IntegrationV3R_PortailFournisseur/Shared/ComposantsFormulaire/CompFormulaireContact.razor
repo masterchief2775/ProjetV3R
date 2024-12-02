@@ -7,6 +7,7 @@
 
 <div class="container-fluid mt-4">
     <form class="form" @onsubmit="HandleSubmit">
+        <h5>Personnes à contacter</h5>
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="text-danger">@errorMessage</div>
@@ -16,7 +17,7 @@
         {
             ContactInput contact = SingletonForm.ContactsInput[i];
             <div class="contact-entry mb-3 row">
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="prenomInput" class="form-label">Prénom</label>
                     <input type="text" class="form-control" @bind="contact.Prenom" maxlength="32" required>
                     @if (!string.IsNullOrEmpty(contact.PrenomError))
@@ -25,7 +26,7 @@
                     }
                 </div>
 
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="nomInput" class="form-label">Nom</label>
                     <input type="text" class="form-control" @bind="contact.Nom" maxlength="32" required>
                     @if (!string.IsNullOrEmpty(contact.NomError))
@@ -34,7 +35,7 @@
                     }
                 </div>
 
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="roleInput" class="form-label">Fonction</label>
                     <input type="text" class="form-control" @bind="contact.Role" maxlength="32" required>
                     @if (!string.IsNullOrEmpty(contact.RoleError))
@@ -52,7 +53,7 @@
                     }
                 </div>
 
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="numeroTelephoneInput" class="form-label">Numéro de téléphone</label>
                     <input type="tel" class="form-control" value="@contact.NumeroTelephone" placeholder="Ex: 123-456-7890"
                        @oninput="e => FormatTelephoneNumber(e, contact)" maxlength="12" required>
@@ -63,7 +64,7 @@
                 </div>
 
 
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="typeTelephoneInput" class="form-label">Type de téléphone</label>
                     <select class="form-control" @bind="contact.TypeTelephone" required>
                         <option value="">Sélectionner...</option>
@@ -77,7 +78,7 @@
                     }
                 </div>
 
-                <div class="col-6 mb-3">
+                <div class="col-3 mb-3">
                     <label for="posteInput" class="form-label">Poste</label>
                     <input type="text" class="form-control" @bind="contact.Poste" maxlength="6">
                     @if (!string.IsNullOrEmpty(contact.PosteError))

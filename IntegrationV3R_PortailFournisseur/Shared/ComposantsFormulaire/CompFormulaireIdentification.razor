@@ -22,8 +22,8 @@
                 }
             </div>
 
+            <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
             <div class="col-md-3">
-                <label for="neqInput" class="form-label">Numéro d'entreprise du Québec (NEQ)</label>
                 <input type="text" class="form-control" id="neqInput" @bind="SingletonForm.NeqInput">
                 @if (!string.IsNullOrEmpty(neqError))
                 {

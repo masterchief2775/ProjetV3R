@@ -103,8 +103,21 @@
 
 	public int? userId = null;
 
+	private async Task OnBackButtonPressed()
+	{
+		await JSRuntime.InvokeVoidAsync("onbackbutton", DotNetObjectReference.Create(this));
+	}
+	[JSInvokable]
+    public void ShowAlert()
+    {
+        // This will display an alert when the back button is pressed.
+        JSRuntime.InvokeVoidAsync("alert", "You clicked the back button!");
+    }
 	protected override async Task OnInitializedAsync()
 	{
+		await OnBackButtonPressed();
+
+
 		_cancellationTokenSource?.Cancel();
 		_cancellationTokenSource?.Dispose();
 		_cancellationTokenSource = new CancellationTokenSource();
