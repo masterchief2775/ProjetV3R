@@ -11,7 +11,7 @@
         <!-- Product Description -->
         <div class="mb-3">
             <label for="productDescriptionInput" class="form-label">Description du produit</label>
-            <textarea class="form-control" id="productDescriptionInput" @bind="SingletonForm.DescriptionProduitsServicesInput" maxlength="500"></textarea>
+            <textarea class="form-control" id="productDescriptionInput" @bind="SingletonForm.DescriptionProduitsServicesInput" maxlength="500" style="height:100px"></textarea>
             @if (!string.IsNullOrEmpty(productDescriptionError))
             {
                 <div class="text-danger">@productDescriptionError</div>

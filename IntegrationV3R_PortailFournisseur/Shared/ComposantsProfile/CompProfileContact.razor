@@ -1,17 +1,29 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data.Models
-<h5>Contacts</h5>
+
 @if (Contacts != null && Contacts.Any())
 {
-    @foreach (var contact in Contacts)
-    {
-        <div class="contact-entry mb-3 row">
-            <div class="col-6 mb-3">
-                <strong>Nom du contact:</strong> @contact.NomContact<br>
-                <strong>Numéro de téléphone:</strong> @contact.NumTelContact<br>
-                <strong>Email:</strong> @contact.CourrielContact<br>
+        @foreach (Contact contact in Contacts)
+        {
+            <div class="border-top border-dark info-card">
+                <h5 class="mt-3">
+                    Contact @numContact
+                </h5>
+
+                <p><strong>Nom du Contact :</strong> @contact.PrenomContact @contact.NomContact </p>
+                <p><strong>Fonction du Contact :</strong> @contact.FonctionContact </p>
+                <p><strong>Courriel du Contact :</strong> @contact.CourrielContact </p>
+                <p>
+                    <strong>Téléphone du Contact:</strong> @contact.NumTelContact @(
+                        contact.PosteTelContact != string.Empty ? "Poste " + contact.PosteTelContact : ""
+                    )
+                </p>
+                <p><strong>Type de Téléphone :</strong> @contact.TypeTel</p>
+
             </div>
-        </div>
-    }
+            { numContact++; }
+        }
+
+    
 }
 else
 {
@@ -20,4 +32,6 @@ else
 
 @code {
     [Parameter] public List<Contact> Contacts { get; set; }
+
+    public int numContact = 1;
 }

@@ -51,8 +51,17 @@
                 <button class="btn btn-outline-primary mb-2 @((isAddressVisible ? "active" : ""))" @onclick="ShowAddress">
                     Adresse
                 </button>
+                <button class="btn btn-outline-primary mb-2 @((isContactsVisible ? "active" : ""))" @onclick="ShowContacts">
+                    Contacts
+                </button>
+                <button class="btn btn-outline-primary mb-2 @((isProductsVisible ? "active" : ""))" @onclick="ShowProducts">
+                    Produits
+                </button>
                 <button class="btn btn-outline-primary mb-2 @((isRBQLicencesVisible ? "active" : ""))" @onclick="ShowRBQLicences">
                     Licence RBQ
+                </button>
+                <button class="btn btn-outline-primary mb-2 @((isBrochuresVisible ? "active" : ""))" @onclick="ShowBrochures">
+                    Brochures
                 </button>
                 @if (finance != null)
                 {
@@ -60,15 +69,6 @@
                         Finances
                     </button>
                 }
-                <button class="btn btn-outline-primary mb-2 @((isContactsVisible ? "active" : ""))" @onclick="ShowContacts">
-                    Contacts
-                </button>
-                <button class="btn btn-outline-primary mb-2 @((isProductsVisible ? "active" : ""))" @onclick="ShowProducts">
-                    Produits
-                </button>
-                <button class="btn btn-outline-primary mb-2 @((isBrochuresVisible ? "active" : ""))" @onclick="ShowBrochures">
-                    Brochures
-                </button>
             </div> <!-- nav-pills -->
         </div> <!-- col-md-3 -->
         <!-- Main Content Area -->
@@ -92,7 +92,31 @@
                         <strong>Adresse</strong>
                     </div>
                     <div class="card-body">
-                        <CompProfileAdresse NumeroCiv="@numeroCiv" Rue="@rue" Ville="@ville" Province="@province" CodePostal="@codePostal" RegionAdministrative="@regionAdministrative" NumeroTelephone="@numeroTelephone" />
+                        <CompProfileAdresse NumeroCiv="@numeroCiv" Bureau="@bureau" Rue="@rue" Ville="@ville" Province="@province" CodePostal="@codePostal" RegionAdministrative="@regionAdministrative" NumeroTelephone="@numeroTelephone" NumeroPoste="@poste" Siteweb="@siteweb"/>
+                    </div>
+                </div>
+            }
+
+            @if (isContactsVisible)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>Contacts</strong>
+                    </div>
+                    <div class="card-body">
+                        <CompProfileContact Contacts="@contacts" />
+                    </div>
+                </div>
+            }
+
+            @if (isProductsVisible)
+            {
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>Produits</strong>
+                    </div>
+                    <div class="card-body">
+                        <CompProfileProduit Products="@products" Description="@description" />
                     </div>
                 </div>
             }
@@ -117,30 +141,6 @@
                     </div>
                     <div class="card-body">
                         <CompProfileFinances Tps="@tps" Tvq="@tvq" CodeConditionPaiement="@conditionPaiement" Devise="@devise" ModeCom="@modeCom" />
-                    </div>
-                </div>
-            }
-
-            @if (isContactsVisible)
-            {
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <strong>Contacts</strong>
-                    </div>
-                    <div class="card-body">
-                        <CompProfileContact Contacts="@contacts" />
-                    </div>
-                </div>
-            }
-
-            @if (isProductsVisible)
-            {
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <strong>Produits</strong>
-                    </div>
-                    <div class="card-body">
-                        <CompProfileProduit Products="@products" />
                     </div>
                 </div>
             }
@@ -355,11 +355,16 @@
 
     private string numeroCiv = "";
     private string rue = "";
+    private string bureau = "";
     private string ville = "";
     private string province = "";
     private string codePostal = "";
     private string regionAdministrative = "";
     private string numeroTelephone = "";
+    private string poste = "";
+    private string siteweb = "";
+
+    private string description = "";
 
     public string tvq = "";
     public string tps = "";
@@ -368,7 +373,7 @@
     public string modeCom = "";
 
     private List<Contact> contacts = new List<Contact>();
-    private List<Produitsservice> products = new List<Produitsservice>();
+    private List<UnspscComodite> products = new List<UnspscComodite>();
     private List<Licencesrbq> rbqDetails = new List<Licencesrbq>();
     private List<Municipalite> municipalites = new List<Municipalite>();
     private List<Province> provinces = new List<Province>();
@@ -527,6 +532,7 @@
                     if (address != null)
                     {
                         numeroCiv = address.NumeroCivique;
+                        bureau = address.Bureau;
                         rue = address.Rue;
                         var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
                         ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
@@ -541,6 +547,8 @@
 
                         codePostal = address.CodePostal;
                         numeroTelephone = address.NumTel;
+                        poste = address.Poste;
+                        siteweb = fournisseur.SiteWeb;
 
                         if (municipality?.CodeTerritoireNavigation != null)
                         {
@@ -555,6 +563,8 @@
                         }
                     }
 
+                    description = fournisseur.DetailsEntreprise;
+
                     finance = fournisseur.Finances.FirstOrDefault();
                     if (finance != null)
                     {
@@ -567,7 +577,9 @@
                     }
 
                     rbqDetails = fournisseur.Licencesrbqs.ToList();
-                    products = fournisseur.Produitsservices.ToList(); // This already includes Comodite
+                    var liaisons = fournisseur.Produitsservices.ToList();
+                    var comoditeIds = liaisons.Select(p => p.ComoditeId).ToList();
+                    products = dbContext.UnspscComodites.Where(c => comoditeIds.Contains(c.ComoditeId)).ToList(); // This already includes Comodite
                     contacts = fournisseur.Contacts.ToList();
                     brochures = fournisseur.Brochures.ToList();
 

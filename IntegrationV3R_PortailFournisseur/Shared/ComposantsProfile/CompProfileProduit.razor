@@ -3,14 +3,15 @@
 <div>
     @if (Products != null && Products.Any())
     {
-        @foreach (var product in Products)
-        {
-            <div class="product-entry mb-3 row">
-                <div class="col-6 mb-3">
-                    <strong>Comodité: </strong> @product.Comodite?.ComoditeTitreFr<br>
-                </div>
-            </div>
-        }
+        <p><strong>Description Produits et Services offerst :</strong> @Description </p>
+
+        <p><strong>Liste :</strong> </p>
+        <div class="mx-2">
+            @foreach (UnspscComodite comodite in Products)
+            {                            
+                <p class="m-2"><strong>@comodite.ComoditeNombre -</strong> @comodite.ComoditeTitreFr</p>
+            }
+        </div>
     }
     else
     {
@@ -19,5 +20,6 @@
 </div>
 
 @code {
-    [Parameter] public List<Produitsservice> Products { get; set; }
+    [Parameter] public List<UnspscComodite> Products { get; set; }
+    [Parameter] public string Description { get; set; }
 }

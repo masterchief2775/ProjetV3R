@@ -1,24 +1,28 @@
 ﻿@using IntegrationV3R_PortailFournisseur.Data.Models
 
-<div class="profile-section">
-    <h5>Adresse</h5>
-    <div class="row mb-3">
-        <div class="col-md-2"><strong>Numero civique:</strong> @NumeroCiv</div>
-        <div class="col-md-2"><strong>Rue:</strong> @Rue</div>
-        <div class="col-md-2"><strong>Ville:</strong> @Ville</div>
-        <div class="col-md-2"><strong>Province:</strong> @Province</div>
-        <div class="col-md-2"><strong>Code postal:</strong> @CodePostal</div>
-        <div class="col-md-2"><strong>Région:</strong> @RegionAdministrative</div>
-        <div class="col-md-2"><strong>Numéro de téléphone:</strong> @NumeroTelephone</div>
-    </div>
+<div class="profile-section">    
+    <p><strong>Adresse complète :</strong> @NumeroCiv @Bureau @Rue </p>
+    <p><strong>Ville/Province :</strong> @Ville @Province</p>
+    <p><strong>Code Postal :</strong> @CodePostal</p>
+    <p>
+        <strong>Numéro téléphone:</strong> @NumeroTelephone @(
+        NumeroPoste != string.Empty ? "Poste " + NumeroPoste : ""
+        )
+    </p>
+    <p><strong>Site Web :</strong> @Siteweb</p>
+
+    
 </div>
 
 @code {
     [Parameter] public string NumeroCiv { get; set; }
+    [Parameter] public string Bureau { get; set; }
     [Parameter] public string Rue { get; set; }
     [Parameter] public string Ville { get; set; }
     [Parameter] public string Province { get; set; }
     [Parameter] public string CodePostal { get; set; }
     [Parameter] public string RegionAdministrative { get; set; }
     [Parameter] public string NumeroTelephone { get; set; }
+    [Parameter] public string NumeroPoste { get; set; }
+    [Parameter] public string Siteweb { get; set; }
 }
