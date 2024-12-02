@@ -204,14 +204,29 @@
             }
             else
             {
-                foreach(Fournisseur fournisseur in currentFournisseurs)
+                if (connectedFournisseur != null)
                 {
-                    if(fournisseur.Neq == SingletonForm.NeqInput && fournisseur.Neq != connectedFournisseur.Neq )
+                    foreach (Fournisseur fournisseur in currentFournisseurs)
                     {
-                        neqError = "Ce NEQ est déjà inscrit dans la liste de fournisseurs pour" + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
-                        isValid = false;
+                        if (fournisseur.Neq == SingletonForm.NeqInput && fournisseur.Neq != connectedFournisseur.Neq)
+                        {
+                            neqError = "Ce NEQ est déjà inscrit dans la liste de fournisseurs pour" + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
+                            isValid = false;
+                        }
                     }
                 }
+                else
+                {
+                    foreach (Fournisseur fournisseur in currentFournisseurs)
+                    {
+                        if (fournisseur.Neq == SingletonForm.NeqInput)
+                        {
+                            neqError = "Ce NEQ est déjà inscrit dans la liste de fournisseurs pour" + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
+                            isValid = false;
+                        }
+                    }
+                }
+
             }
         }        
 
@@ -228,14 +243,29 @@
         }
         else
         {
-            foreach (Fournisseur fournisseur in currentFournisseurs)
+            if(connectedFournisseur != null)
             {
-                if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput && fournisseur.NomEntreprise != connectedFournisseur.NomEntreprise)
+                foreach (Fournisseur fournisseur in currentFournisseurs)
                 {
-                    nomEntrepriseError = "Ce nom est déjà inscrit dans la liste de fournisseurs. Veulliez confirmer qu'il est bien écrit";
-                    isValid = false;
+                    if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput && fournisseur.NomEntreprise != connectedFournisseur.NomEntreprise)
+                    {
+                        nomEntrepriseError = "Ce nom est déjà inscrit dans la liste de fournisseurs. Veulliez confirmer qu'il est bien écrit";
+                        isValid = false;
+                    }
                 }
             }
+            else
+            {
+                foreach (Fournisseur fournisseur in currentFournisseurs)
+                {
+                    if (fournisseur.NomEntreprise == SingletonForm.NomEntrepriseInput)
+                    {
+                        nomEntrepriseError = "Ce nom est déjà inscrit dans la liste de fournisseurs. Veulliez confirmer qu'il est bien écrit";
+                        isValid = false;
+                    }
+                }
+            }
+
         }
 
 
@@ -252,14 +282,29 @@
         }        
         else
         {
-            foreach (Fournisseur fournisseur in currentFournisseurs)
+            if (connectedFournisseur != null)
             {
-                if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput && fournisseur.CourrielEntreprise != connectedFournisseur.CourrielEntreprise)
+                foreach (Fournisseur fournisseur in currentFournisseurs)
                 {
-                    emailError = "Ce courriel est déjà inscrit dans la liste de fournisseurs pour " + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
-                    isValid = false;
+                    if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput && fournisseur.CourrielEntreprise != connectedFournisseur.CourrielEntreprise)
+                    {
+                        emailError = "Ce courriel est déjà inscrit dans la liste de fournisseurs pour " + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
+                        isValid = false;
+                    }
                 }
             }
+            else
+            {
+                foreach (Fournisseur fournisseur in currentFournisseurs)
+                {
+                    if (fournisseur.CourrielEntreprise == SingletonForm.EmailInput)
+                    {
+                        emailError = "Ce courriel est déjà inscrit dans la liste de fournisseurs pour " + fournisseur.NomEntreprise + ". Veulliez confirmer qu'il est bien écrit";
+                        isValid = false;
+                    }
+                }
+            }
+
         }
 
         // Validation for Password

@@ -268,26 +268,31 @@
             }   
 
             string cleanRBQ = Regex.Replace(SingletonForm.RBQNumberInput, @"-", "");
-            foreach(Licencesrbq licence in currentLicences)
+            if(connectedLicence != null)
             {
-                if (userid != null)
-                {                   
+                foreach (Licencesrbq licence in currentLicences)
+                {
+
                     if (licence.NumLicence == SingletonForm.RBQNumberInput && licence.NumLicence != connectedLicence.NumLicence)
                     {
                         rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
                         isValid = false;
                     }
                 }
-                else
+            }
+            else
+            {
+                foreach (Licencesrbq licence in currentLicences)
                 {
+
                     if (licence.NumLicence == SingletonForm.RBQNumberInput)
                     {
                         rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
                         isValid = false;
                     }
                 }
-
             }
+
 
         }
 

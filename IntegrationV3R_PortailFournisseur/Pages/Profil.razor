@@ -178,7 +178,7 @@
                         </button>
                     </div>
                 }
-                @if (!etatCompte && statut != "Approuvée")
+                @if (!etatCompte && statut == "Approuvée")
                 {
                     <div class="text-end">
                         <button class="btn-success" @onclick="ShowConfirmationReactivate">
