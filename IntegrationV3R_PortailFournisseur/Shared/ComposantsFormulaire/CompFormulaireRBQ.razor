@@ -273,8 +273,8 @@
             {
                 foreach (Licencesrbq licence in currentLicences)
                 {
-
-                    if (licence.NumLicence == SingletonForm.RBQNumberInput && licence.NumLicence != connectedLicence.NumLicence)
+                    Console.WriteLine("****************************************************" + licence.NumLicence);
+                    if (licence.NumLicence == cleanRBQ && licence.NumLicence != connectedLicence.NumLicence)
                     {
                         rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
                         isValid = false;
@@ -285,8 +285,8 @@
             {
                 foreach (Licencesrbq licence in currentLicences)
                 {
-
-                    if (licence.NumLicence == SingletonForm.RBQNumberInput)
+                    Console.WriteLine("****************************************************" + licence.NumLicence);
+                    if (licence.NumLicence == cleanRBQ)
                     {
                         rbqNumberError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
                         isValid = false;

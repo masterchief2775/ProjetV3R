@@ -7,6 +7,8 @@
 @using Microsoft.EntityFrameworkCore
 @inject IntegrationV3R_PortailFournisseur.Data.Models.ApplicationDbContext dbContext
 
+<LoadingScreen IsLoading="isLoading" />
+
 <div class="modal" style="@(IsVisible ? "display:block;" : "display:none;")">
     <div class="modal-boxSize" >
         <div >
@@ -74,6 +76,8 @@
 
     private bool IsVisible { get; set; } = true;
 
+    private bool isLoading = false;
+
     public string codeRBQ = string.Empty;
 
     public string codeRBQError = string.Empty;
@@ -96,7 +100,7 @@
         await BDFetched.InvokeAsync(true);        
     }
 
-    
+
 
     public void ShowModal()
     {
@@ -203,11 +207,12 @@
 
     protected async Task FetchRecord()
     {
-
+        isLoading = true;
         record = await DonnéesQuébecService.GetRecordByLicenceAsync(codeRBQ);
         if(record == null)
         {
             FetchError();
+            isLoading = false;
         }
         else
         {
@@ -246,9 +251,9 @@
             SharedData.Restriction = record.Restriction;
 
 
-
+            isLoading = false;
             await OnDataFetched.InvokeAsync(true);
-
+            
             CloseModal();            
         }        
     }    
