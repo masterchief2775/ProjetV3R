@@ -25,11 +25,20 @@
                             </h5>
 
                             <p style="">
-                                Vous avez un code RBQ ? Entré le pour qu'on puisse pré-remplir certaines informations !
+                                Vous avez un NEQ ou un code RBQ ? Entré le pour qu'on puisse pré-remplir certaines informations !
                             </p>
                         </div>
                         <div></div>
                         <div>
+                            <div style="width:70%">
+                                <label>Code NEQ</label>
+                                <input type="text" class="form-control mb-2" id="codeNEQ" @bind-value="codeNEQ" @oninput="FormatCodeNEQ" maxlength="12">
+                                @if (!string.IsNullOrEmpty(codeNEQError))
+                                {
+                                    <div class="text-danger">@codeNEQError</div>
+                                }
+
+                            </div>
                             <div style="width:70%">
                                 <label>Code RBQ</label>
                                 <input type="text" class="form-control mb-2" id="codeRBQ" @bind-value="codeRBQ" @oninput="FormatCodeRBQ" maxlength="12">
@@ -78,8 +87,10 @@
 
     private bool isLoading = false;
 
+    public string codeNEQ = string.Empty;
     public string codeRBQ = string.Empty;
 
+    public string codeNEQError = string.Empty;
     public string codeRBQError = string.Empty;
 
     public List<Licencesrbq> currentLicences = new List<Licencesrbq>();
@@ -116,22 +127,39 @@
 
     public void HandleSubmit()
     {
+        codeNEQError = string.Empty;
         codeRBQError = string.Empty;
 
-        var isValid = true;
+        var isValidNEQ = true;
+        var isValidRBQ = true;
 
+        string cleanNEQ = Regex.Replace(codeNEQ, @"-", "");
         string cleanRBQ = Regex.Replace(codeRBQ, @"-", "");
         bool hasNonDigit = Regex.IsMatch(cleanRBQ, @"\D");
+
+        if (!string.IsNullOrEmpty(codeNEQ))
+        {
+            if (!IsNumeric(codeNEQ) || codeNEQ.Length != 10 || !IsValidNEQFormat(codeNEQ))
+            {
+                codeNEQError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88.";
+                isValidNEQ = false;
+            }
+        }
+        else
+        {
+            isValidNEQ = false;
+        }
+
 
         if (string.IsNullOrWhiteSpace(codeRBQ) || codeRBQ.Length != 12)
         {
             codeRBQError = "Veuillez entrer un code RBQ valide";
-            isValid = false;
+            isValidRBQ = false;
         }
         else if(hasNonDigit)
         {
             codeRBQError = "Un code RBQ ne peux que contenir des chiffres";
-            isValid = false;
+            isValidRBQ = false;
         }
         else
         {
@@ -141,15 +169,29 @@
                 if (licence.NumLicence == cleanRBQ)
                 {
                     codeRBQError = "Cette licence RBQ est déjà assigné. Veulliez confirmer qu'elle est bien inscrit";
-                    isValid = false;
+                    isValidRBQ = false;
                 }
             }
         }
 
-        if (isValid)
+        if (isValidNEQ)
         {
-            FetchRecord();
+            //FetchRecordNEQ();
         }
+        else if (isValidRBQ)
+        {
+            FetchRecordRBQ();
+        }
+    }
+
+    private bool IsNumeric(string input)
+    {
+        return input.All(char.IsDigit);
+    }
+
+    private bool IsValidNEQFormat(string neq)
+    {
+        return (neq.StartsWith("11") || neq.StartsWith("22") || neq.StartsWith("33") || neq.StartsWith("88"));
     }
 
     public void FormatCodeRBQ(ChangeEventArgs e)
@@ -205,7 +247,7 @@
     string province;
     string nomVille;
 
-    protected async Task FetchRecord()
+    protected async Task FetchRecordRBQ()
     {
         isLoading = true;
         record = await DonnéesQuébecService.GetRecordByLicenceAsync(codeRBQ);

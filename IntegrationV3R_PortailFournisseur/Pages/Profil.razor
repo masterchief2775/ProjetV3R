@@ -533,29 +533,32 @@
                     {
                         numeroCiv = address.NumeroCivique;
                         bureau = address.Bureau;
-                        rue = address.Rue;
-                        var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
-                        ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
-
-                        var provinceObj = provinces.FirstOrDefault(p => p.CodeProvince == address.CodeProvince);
-                        province = provinceObj?.NomProvince ?? "Province Inconnue";
+                        rue = address.Rue;                        
 
                         if (address.CodeProvince != "4")
                         {
                             ville = address.NomMunicipalite;
                         }
+                        else
+                        {
+                            var municipality = municipalites.FirstOrDefault(m => m.CodeMunicipalite == address.CodeMunicipalite);
+                            ville = municipality?.NomMunicipalite ?? "Municipalité Inconnu";
+                        }
+
+                        var provinceObj = provinces.FirstOrDefault(p => p.CodeProvince == address.CodeProvince);
+                        province = provinceObj?.NomProvince ?? "Province Inconnue";
 
                         codePostal = address.CodePostal;
                         numeroTelephone = address.NumTel;
                         poste = address.Poste;
                         siteweb = fournisseur.SiteWeb;
-
+                        /*
                         if (municipality?.CodeTerritoireNavigation != null)
                         {
                             var regionAdminCode = municipality.CodeTerritoireNavigation.CodeRegionAdministrative;
                             var regionAdmin = regionAdministrativeList.FirstOrDefault(r => r.CodeRegionAdministrative == regionAdminCode);
                             regionAdministrative = regionAdmin?.NomRegionAmdin ?? "Région administrative Inconnue";
-                        }
+                        }*/
 
                         if (address.CodeProvince != "4")
                         {

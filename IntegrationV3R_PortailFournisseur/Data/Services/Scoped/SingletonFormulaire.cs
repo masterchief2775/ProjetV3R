@@ -132,6 +132,7 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services.Scoped
             NumCiviqueInput = adresse.NumeroCivique;
             BureauInput = adresse.Bureau;
             RueInput = adresse.Rue;
+            Console.WriteLine("****************" + adresse.CodeMunicipalite + "**********************************");
             if (!string.IsNullOrEmpty(adresse.CodeMunicipalite))
                 MunicipaliteInput = adresse.CodeMunicipalite;
             else
@@ -264,10 +265,14 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services.Scoped
             adresse.NumeroCivique = NumCiviqueInput;
             adresse.Rue = RueInput;
             adresse.Bureau = BureauInput;
-            if (!string.IsNullOrEmpty(MunicipaliteInput))
-                adresse.CodeMunicipalite = MunicipaliteInput;
+            if (ProvinceInput == "4")
+            {
+                adresse.CodeMunicipalite = MunicipaliteInput;                
+            }                
             else
-                adresse.NomMunicipalite = NomMunicipaliteInput;
+            {
+                adresse.NomMunicipalite = NomMunicipaliteInput;                
+            }                
             adresse.CodeProvince = ProvinceInput;
             adresse.CodePostal = cleanedCodePostal;
             adresse.NumTel = cleanedNumeroTelephone;
