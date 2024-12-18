@@ -23,7 +23,7 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services.Scoped
 
             string lienTemporaire = "https://en.wikipedia.org/wiki/Thumb_signal#/media/File:Jempol_Ngadep_Atas_(cropped).jpg";
 
-            var pathImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Templates/Logo_of_Trois-Rivières,_Quebec.svg");
+            var pathImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Templates/logo-v3r-v2.svg");
             string svgContent = File.ReadAllText(pathImage);
             byte[] imageBytes = System.Text.Encoding.UTF8.GetBytes(svgContent);
 

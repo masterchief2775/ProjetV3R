@@ -458,23 +458,26 @@
     private void FormatTelephoneNumber(string e)
     {
         var input = e;
-        input = new string(input.Where(char.IsDigit).ToArray());
-
-        if (input.Length > 10)
+        if(input != null)
         {
-            input = input.Substring(0, 10);
-        }
+            input = new string(input.Where(char.IsDigit).ToArray());
 
-        if (input.Length > 3)
-        {
-            input = input.Insert(3, "-");
-        }
-        if (input.Length > 7)
-        {
-            input = input.Insert(7, "-");
-        }
+            if (input.Length > 10)
+            {
+                input = input.Substring(0, 10);
+            }
 
-        SingletonForm.NumeroTelephoneInput = input;
+            if (input.Length > 3)
+            {
+                input = input.Insert(3, "-");
+            }
+            if (input.Length > 7)
+            {
+                input = input.Insert(7, "-");
+            }
+
+            SingletonForm.NumeroTelephoneInput = input;
+        }        
     }
 
     private void FormatCodePostal(ChangeEventArgs e)

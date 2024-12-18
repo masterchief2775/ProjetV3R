@@ -202,6 +202,7 @@
                 neqError = "Le NEQ doit être un numéro de 10 chiffres commençant par 11, 22, 33 ou 88.";
                 isValid = false;
             }
+            /*
             else
             {
                 if (connectedFournisseur != null)
@@ -228,6 +229,7 @@
                 }
 
             }
+            */
         }        
 
         // Validation for Nom de l'entreprise
@@ -240,7 +242,8 @@
         {
             nomEntrepriseError = "Le nom de l'entreprise doit faire moins de 64 caractères.";
             isValid = false;
-        }
+        } 
+        /*
         else
         {
             if(connectedFournisseur != null)
@@ -267,6 +270,7 @@
             }
 
         }
+        */
 
 
         // Validation for Email
@@ -279,7 +283,8 @@
         {
             emailError = "L'adresse courriel doit être valide et faire moins de 64 caractères.";
             isValid = false;
-        }        
+        }   
+        
         else
         {
             if (connectedFournisseur != null)
@@ -306,6 +311,7 @@
             }
 
         }
+        
 
         // Validation for Password
         if(userid == null)

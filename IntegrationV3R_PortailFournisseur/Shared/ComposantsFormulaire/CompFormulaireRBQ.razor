@@ -102,7 +102,7 @@
 
 
         <!-- Catégories sélectionnées -->
-        <div class="mb-3">
+        <div class="mb-3" style="width:70%">
             <h5>Sous-catégories sélectionnées</h5>
             <ul>
                 @if (SingletonForm.SelectedSubCategories.Any() && SingletonForm.SelectedSubCategories[0] != null)
@@ -110,12 +110,16 @@
                     foreach (var category in SingletonForm.SelectedSubCategories)
                     {
                         <li>
-                            <strong>@category.NumeroSousCategorieAfter2008 - @category.NomSousCategorieAfter2008</strong>
-                            <button type="button" class="btn-supprimer btn-sm"
-                            @onclick="() => RemoveSubCategory(category)"
-                            style="padding-top: 4px;padding-right: 4px; padding-left: 7px; padding-bottom:7px;">
-                                <img src="/icons/deletewhite.png" alt="" class="me-1 icon" />
-                            </button>
+                            <br>
+                            <div style="display:flex; flex-direction:row; justify-content:space-between;">
+                                <strong>@category.NumeroSousCategorieAfter2008 - @category.NomSousCategorieAfter2008</strong>
+                                <button type="button" class="btn-supprimer btn-sm"
+                                @onclick="() => RemoveSubCategory(category)"
+                                style="padding-top: 4px;padding-right: 4px; padding-left: 7px; padding-bottom:7px;">
+                                    <img src="/icons/deletewhite.png" alt="" class="me-1 icon" />
+                                </button>
+                            </div>
+                            
                         </li>
                     }
                 }
@@ -219,6 +223,21 @@
 
         SingletonForm.SelectedLicenseType = SharedData.TypeLicence;
         SingletonForm.SelectedCategory = SharedData.CategorieLicence;
+
+        Console.WriteLine(SharedData.CodesSousCat.Count);
+
+        foreach(string codeSousCat in SharedData.CodesSousCat)
+        {
+            Console.WriteLine(codeSousCat);
+            foreach(Souscategoriesafter2008 codeOfficiel in fetchedSousCategories)
+            {
+                if(codeSousCat == codeOfficiel.NumeroSousCategorieAfter2008)
+                {
+                    if(!SingletonForm.SelectedSubCategories.Contains(codeOfficiel))
+                        SingletonForm.SelectedSubCategories.Add(codeOfficiel);
+                }
+            }
+        }
 
         StateHasChanged();
     }

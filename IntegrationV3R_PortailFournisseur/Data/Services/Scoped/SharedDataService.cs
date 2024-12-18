@@ -24,5 +24,7 @@
         public string CategorieLicence { get; set; } = "";
         public string Restriction { get; set; } = "";
 
+        public List<string> CodesSousCat { get; set; } = new List<string>();
+
     }
 }

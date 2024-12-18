@@ -16,13 +16,38 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services
             _httpClient = httpClient;
         }
 
-        public async Task<Fiche?> GetRecordByLicenceAsync(string numeroDeLicence)
+        public async Task<List<Fiche>?> GetRecordByLicenceAsync(string numeroDeLicence)
         {
-            string query = $"SELECT * from \"32f6ec46-85fd-45e9-945b-965d9235840a\" WHERE \"Numero de licence\" = '{numeroDeLicence}'";
-            string url = $"/recherche/api/3/action/datastore_search_sql?sql={HttpUtility.UrlEncode(query)}";
+            try
+            {
+                string query = $"SELECT * from \"32f6ec46-85fd-45e9-945b-965d9235840a\" WHERE \"Numero de licence\" = '{numeroDeLicence}'";
+                string url = $"/recherche/api/3/action/datastore_search_sql?sql={HttpUtility.UrlEncode(query)}";
 
-            var response = await _httpClient.GetFromJsonAsync<ApiResponse>(url);
-            return response?.Result?.Records.FirstOrDefault();
+                var response = await _httpClient.GetFromJsonAsync<ApiResponse>(url);
+                return response?.Result?.Records.ToList();
+            }
+            catch
+            {
+                return null;
+            }
+            
+        }
+
+        public async Task<List<Fiche>?> GetRecordByNEQAsync(string neq)
+        {
+            try
+            {                
+                string query = $"SELECT * from \"32f6ec46-85fd-45e9-945b-965d9235840a\" WHERE \"NEQ\" = '{neq}'";
+                string url = $"/recherche/api/3/action/datastore_search_sql?sql={HttpUtility.UrlEncode(query)}";
+
+                var response = await _httpClient.GetFromJsonAsync<ApiResponse>(url);
+                return response?.Result?.Records.ToList();
+            }
+            catch 
+            { 
+                return null;
+            }
+            
         }
     }
 
@@ -77,6 +102,9 @@ namespace IntegrationV3R_PortailFournisseur.Data.Services
 
         [JsonPropertyName("Restriction")]
         public string Restriction { get; set; }
+
+        [JsonPropertyName("Sous-categories")]
+        public string SousCat { get; set; }
 
 
 
